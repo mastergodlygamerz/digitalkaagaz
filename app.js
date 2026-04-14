@@ -292,6 +292,188 @@ renderBlogs();
 renderNews();
 renderAchievements();
 
+// ===== FIREBASE AUTH & VISITOR TRACKING =====
+(function initFirebase() {
+  // Wait for Firebase module to load
+  function waitForFirebase(cb) {
+    if (window._firebase) return cb();
+    setTimeout(function () { waitForFirebase(cb); }, 100);
+  }
+
+  waitForFirebase(function () {
+    var fb = window._firebase;
+    var auth = fb.auth;
+    var db = fb.db;
+
+    // --- AUTH UI ---
+    var authBtn = document.getElementById('auth-btn');
+    var authOverlay = document.getElementById('auth-overlay');
+    var authClose = document.getElementById('auth-close');
+    var authForm = document.getElementById('auth-form');
+    var authTitle = document.getElementById('auth-title');
+    var authNameGroup = document.getElementById('auth-name-group');
+    var authName = document.getElementById('auth-name');
+    var authEmail = document.getElementById('auth-email');
+    var authPassword = document.getElementById('auth-password');
+    var authError = document.getElementById('auth-error');
+    var authSubmit = document.getElementById('auth-submit');
+    var authSwitchText = document.getElementById('auth-switch-text');
+    var authSwitchLink = document.getElementById('auth-switch-link');
+    var userBar = document.getElementById('user-bar');
+    var userBarName = document.getElementById('user-bar-name');
+    var logoutBtn = document.getElementById('logout-btn');
+
+    var isSignUp = false;
+
+    function showAuthPanel() {
+      authOverlay.removeAttribute('hidden');
+      authError.setAttribute('hidden', '');
+      authEmail.value = '';
+      authPassword.value = '';
+      authName.value = '';
+    }
+    function hideAuthPanel() {
+      authOverlay.setAttribute('hidden', '');
+    }
+    function toggleMode() {
+      isSignUp = !isSignUp;
+      authTitle.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      authSubmit.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      authSwitchText.textContent = isSignUp ? 'Already have an account?' : "Don't have an account?";
+      authSwitchLink.textContent = isSignUp ? 'Sign In' : 'Sign Up';
+      authNameGroup.hidden = !isSignUp;
+      authError.setAttribute('hidden', '');
+    }
+
+    authBtn.addEventListener('click', function () {
+      if (auth.currentUser) { return; }
+      showAuthPanel();
+    });
+    authClose.addEventListener('click', hideAuthPanel);
+    authOverlay.addEventListener('click', function (e) {
+      if (e.target === authOverlay) hideAuthPanel();
+    });
+    authSwitchLink.addEventListener('click', function (e) { e.preventDefault(); toggleMode(); });
+
+    authForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = authEmail.value.trim();
+      var pass = authPassword.value;
+      authError.setAttribute('hidden', '');
+
+      if (!email || !pass) {
+        authError.textContent = 'Please fill in all fields.';
+        authError.removeAttribute('hidden');
+        return;
+      }
+      if (pass.length < 6) {
+        authError.textContent = 'Password must be at least 6 characters.';
+        authError.removeAttribute('hidden');
+        return;
+      }
+
+      authSubmit.disabled = true;
+      authSubmit.textContent = 'Please wait...';
+
+      if (isSignUp) {
+        var name = authName.value.trim();
+        if (!name) {
+          authError.textContent = 'Please enter your name.';
+          authError.removeAttribute('hidden');
+          authSubmit.disabled = false;
+          authSubmit.textContent = 'Sign Up';
+          return;
+        }
+        fb.createUserWithEmailAndPassword(auth, email, pass)
+          .then(function (cred) {
+            return fb.updateProfile(cred.user, { displayName: name }).then(function () {
+              // Log user to Firestore
+              return fb.addDoc(fb.collection(db, 'users'), {
+                uid: cred.user.uid,
+                name: name,
+                email: email,
+                createdAt: fb.serverTimestamp()
+              });
+            });
+          })
+          .then(function () { hideAuthPanel(); })
+          .catch(function (err) {
+            authError.textContent = err.message.replace('Firebase: ', '');
+            authError.removeAttribute('hidden');
+          })
+          .finally(function () {
+            authSubmit.disabled = false;
+            authSubmit.textContent = 'Sign Up';
+          });
+      } else {
+        fb.signInWithEmailAndPassword(auth, email, pass)
+          .then(function () { hideAuthPanel(); })
+          .catch(function (err) {
+            authError.textContent = err.message.replace('Firebase: ', '');
+            authError.removeAttribute('hidden');
+          })
+          .finally(function () {
+            authSubmit.disabled = false;
+            authSubmit.textContent = 'Sign In';
+          });
+      }
+    });
+
+    logoutBtn.addEventListener('click', function () {
+      fb.signOut(auth);
+    });
+
+    // --- AUTH STATE ---
+    fb.onAuthStateChanged(auth, function (user) {
+      if (user) {
+        authBtn.textContent = user.displayName || user.email.split('@')[0];
+        authBtn.classList.add('logged-in');
+        userBar.removeAttribute('hidden');
+        userBarName.textContent = user.displayName || user.email;
+      } else {
+        authBtn.textContent = 'Sign In';
+        authBtn.classList.remove('logged-in');
+        userBar.setAttribute('hidden', '');
+      }
+    });
+
+    // --- VISITOR TRACKING ---
+    (function trackVisitor() {
+      fetch('https://ip-api.com/json/?fields=query,country,regionName,city,isp,org,as,mobile')
+        .then(function (r) { return r.json(); })
+        .then(function (geo) {
+          fb.addDoc(fb.collection(db, 'visitors'), {
+            ip: geo.query || 'unknown',
+            country: geo.country || 'unknown',
+            region: geo.regionName || '',
+            city: geo.city || '',
+            isp: geo.isp || '',
+            org: geo.org || '',
+            mobile: geo.mobile || false,
+            userAgent: navigator.userAgent,
+            referrer: document.referrer || 'direct',
+            page: location.pathname,
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            language: navigator.language,
+            timestamp: fb.serverTimestamp()
+          });
+        })
+        .catch(function () {
+          // Fallback without geo data
+          fb.addDoc(fb.collection(db, 'visitors'), {
+            ip: 'unknown',
+            country: 'unknown',
+            userAgent: navigator.userAgent,
+            referrer: document.referrer || 'direct',
+            page: location.pathname,
+            timestamp: fb.serverTimestamp()
+          });
+        });
+    })();
+  });
+})();
+
 // Re-observe newly added .reveal elements
 requestAnimationFrame(function () {
   var elements = document.querySelectorAll('.reveal:not(.visible)');
