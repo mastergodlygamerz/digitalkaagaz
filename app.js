@@ -97,9 +97,6 @@ const newsTimeline = document.getElementById('news-timeline');
 const achievementsGrid = document.getElementById('achievements-grid');
 const contactForm = document.getElementById('contact-form');
 const toast = document.getElementById('toast');
-const modalOverlay = document.getElementById('modal-overlay');
-const modalBody = document.getElementById('modal-body');
-const modalClose = document.getElementById('modal-close');
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('nav-links');
 
@@ -113,21 +110,29 @@ function renderBlogs() {
   blogPosts.forEach(post => {
     const card = document.createElement('article');
     card.className = 'blog-card fade-in';
-    card.setAttribute('role', 'button');
-    card.tabIndex = 0;
     card.innerHTML = `
       <img class="blog-card-img" src="${escapeAttr(post.image)}" alt="" loading="lazy" onerror="this.style.display='none'">
       <div class="blog-card-body">
         <h3>${esc(post.title)}</h3>
         <p class="preview">${esc(post.description)}</p>
+        <div class="blog-card-full" hidden>
+          <p>${esc(post.content)}</p>
+        </div>
       </div>
       <div class="blog-card-footer">
         <span>${esc(post.date)}</span>
         <span class="read-more">Read More &rarr;</span>
       </div>
     `;
-    card.addEventListener('click', () => openBlogModal(post));
-    card.addEventListener('keydown', e => { if (e.key === 'Enter') openBlogModal(post); });
+    const readMoreBtn = card.querySelector('.read-more');
+    const fullContent = card.querySelector('.blog-card-full');
+    const previewEl = card.querySelector('.preview');
+    readMoreBtn.addEventListener('click', () => {
+      const expanded = !fullContent.hidden;
+      fullContent.hidden = expanded;
+      previewEl.style.display = expanded ? '' : 'none';
+      readMoreBtn.innerHTML = expanded ? 'Read More &rarr;' : '&larr; Show Less';
+    });
     blogGrid.appendChild(card);
   });
 }
@@ -165,31 +170,6 @@ function renderAchievements() {
     achievementsGrid.appendChild(card);
   });
 }
-
-// ===== BLOG MODAL =====
-function openBlogModal(post) {
-  modalBody.innerHTML = `
-    <img class="modal-img" src="${escapeAttr(post.image)}" alt="" onerror="this.style.display='none'">
-    <h2>${esc(post.title)}</h2>
-    <p class="modal-meta">${esc(post.date)}</p>
-    <div class="modal-content">${esc(post.content)}</div>
-  `;
-  modalOverlay.hidden = false;
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  modalOverlay.hidden = true;
-  document.body.style.overflow = '';
-}
-
-modalClose.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', e => {
-  if (e.target === modalOverlay) closeModal();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !modalOverlay.hidden) closeModal();
-});
 
 // ===== CONTACT FORM =====
 contactForm.addEventListener('submit', e => {
@@ -231,6 +211,11 @@ function createParticles() {
 
 // ===== FADE-IN ON SCROLL =====
 function initFadeIn() {
+  const elements = document.querySelectorAll('.fade-in');
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('visible'));
+    return;
+  }
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -238,9 +223,9 @@ function initFadeIn() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.05 });
 
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  elements.forEach(el => observer.observe(el));
 }
 
 // ===== HELPERS =====
