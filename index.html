@@ -1,5 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Digital Kagaaz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Kaagaz — Your Digital Paper</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 </head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">Digital<span>Kaagaz</span></a>
+      <ul class="nav-links">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#blogs">Blogs</a></li>
+        <li><a href="#write">Write</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+      <button class="nav-cta" onclick="document.getElementById('write').scrollIntoView({behavior:'smooth'})">
+        New Post
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section id="hero" class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">Welcome to Digital Kaagaz</p>
+      <h1>Write. Share.<br><span class="gradient-text">Inspire the World.</span></h1>
+      <p class="hero-sub">A beautiful space to pen your thoughts, share stories, and connect with readers everywhere.</p>
+      <div class="hero-btns">
+        <a href="#blogs" class="btn btn-primary">Read Blogs</a>
+        <a href="#write" class="btn btn-outline">Start Writing</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="floating-card card-1">
+        <div class="card-icon">&#9998;</div>
+        <p>Creative Writing</p>
+      </div>
+      <div class="floating-card card-2">
+        <div class="card-icon">&#128218;</div>
+        <p>Story Telling</p>
+      </div>
+      <div class="floating-card card-3">
+        <div class="card-icon">&#128161;</div>
+        <p>Fresh Ideas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STATS BAR ========== -->
+  <section class="stats-bar">
+    <div class="stat"><span id="stat-posts">0</span><p>Posts Published</p></div>
+    <div class="stat"><span>&#8734;</span><p>Possibilities</p></div>
+    <div class="stat"><span>100%</span><p>Free to Use</p></div>
+    <div class="stat"><span>&#9829;</span><p>Made with Love</p></div>
+  </section>
+
+  <!-- ========== BLOG FEED ========== -->
+  <section id="blogs" class="blogs-section">
+    <div class="section-header">
+      <p class="section-tag">Our Blog</p>
+      <h2>Latest Posts</h2>
+      <p class="section-sub">Discover stories, ideas, and insights from our community of writers.</p>
+    </div>
+    <div class="blog-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="Technology">Technology</button>
+      <button class="filter-btn" data-filter="Lifestyle">Lifestyle</button>
+      <button class="filter-btn" data-filter="Travel">Travel</button>
+      <button class="filter-btn" data-filter="Food">Food</button>
+      <button class="filter-btn" data-filter="Other">Other</button>
+    </div>
+    <div class="blog-grid" id="blog-grid">
+      <!-- Blog cards inserted by JS -->
+    </div>
+    <p class="empty-state" id="empty-state">No blog posts yet. Be the first to write one!</p>
+  </section>
+
+  <!-- ========== WRITE / CREATE BLOG ========== -->
+  <section id="write" class="write-section">
+    <div class="section-header">
+      <p class="section-tag">Create</p>
+      <h2>Write a New Post</h2>
+      <p class="section-sub">Share your story with the world. Fill in the details below and hit publish.</p>
+    </div>
+    <form id="blog-form" class="blog-form" autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="author">Author Name</label>
+          <input type="text" id="author" placeholder="Your name" required maxlength="50">
+        </div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" required>
+            <option value="">Select a category</option>
+            <option>Technology</option>
+            <option>Lifestyle</option>
+            <option>Travel</option>
+            <option>Food</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="title">Blog Title</label>
+        <input type="text" id="title" placeholder="Give your post a catchy title" required maxlength="120">
+      </div>
+      <div class="form-group">
+        <label for="cover-url">Cover Image URL <small>(optional)</small></label>
+        <input type="url" id="cover-url" placeholder="https://example.com/image.jpg">
+      </div>
+      <div class="form-group">
+        <label for="content">Content</label>
+        <textarea id="content" rows="10" placeholder="Write your blog post here..." required minlength="20"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-publish">
+        <span class="btn-text">Publish Post</span>
+        <span class="btn-loader" hidden></span>
+      </button>
+    </form>
+    <div id="toast" class="toast" hidden>Post published successfully!</div>
+  </section>
+
+  <!-- ========== ABOUT ========== -->
+  <section id="about" class="about-section">
+    <div class="about-inner">
+      <div class="about-text">
+        <p class="section-tag">About Us</p>
+        <h2>What is Digital Kaagaz?</h2>
+        <p>Digital Kaagaz (meaning "Digital Paper") is a free, open blogging platform where anyone can share their thoughts, stories, and ideas with the world. No sign-ups, no paywalls — just pure writing.</p>
+        <p>We believe every voice matters and every story deserves to be told. Start writing today and join our growing community of creators.</p>
+      </div>
+      <div class="about-features">
+        <div class="feature">
+          <div class="feature-icon">&#9889;</div>
+          <h3>Instant Publishing</h3>
+          <p>Write and publish in seconds. No approval queues.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">&#127912;</div>
+          <h3>Beautiful Design</h3>
+          <p>Your posts look great automatically with our clean layout.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">&#128274;</div>
+          <h3>Your Data, Locally</h3>
+          <p>Posts are saved in your browser. No tracking, no ads.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">Digital<span>Kaagaz</span></a>
+        <p>Your digital paper — write freely, share boldly.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <a href="#hero">Home</a>
+        <a href="#blogs">Blogs</a>
+        <a href="#write">Write</a>
+        <a href="#about">About</a>
+      </div>
+      <div class="footer-links">
+        <h4>Categories</h4>
+        <a href="#blogs" onclick="filterByCategory('Technology')">Technology</a>
+        <a href="#blogs" onclick="filterByCategory('Lifestyle')">Lifestyle</a>
+        <a href="#blogs" onclick="filterByCategory('Travel')">Travel</a>
+        <a href="#blogs" onclick="filterByCategory('Food')">Food</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Digital Kaagaz. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ========== BLOG DETAIL MODAL ========== -->
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
