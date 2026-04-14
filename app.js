@@ -1,5 +1,11 @@
+// ============================================================
+// Digital Kagaaz — app.js
+// NO popups, NO modals, NO alerts, NO toasts, NO confirm dialogs
+// Everything renders inline on the page.
+// ============================================================
+
 // ===== BLOG DATA =====
-// Add new blog posts here — they render automatically.
+// To add a new blog post, just add an object here.
 const blogPosts = [
   {
     id: 1,
@@ -96,141 +102,138 @@ const blogGrid = document.getElementById('blog-grid');
 const newsTimeline = document.getElementById('news-timeline');
 const achievementsGrid = document.getElementById('achievements-grid');
 const contactForm = document.getElementById('contact-form');
-const toast = document.getElementById('toast');
+const formSuccess = document.getElementById('form-success');
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('nav-links');
 
 // ===== RENDER BLOGS =====
 function renderBlogs() {
-  blogGrid.innerHTML = '';
-  if (blogPosts.length === 0) {
-    blogGrid.innerHTML = '<p class="blog-empty">No blog posts yet.</p>';
-    return;
-  }
-  blogPosts.forEach(post => {
-    const card = document.createElement('article');
-    card.className = 'blog-card fade-in';
-    card.innerHTML = `
-      <img class="blog-card-img" src="${escapeAttr(post.image)}" alt="" loading="lazy" onerror="this.style.display='none'">
-      <div class="blog-card-body">
-        <h3>${esc(post.title)}</h3>
-        <p class="preview">${esc(post.description)}</p>
-        <div class="blog-card-full" hidden>
-          <p>${esc(post.content)}</p>
-        </div>
-      </div>
-      <div class="blog-card-footer">
-        <span>${esc(post.date)}</span>
-        <span class="read-more">Read More &rarr;</span>
-      </div>
-    `;
-    const readMoreBtn = card.querySelector('.read-more');
-    const fullContent = card.querySelector('.blog-card-full');
-    const previewEl = card.querySelector('.preview');
-    readMoreBtn.addEventListener('click', () => {
-      const expanded = !fullContent.hidden;
-      fullContent.hidden = expanded;
-      previewEl.style.display = expanded ? '' : 'none';
-      readMoreBtn.innerHTML = expanded ? 'Read More &rarr;' : '&larr; Show Less';
+  blogPosts.forEach(function (post) {
+    var card = document.createElement('article');
+    card.className = 'blog-card reveal';
+    card.innerHTML =
+      '<img class="blog-card-img" src="' + escapeAttr(post.image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+      '<div class="blog-card-body">' +
+        '<h3>' + esc(post.title) + '</h3>' +
+        '<p class="preview">' + esc(post.description) + '</p>' +
+        '<div class="blog-card-full" hidden>' +
+          '<p>' + esc(post.content) + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="blog-card-footer">' +
+        '<span>' + esc(post.date) + '</span>' +
+        '<span class="read-more">Read More &rarr;</span>' +
+      '</div>';
+
+    var readMoreBtn = card.querySelector('.read-more');
+    var fullContent = card.querySelector('.blog-card-full');
+    var previewEl = card.querySelector('.preview');
+
+    readMoreBtn.addEventListener('click', function () {
+      var isExpanded = !fullContent.hidden;
+      fullContent.hidden = isExpanded;
+      previewEl.style.display = isExpanded ? '' : 'none';
+      readMoreBtn.innerHTML = isExpanded ? 'Read More &rarr;' : '&larr; Show Less';
     });
+
     blogGrid.appendChild(card);
   });
 }
 
 // ===== RENDER NEWS =====
 function renderNews() {
-  newsTimeline.innerHTML = '';
-  newsItems.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'news-card fade-in';
-    card.innerHTML = `
-      <div class="news-dot"></div>
-      <div class="news-content">
-        <p class="news-date">${esc(item.date)}</p>
-        <h3>${esc(item.title)}</h3>
-        <p>${esc(item.content)}</p>
-      </div>
-    `;
+  newsItems.forEach(function (item) {
+    var card = document.createElement('div');
+    card.className = 'news-card reveal';
+    card.innerHTML =
+      '<div class="news-content">' +
+        '<p class="news-date">' + esc(item.date) + '</p>' +
+        '<h3>' + esc(item.title) + '</h3>' +
+        '<p>' + esc(item.content) + '</p>' +
+      '</div>';
     newsTimeline.appendChild(card);
   });
 }
 
 // ===== RENDER ACHIEVEMENTS =====
 function renderAchievements() {
-  achievementsGrid.innerHTML = '';
-  achievements.forEach(a => {
-    const card = document.createElement('div');
-    card.className = 'achievement-card fade-in';
-    card.innerHTML = `
-      <div class="achievement-icon">${a.icon}</div>
-      <h3>${esc(a.title)}</h3>
-      <p>${esc(a.description)}</p>
-      <span class="achievement-year">${esc(a.year)}</span>
-    `;
+  achievements.forEach(function (a) {
+    var card = document.createElement('div');
+    card.className = 'achievement-card reveal';
+    card.innerHTML =
+      '<div class="achievement-icon">' + a.icon + '</div>' +
+      '<h3>' + esc(a.title) + '</h3>' +
+      '<p>' + esc(a.description) + '</p>' +
+      '<span class="achievement-year">' + esc(a.year) + '</span>';
     achievementsGrid.appendChild(card);
   });
 }
 
-// ===== CONTACT FORM =====
-contactForm.addEventListener('submit', e => {
+// ===== CONTACT FORM (inline success message, no popup) =====
+contactForm.addEventListener('submit', function (e) {
   e.preventDefault();
-  showToast('Message sent! We\'ll get back to you soon.');
+  formSuccess.hidden = false;
   contactForm.reset();
+  // Auto-hide after 5 seconds
+  setTimeout(function () { formSuccess.hidden = true; }, 5000);
 });
 
 // ===== HAMBURGER MENU =====
-hamburger.addEventListener('click', () => {
+hamburger.addEventListener('click', function () {
   navLinks.classList.toggle('open');
 });
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => navLinks.classList.remove('open'));
+navLinks.querySelectorAll('a').forEach(function (link) {
+  link.addEventListener('click', function () {
+    navLinks.classList.remove('open');
+  });
 });
 
-// ===== NAVBAR SCROLL EFFECT =====
-window.addEventListener('scroll', () => {
-  const nav = document.getElementById('navbar');
-  nav.style.background = window.scrollY > 50
-    ? 'rgba(10,10,15,0.95)'
-    : 'rgba(10,10,15,0.8)';
+// ===== NAVBAR SCROLL =====
+window.addEventListener('scroll', function () {
+  var nav = document.getElementById('navbar');
+  nav.style.background = window.scrollY > 60
+    ? 'rgba(7,7,13,0.95)'
+    : 'rgba(7,7,13,0.75)';
 });
 
 // ===== HERO PARTICLES =====
-function createParticles() {
-  const container = document.getElementById('hero-particles');
+(function createParticles() {
+  var container = document.getElementById('hero-particles');
   if (!container) return;
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
+  for (var i = 0; i < 25; i++) {
+    var p = document.createElement('div');
     p.className = 'particle';
     p.style.left = Math.random() * 100 + '%';
-    p.style.top = (60 + Math.random() * 40) + '%';
-    p.style.animationDuration = (4 + Math.random() * 6) + 's';
-    p.style.animationDelay = (Math.random() * 6) + 's';
+    p.style.top = (50 + Math.random() * 50) + '%';
+    p.style.animationDuration = (5 + Math.random() * 7) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
     container.appendChild(p);
   }
-}
+})();
 
-// ===== FADE-IN ON SCROLL =====
-function initFadeIn() {
-  const elements = document.querySelectorAll('.fade-in');
+// ===== SCROLL REVEAL (no fade-in class, uses .reveal) =====
+(function initReveal() {
+  var elements = document.querySelectorAll('.reveal');
   if (!('IntersectionObserver' in window)) {
-    elements.forEach(el => el.classList.add('visible'));
+    // Fallback: show everything
+    elements.forEach(function (el) { el.classList.add('visible'); });
     return;
   }
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.05 });
+  }, { threshold: 0.08 });
 
-  elements.forEach(el => observer.observe(el));
-}
+  elements.forEach(function (el) { observer.observe(el); });
+})();
 
 // ===== HELPERS =====
 function esc(str) {
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
@@ -238,17 +241,25 @@ function escapeAttr(str) {
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.hidden = false;
-  setTimeout(() => { toast.hidden = true; }, 3500);
-}
-
 // ===== INIT =====
 renderBlogs();
 renderNews();
 renderAchievements();
-createParticles();
 
-// Run fade-in observer after a tick so dynamically added elements are in the DOM
-requestAnimationFrame(initFadeIn);
+// Re-observe newly added .reveal elements
+requestAnimationFrame(function () {
+  var elements = document.querySelectorAll('.reveal:not(.visible)');
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(function (el) { el.classList.add('visible'); });
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  elements.forEach(function (el) { observer.observe(el); });
+});
