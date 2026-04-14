@@ -1,3 +1,26 @@
+/* ===== KILL ANY HOSTING-INJECTED POPUPS ===== */
+[class*="cookie"], [id*="cookie"],
+[class*="consent"], [id*="consent"],
+[class*="gdpr"], [id*="gdpr"],
+[class*="cc-"], [id*="cc-"],
+[class*="CookieConsent"], [id*="CookieConsent"],
+[class*="cookie-banner"], [id*="cookie-banner"],
+[class*="cookie_notice"], [id*="cookie_notice"],
+[class*="cookie-notice"], [id*="cookie-notice"],
+[class*="notice-banner"], [id*="notice-banner"],
+[class*="popup"], [id*="popup"],
+[class*="overlay"]:not(.hero *), [id*="overlay"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
+
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 80px; }

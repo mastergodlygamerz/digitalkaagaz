@@ -282,3 +282,50 @@ requestAnimationFrame(function () {
   }, { threshold: 0.08 });
   elements.forEach(function (el) { observer.observe(el); });
 });
+
+// ===== KILL ANY HOSTING-INJECTED POPUPS =====
+(function killPopups() {
+  var selectors = [
+    '[class*="cookie"]', '[id*="cookie"]',
+    '[class*="consent"]', '[id*="consent"]',
+    '[class*="gdpr"]', '[id*="gdpr"]',
+    '[class*="cc-"]', '[id*="cc-"]',
+    '[class*="CookieConsent"]', '[id*="CookieConsent"]',
+    '[class*="popup"]', '[id*="popup"]',
+    '[class*="overlay"]', '[id*="overlay"]',
+    '[class*="notice-banner"]', '[id*="notice-banner"]',
+    '[class*="cookie-banner"]', '[id*="cookie-banner"]'
+  ];
+  function nuke() {
+    var els = document.querySelectorAll(selectors.join(','));
+    els.forEach(function (el) {
+      // Don't remove our own elements
+      if (el.closest('#hero') || el.closest('nav') || el.closest('.footer')) return;
+      el.remove();
+    });
+  }
+  // Run immediately, after load, and watch for late injections
+  nuke();
+  window.addEventListener('DOMContentLoaded', nuke);
+  window.addEventListener('load', nuke);
+  setTimeout(nuke, 500);
+  setTimeout(nuke, 1500);
+  setTimeout(nuke, 3000);
+  // MutationObserver to catch anything added after load
+  if (typeof MutationObserver !== 'undefined') {
+    var obs = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          var match = selectors.some(function (s) {
+            try { return node.matches(s) || node.querySelector(s); } catch(e) { return false; }
+          });
+          if (match && !node.closest('#hero') && !node.closest('nav') && !node.closest('.footer')) {
+            node.remove();
+          }
+        });
+      });
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  }
+})();
