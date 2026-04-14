@@ -17,7 +17,7 @@ jobs:
         with:
           server: 145.223.17.13
           username: u500567116
-          password: ?[@ZKsn:E!8fNF6p
+          password: KyamBCN&dc3xeu>4
           port: 21
           protocol: ftp
           server-dir: public_html/
