@@ -9,7 +9,7 @@
 [class*="cookie-notice"], [id*="cookie-notice"],
 [class*="notice-banner"], [id*="notice-banner"],
 [class*="popup"], [id*="popup"],
-[class*="overlay"]:not(.hero *):not(.auth-overlay), [id*="overlay"]:not(#auth-overlay) {
+[class*="overlay"]:not(.hero *), [id*="overlay"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -35,12 +35,12 @@
 .btn-auth:hover { background: rgba(0,229,255,0.08); border-color: #00e5ff; }
 .btn-auth.logged-in { color: #5ef0ff; border-color: #5ef0ff; }
 
-.auth-overlay {
+.dk-auth-screen {
   position: fixed; inset: 0; z-index: 10000;
   background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
 }
-.auth-overlay[hidden] { display: none; }
+.dk-auth-screen[hidden] { display: none; }
 .auth-panel {
   background: #0e0e18; border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px; padding: 40px; width: 100%; max-width: 420px;

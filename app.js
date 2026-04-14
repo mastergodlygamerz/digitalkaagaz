@@ -307,7 +307,7 @@ renderAchievements();
 
     // --- AUTH UI ---
     var authBtn = document.getElementById('auth-btn');
-    var authOverlay = document.getElementById('auth-overlay');
+    var authOverlay = document.getElementById('dk-auth-screen');
     var authClose = document.getElementById('auth-close');
     var authForm = document.getElementById('auth-form');
     var authTitle = document.getElementById('auth-title');
@@ -510,7 +510,7 @@ requestAnimationFrame(function () {
     els.forEach(function (el) {
       // Don't remove our own elements
       if (el.closest('#hero') || el.closest('nav') || el.closest('.footer')
-        || el.id === 'auth-overlay' || el.closest('#auth-overlay')
+        || el.id === 'dk-auth-screen' || el.closest('#dk-auth-screen')
         || el.id === 'user-bar' || el.closest('#user-bar')) return;
       el.remove();
     });
@@ -532,7 +532,7 @@ requestAnimationFrame(function () {
             try { return node.matches(s) || node.querySelector(s); } catch(e) { return false; }
           });
           if (match && !node.closest('#hero') && !node.closest('nav') && !node.closest('.footer')
-            && node.id !== 'auth-overlay' && !node.closest('#auth-overlay')
+            && node.id !== 'dk-auth-screen' && !node.closest('#dk-auth-screen')
             && node.id !== 'user-bar' && !node.closest('#user-bar')) {
             node.remove();
           }
