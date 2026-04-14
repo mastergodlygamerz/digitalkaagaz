@@ -94,156 +94,88 @@
       <p class="hero-tag">&#9889; Welcome to the Future</p>
       <h1>Digital <span class="neon-text">Kagaaz</span></h1>
       <p class="hero-sub">Your digital paperwork, simplified.</p>
+
+      <!-- OUR PRODUCTS (inside hero) -->
+      <div class="hero-products">
+        <p class="hero-products-label">Our <span class="neon-text">Products</span></p>
+        <div class="products-grid">
+
+          <!-- CARD 1: Growth Journey with live chart -->
+          <div class="product-card" id="growth">
+            <div class="product-card-top">
+              <h3>Growth Journey</h3>
+              <p>Track our progress, statistics, and milestones over time.</p>
+              <div class="growth-live-count">
+                <span class="growth-number" id="growth-total">&mdash;</span>
+                <span class="growth-label">Users</span>
+              </div>
+            </div>
+            <div class="product-card-chart">
+              <div class="growth-filters" id="growth-filters">
+                <button class="growth-filter active" data-range="7d">7D</button>
+                <button class="growth-filter" data-range="30d">30D</button>
+                <button class="growth-filter" data-range="quarter">Q</button>
+                <button class="growth-filter" data-range="year">1Y</button>
+                <button class="growth-filter" data-range="5year">5Y</button>
+              </div>
+              <canvas id="growth-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- CARD 2: Our Book with rotating images -->
+          <a href="https://amzn.in/d/028a2Cjx" target="_blank" rel="noopener" class="product-card" id="book">
+            <div class="product-card-top">
+              <h3>Our Book</h3>
+              <p>Discover our published work and insights on parenting and learning.</p>
+              <div class="book-badges-mini">
+                <span>&#11088; #1 Bestseller</span>
+                <span>&#128214; Paperback</span>
+              </div>
+            </div>
+            <div class="product-card-carousel">
+              <div class="book-slides" id="book-slides">
+                <img src="images/book1.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide active">
+                <img src="images/book2.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
+                <img src="images/book3.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
+                <img src="images/book4.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
+                <img src="images/book5.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
+              </div>
+              <div class="book-dots" id="book-dots">
+                <span class="book-dot active" data-index="0"></span>
+                <span class="book-dot" data-index="1"></span>
+                <span class="book-dot" data-index="2"></span>
+                <span class="book-dot" data-index="3"></span>
+                <span class="book-dot" data-index="4"></span>
+              </div>
+            </div>
+            <div class="product-card-footer">
+              <span class="product-link">Buy on Amazon &rarr;</span>
+            </div>
+          </a>
+
+          <!-- CARD 3: Coming Soon -->
+          <div class="product-card product-card-soon">
+            <div class="product-card-top">
+              <h3>Coming Soon</h3>
+              <p>More exciting products are on the way.</p>
+            </div>
+            <div class="product-card-placeholder">
+              <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="24" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="5 5"/><text x="40" y="45" font-family="Poppins" font-size="18" fill="rgba(255,255,255,0.1)" text-anchor="middle">?</text></svg>
+            </div>
+            <div class="product-card-footer">
+              <span class="product-link product-link-muted">Stay Tuned</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <a href="#blogs" class="btn btn-primary">
         Explore
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
     </div>
     <div class="hero-particles" id="hero-particles"></div>
-  </section>
-
-  <!-- ========== PRODUCTS SECTION ========== -->
-  <section id="products" class="section products-section">
-    <div class="section-header">
-      <p class="section-tag">What We Offer</p>
-      <h2>Our <span class="neon-text">Products</span></h2>
-      <p class="section-sub">Explore what we are building at Digital Kagaaz</p>
-    </div>
-    <div class="products-grid">
-      <a href="#growth" class="product-card reveal">
-        <div class="product-card-img">
-          <svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="120" height="80" rx="8" fill="#0c0c18"/>
-            <polyline points="10,65 30,45 50,55 70,25 90,35 110,15" stroke="#00e5ff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="30" cy="45" r="3" fill="#00e5ff"/>
-            <circle cx="70" cy="25" r="3" fill="#00e5ff"/>
-            <circle cx="110" cy="15" r="3" fill="#00e5ff"/>
-            <rect x="15" y="55" width="8" height="15" rx="2" fill="rgba(0,229,255,0.15)"/>
-            <rect x="30" y="45" width="8" height="25" rx="2" fill="rgba(0,229,255,0.2)"/>
-            <rect x="45" y="50" width="8" height="20" rx="2" fill="rgba(0,229,255,0.15)"/>
-            <rect x="60" y="35" width="8" height="35" rx="2" fill="rgba(0,229,255,0.25)"/>
-            <rect x="75" y="40" width="8" height="30" rx="2" fill="rgba(0,229,255,0.2)"/>
-            <rect x="90" y="28" width="8" height="42" rx="2" fill="rgba(0,229,255,0.3)"/>
-          </svg>
-        </div>
-        <div class="product-card-body">
-          <h3>Growth Journey</h3>
-          <p>Track our progress, statistics, and milestones over time.</p>
-        </div>
-        <div class="product-card-footer">
-          <span class="product-link">View Stats &rarr;</span>
-        </div>
-      </a>
-      <a href="#book" class="product-card reveal">
-        <div class="product-card-img">
-          <svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="120" height="80" rx="8" fill="#0c0c18"/>
-            <rect x="35" y="10" width="30" height="42" rx="4" fill="rgba(0,229,255,0.12)" stroke="#00e5ff" stroke-width="1.5"/>
-            <rect x="39" y="16" width="22" height="2" rx="1" fill="rgba(0,229,255,0.4)"/>
-            <rect x="39" y="22" width="18" height="2" rx="1" fill="rgba(0,229,255,0.25)"/>
-            <rect x="39" y="28" width="20" height="2" rx="1" fill="rgba(0,229,255,0.25)"/>
-            <rect x="39" y="34" width="14" height="2" rx="1" fill="rgba(0,229,255,0.2)"/>
-            <path d="M35 52 L50 58 L65 52" stroke="#00e5ff" stroke-width="1.5" fill="none"/>
-            <text x="60" y="72" font-family="Poppins" font-size="8" fill="#6b7080" text-anchor="middle">Bestseller</text>
-            <circle cx="92" cy="22" r="10" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1"/>
-            <text x="92" y="25" font-family="Poppins" font-size="8" fill="#00e5ff" text-anchor="middle">#1</text>
-          </svg>
-        </div>
-        <div class="product-card-body">
-          <h3>Our Book</h3>
-          <p>Discover our published work and insights on parenting and learning.</p>
-        </div>
-        <div class="product-card-footer">
-          <span class="product-link">Read More &rarr;</span>
-        </div>
-      </a>
-      <div class="product-card product-card-soon reveal">
-        <div class="product-card-img product-card-img-soon">
-          <svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="120" height="80" rx="8" fill="#0c0c18"/>
-            <circle cx="60" cy="35" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="60" y="39" font-family="Poppins" font-size="14" fill="rgba(255,255,255,0.12)" text-anchor="middle">?</text>
-            <rect x="35" y="58" width="50" height="6" rx="3" fill="rgba(255,255,255,0.04)"/>
-            <rect x="42" y="66" width="36" height="4" rx="2" fill="rgba(255,255,255,0.03)"/>
-          </svg>
-        </div>
-        <div class="product-card-body">
-          <h3>Coming Soon</h3>
-          <p>More exciting products are on the way.</p>
-        </div>
-        <div class="product-card-footer">
-          <span class="product-link product-link-muted">Stay Tuned</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== GROWTH CHART SECTION ========== -->
-  <section id="growth" class="section growth-section">
-    <div class="section-header">
-      <p class="section-tag">Our Community</p>
-      <h2>Growth <span class="neon-text">Journey</span></h2>
-      <p class="section-sub">Watch our community grow — live registered user count.</p>
-    </div>
-    <div class="growth-container">
-      <div class="growth-stat-row">
-        <div class="growth-live-count">
-          <span class="growth-number" id="growth-total">—</span>
-          <span class="growth-label">Registered Users</span>
-        </div>
-      </div>
-      <div class="growth-filters" id="growth-filters">
-        <button class="growth-filter active" data-range="7d">7 Days</button>
-        <button class="growth-filter" data-range="30d">30 Days</button>
-        <button class="growth-filter" data-range="quarter">Quarter</button>
-        <button class="growth-filter" data-range="year">Year</button>
-        <button class="growth-filter" data-range="5year">5 Years</button>
-      </div>
-      <div class="growth-chart-wrap">
-        <canvas id="growth-chart"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== BOOK SECTION ========== -->
-  <section id="book" class="section book-section">
-    <div class="section-header">
-      <p class="section-tag">Amazon #1 Bestseller</p>
-      <h2>Our <span class="neon-text">Book</span></h2>
-      <p class="section-sub">A Parent's Journey to Uncovering Opportunities in Daily Struggles</p>
-    </div>
-    <div class="book-container">
-      <div class="book-carousel">
-        <div class="book-slides" id="book-slides">
-          <img src="images/book1.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide active">
-          <img src="images/book2.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
-          <img src="images/book3.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
-          <img src="images/book4.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
-          <img src="images/book5.jpg" alt="Secret to Unfold Parenting Challenge" class="book-slide">
-        </div>
-        <div class="book-dots" id="book-dots">
-          <span class="book-dot active" data-index="0"></span>
-          <span class="book-dot" data-index="1"></span>
-          <span class="book-dot" data-index="2"></span>
-          <span class="book-dot" data-index="3"></span>
-          <span class="book-dot" data-index="4"></span>
-        </div>
-      </div>
-      <div class="book-info">
-        <h3>Secret to Unfold Parenting Challenge</h3>
-        <p class="book-author">by <strong>Kamaljeet Singh</strong></p>
-        <p class="book-desc">Parenting is a journey that begins with excitement and dreams but often unfolds in unexpected ways. Walk alongside Singh and Kaur as they navigate the ups and downs of raising their child &mdash; discovering the opportunities hidden within daily struggles, the moments of growth, learning, and deepening relationships that make the journey worthwhile.</p>
-        <div class="book-badges">
-          <span class="book-badge">&#128214; Paperback</span>
-          <span class="book-badge">&#128241; Kindle</span>
-          <span class="book-badge">&#11088; #1 Bestseller</span>
-        </div>
-        <a href="https://amzn.in/d/028a2Cjx" target="_blank" rel="noopener" class="btn btn-primary book-btn">
-          Buy on Amazon
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-        </a>
-      </div>
-    </div>
   </section>
 
   <!-- ========== BLOG SECTION ========== -->
