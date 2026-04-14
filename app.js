@@ -260,6 +260,33 @@ function escapeAttr(str) {
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// ===== BOOK IMAGE CAROUSEL =====
+(function initBookCarousel() {
+  var slides = document.querySelectorAll('.book-slide');
+  var dots = document.querySelectorAll('.book-dot');
+  if (!slides.length) return;
+  var current = 0;
+  var total = slides.length;
+
+  function showSlide(index) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (index + total) % total;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+
+  // Auto-rotate every 4 seconds
+  setInterval(function () { showSlide(current + 1); }, 4000);
+
+  // Click on dots
+  dots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      showSlide(parseInt(dot.getAttribute('data-index')));
+    });
+  });
+})();
+
 // ===== INIT =====
 renderBlogs();
 renderNews();

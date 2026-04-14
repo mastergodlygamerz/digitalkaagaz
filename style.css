@@ -179,6 +179,62 @@ nav {
   100% { transform: translateY(-100vh) scale(0); opacity: 0; }
 }
 
+/* ===== BOOK SECTION ===== */
+.book-section {
+  background: linear-gradient(180deg, transparent, rgba(0,229,255,0.015), transparent);
+}
+.book-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: center; max-width: 1100px; margin: 0 auto;
+}
+.book-carousel {
+  position: relative; border-radius: 20px; overflow: hidden;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.book-slides { position: relative; width: 100%; aspect-ratio: 4/3; }
+.book-slide {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.book-slide.active { opacity: 1; }
+.book-dots {
+  display: flex; justify-content: center; gap: 10px;
+  padding: 16px 0;
+}
+.book-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); cursor: pointer;
+  transition: all 0.3s ease;
+}
+.book-dot.active {
+  background: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.5);
+  transform: scale(1.2);
+}
+.book-info { display: flex; flex-direction: column; gap: 18px; }
+.book-info h3 {
+  font-size: 1.8rem; font-weight: 800; color: #fff;
+  line-height: 1.3; letter-spacing: -0.5px;
+}
+.book-author { color: #00e5ff; font-size: 1rem; font-weight: 500; }
+.book-desc {
+  color: #6b7080; font-size: 0.95rem; line-height: 1.8;
+}
+.book-badges { display: flex; flex-wrap: wrap; gap: 10px; }
+.book-badge {
+  display: inline-block; padding: 6px 16px;
+  background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.12);
+  border-radius: 100px; font-size: 0.78rem; font-weight: 600;
+  color: #00e5ff;
+}
+.book-btn { align-self: flex-start; margin-top: 8px; }
+@media (max-width: 900px) {
+  .book-container { grid-template-columns: 1fr; gap: 36px; }
+  .book-info { text-align: center; align-items: center; }
+  .book-btn { align-self: center; }
+}
+
 /* ===== BLOG SECTION ===== */
 .blog-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
