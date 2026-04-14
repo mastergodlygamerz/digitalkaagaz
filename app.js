@@ -471,6 +471,164 @@ renderAchievements();
           });
         });
     })();
+
+    // --- GROWTH CHART (PUBLIC) ---
+    (function initGrowthChart() {
+      var canvas = document.getElementById('growth-chart');
+      var totalEl = document.getElementById('growth-total');
+      var filtersEl = document.getElementById('growth-filters');
+      if (!canvas || !filtersEl) return;
+
+      var allSignups = [];
+      var chart = null;
+      var currentRange = '7d';
+
+      // Fetch all user signups
+      fb.getDocs(fb.query(fb.collection(db, 'users'), fb.orderBy('createdAt', 'asc')))
+        .then(function (snap) {
+          snap.forEach(function (doc) {
+            var d = doc.data();
+            if (d.createdAt) {
+              allSignups.push(d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt));
+            }
+          });
+          totalEl.textContent = allSignups.length;
+          renderChart(currentRange);
+        })
+        .catch(function () {
+          totalEl.textContent = '—';
+        });
+
+      // Filter buttons
+      filtersEl.addEventListener('click', function (e) {
+        var btn = e.target.closest('.growth-filter');
+        if (!btn) return;
+        filtersEl.querySelectorAll('.growth-filter').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentRange = btn.getAttribute('data-range');
+        renderChart(currentRange);
+      });
+
+      function renderChart(range) {
+        var now = new Date();
+        var labels = [];
+        var buckets = {};
+        var startDate, groupFn, labelFn;
+
+        if (range === '7d') {
+          startDate = new Date(now); startDate.setDate(startDate.getDate() - 6);
+          for (var i = 0; i < 7; i++) {
+            var d = new Date(startDate); d.setDate(d.getDate() + i);
+            var key = d.toISOString().slice(0, 10);
+            labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
+            buckets[key] = 0;
+          }
+          groupFn = function (dt) { return dt.toISOString().slice(0, 10); };
+        } else if (range === '30d') {
+          startDate = new Date(now); startDate.setDate(startDate.getDate() - 29);
+          for (var i = 0; i < 30; i++) {
+            var d = new Date(startDate); d.setDate(d.getDate() + i);
+            var key = d.toISOString().slice(0, 10);
+            labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
+            buckets[key] = 0;
+          }
+          groupFn = function (dt) { return dt.toISOString().slice(0, 10); };
+        } else if (range === 'quarter') {
+          startDate = new Date(now); startDate.setMonth(startDate.getMonth() - 2);
+          startDate.setDate(1);
+          for (var i = 0; i < 3; i++) {
+            var d = new Date(startDate); d.setMonth(d.getMonth() + i);
+            var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            labels.push(d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }));
+            buckets[key] = 0;
+          }
+          groupFn = function (dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'); };
+        } else if (range === 'year') {
+          startDate = new Date(now); startDate.setMonth(startDate.getMonth() - 11);
+          startDate.setDate(1);
+          for (var i = 0; i < 12; i++) {
+            var d = new Date(startDate); d.setMonth(d.getMonth() + i);
+            var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            labels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+            buckets[key] = 0;
+          }
+          groupFn = function (dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'); };
+        } else if (range === '5year') {
+          startDate = new Date(now); startDate.setFullYear(startDate.getFullYear() - 4);
+          startDate.setMonth(0, 1);
+          for (var i = 0; i < 5; i++) {
+            var yr = startDate.getFullYear() + i;
+            labels.push(String(yr));
+            buckets[String(yr)] = 0;
+          }
+          groupFn = function (dt) { return String(dt.getFullYear()); };
+        }
+
+        allSignups.forEach(function (dt) {
+          var key = groupFn(dt);
+          if (key in buckets) buckets[key]++;
+        });
+
+        var data = Object.values(buckets);
+
+        // Cumulative
+        var cumulative = [];
+        var sum = 0;
+        data.forEach(function (v) { sum += v; cumulative.push(sum); });
+
+        if (chart) chart.destroy();
+        chart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'New Signups',
+              data: data,
+              borderColor: '#00e5ff',
+              backgroundColor: 'rgba(0,229,255,0.08)',
+              borderWidth: 2,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: '#00e5ff',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }, {
+              label: 'Total Users',
+              data: cumulative,
+              borderColor: '#7c3aed',
+              backgroundColor: 'rgba(124,58,237,0.05)',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              tension: 0.4,
+              fill: false,
+              pointBackgroundColor: '#7c3aed',
+              pointRadius: 3,
+              pointHoverRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                labels: { color: '#6b7080', font: { family: 'Poppins', size: 12 } }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: '#4a4e5a', font: { family: 'Poppins', size: 11 }, maxRotation: 45 },
+                grid: { color: 'rgba(255,255,255,0.03)' }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#4a4e5a', font: { family: 'Poppins', size: 11 }, stepSize: 1 },
+                grid: { color: 'rgba(255,255,255,0.03)' }
+              }
+            }
+          }
+        });
+      }
+    })();
   });
 })();
 

@@ -11,7 +11,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
@@ -27,8 +27,9 @@
     const db = getFirestore(app);
 
     // Expose to global for app.js
-    window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp };
+    window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy };
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -99,6 +100,33 @@
       </a>
     </div>
     <div class="hero-particles" id="hero-particles"></div>
+  </section>
+
+  <!-- ========== GROWTH CHART SECTION ========== -->
+  <section id="growth" class="section growth-section">
+    <div class="section-header">
+      <p class="section-tag">Our Community</p>
+      <h2>Growth <span class="neon-text">Journey</span></h2>
+      <p class="section-sub">Watch our community grow — live registered user count.</p>
+    </div>
+    <div class="growth-container">
+      <div class="growth-stat-row">
+        <div class="growth-live-count">
+          <span class="growth-number" id="growth-total">—</span>
+          <span class="growth-label">Registered Users</span>
+        </div>
+      </div>
+      <div class="growth-filters" id="growth-filters">
+        <button class="growth-filter active" data-range="7d">7 Days</button>
+        <button class="growth-filter" data-range="30d">30 Days</button>
+        <button class="growth-filter" data-range="quarter">Quarter</button>
+        <button class="growth-filter" data-range="year">Year</button>
+        <button class="growth-filter" data-range="5year">5 Years</button>
+      </div>
+      <div class="growth-chart-wrap">
+        <canvas id="growth-chart"></canvas>
+      </div>
+    </div>
   </section>
 
   <!-- ========== BOOK SECTION ========== -->
