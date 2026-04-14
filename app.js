@@ -169,10 +169,29 @@ function renderAchievements() {
   });
 }
 
-// ===== CONTACT FORM (inline success message, no popup) =====
+// ===== CONTACT FORM (inline validation + inline success, no popup ever) =====
+var formError = document.getElementById('form-error');
 contactForm.addEventListener('submit', function (e) {
   e.preventDefault();
+  formError.hidden = true;
+
+  var name = document.getElementById('contact-name').value.trim();
+  var email = document.getElementById('contact-email').value.trim();
+  var message = document.getElementById('contact-message').value.trim();
+
+  if (!name || !email || !message) {
+    formError.textContent = 'Please fill in all fields.';
+    formError.hidden = false;
+    return;
+  }
+  if (message.length < 10) {
+    formError.textContent = 'Message must be at least 10 characters.';
+    formError.hidden = false;
+    return;
+  }
+
   formSuccess.hidden = false;
+  formError.hidden = true;
   contactForm.reset();
   // Auto-hide after 5 seconds
   setTimeout(function () { formSuccess.hidden = true; }, 5000);
