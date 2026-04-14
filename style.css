@@ -188,14 +188,20 @@ nav {
   max-width: 1100px; margin: 0 auto;
 }
 .book-carousel {
-  flex-shrink: 0; width: 280px; position: relative;
-  border-radius: 12px; overflow: hidden;
-  background: #0e0e18;
-  border: 2px solid rgba(0,229,255,0.15);
-  box-shadow: 0 0 30px rgba(0,229,255,0.08), 0 8px 32px rgba(0,0,0,0.4);
+  flex-shrink: 0; width: 350px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 20px; overflow: hidden;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.book-carousel:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 40px rgba(0,229,255,0.07), 0 20px 50px rgba(0,0,0,0.25);
+  border-color: rgba(0,229,255,0.12);
 }
 .book-slides {
-  position: relative; width: 280px; height: 380px;
+  position: relative; width: 100%; height: 210px;
+  background: linear-gradient(135deg, #0c0c14, #14141e);
 }
 .book-slide {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -205,8 +211,8 @@ nav {
 .book-slide.active { opacity: 1; }
 .book-dots {
   display: flex; justify-content: center; gap: 8px;
-  padding: 12px 0;
-  background: rgba(0,0,0,0.3);
+  padding: 14px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
 }
 .book-dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -239,8 +245,7 @@ nav {
 .book-btn { align-self: flex-start; margin-top: 8px; }
 @media (max-width: 900px) {
   .book-container { flex-direction: column; align-items: center; gap: 32px; }
-  .book-carousel { width: 240px; }
-  .book-slides { width: 240px; height: 320px; }
+  .book-carousel { width: 100%; max-width: 350px; }
   .book-info { text-align: center; align-items: center; }
   .book-btn { align-self: center; }
 }
