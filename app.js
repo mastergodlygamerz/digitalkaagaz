@@ -276,8 +276,8 @@ function escapeAttr(str) {
     dots[current].classList.add('active');
   }
 
-  // Auto-rotate every 4 seconds
-  setInterval(function () { showSlide(current + 1); }, 4000);
+  // Auto-rotate every 60 seconds
+  setInterval(function () { showSlide(current + 1); }, 60000);
 
   // Click on dots
   dots.forEach(function (dot) {

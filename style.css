@@ -184,35 +184,43 @@ nav {
   background: linear-gradient(180deg, transparent, rgba(0,229,255,0.015), transparent);
 }
 .book-container {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
-  align-items: center; max-width: 1100px; margin: 0 auto;
+  display: flex; gap: 48px; align-items: flex-start;
+  max-width: 1100px; margin: 0 auto;
 }
 .book-carousel {
-  position: relative; border-radius: 20px; overflow: hidden;
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0; width: 280px; position: relative;
+  border-radius: 12px; overflow: hidden;
+  background: #0e0e18;
+  border: 2px solid rgba(0,229,255,0.15);
+  box-shadow: 0 0 30px rgba(0,229,255,0.08), 0 8px 32px rgba(0,0,0,0.4);
 }
-.book-slides { position: relative; width: 100%; aspect-ratio: 4/3; }
+.book-slides {
+  position: relative; width: 280px; height: 380px;
+}
 .book-slide {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: contain; opacity: 0;
-  transition: opacity 0.8s ease;
+  object-fit: cover; opacity: 0;
+  transition: opacity 1s ease;
 }
 .book-slide.active { opacity: 1; }
 .book-dots {
-  display: flex; justify-content: center; gap: 10px;
-  padding: 16px 0;
+  display: flex; justify-content: center; gap: 8px;
+  padding: 12px 0;
+  background: rgba(0,0,0,0.3);
 }
 .book-dot {
-  width: 10px; height: 10px; border-radius: 50%;
+  width: 8px; height: 8px; border-radius: 50%;
   background: rgba(255,255,255,0.15); cursor: pointer;
   transition: all 0.3s ease;
 }
 .book-dot.active {
   background: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.5);
-  transform: scale(1.2);
+  transform: scale(1.3);
 }
-.book-info { display: flex; flex-direction: column; gap: 18px; }
+.book-info {
+  display: flex; flex-direction: column; gap: 18px;
+  padding-top: 8px;
+}
 .book-info h3 {
   font-size: 1.8rem; font-weight: 800; color: #fff;
   line-height: 1.3; letter-spacing: -0.5px;
@@ -230,7 +238,9 @@ nav {
 }
 .book-btn { align-self: flex-start; margin-top: 8px; }
 @media (max-width: 900px) {
-  .book-container { grid-template-columns: 1fr; gap: 36px; }
+  .book-container { flex-direction: column; align-items: center; gap: 32px; }
+  .book-carousel { width: 240px; }
+  .book-slides { width: 240px; height: 320px; }
   .book-info { text-align: center; align-items: center; }
   .book-btn { align-self: center; }
 }
