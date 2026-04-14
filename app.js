@@ -509,7 +509,9 @@ requestAnimationFrame(function () {
     var els = document.querySelectorAll(selectors.join(','));
     els.forEach(function (el) {
       // Don't remove our own elements
-      if (el.closest('#hero') || el.closest('nav') || el.closest('.footer')) return;
+      if (el.closest('#hero') || el.closest('nav') || el.closest('.footer')
+        || el.id === 'auth-overlay' || el.closest('#auth-overlay')
+        || el.id === 'user-bar' || el.closest('#user-bar')) return;
       el.remove();
     });
   }
@@ -529,7 +531,9 @@ requestAnimationFrame(function () {
           var match = selectors.some(function (s) {
             try { return node.matches(s) || node.querySelector(s); } catch(e) { return false; }
           });
-          if (match && !node.closest('#hero') && !node.closest('nav') && !node.closest('.footer')) {
+          if (match && !node.closest('#hero') && !node.closest('nav') && !node.closest('.footer')
+            && node.id !== 'auth-overlay' && !node.closest('#auth-overlay')
+            && node.id !== 'user-bar' && !node.closest('#user-bar')) {
             node.remove();
           }
         });
