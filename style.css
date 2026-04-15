@@ -251,7 +251,8 @@ nav {
 
 /* ===== HERO PRODUCTS (embedded in hero) ===== */
 .hero-products {
-  width: 100%; max-width: 1280px; margin: 36px auto 32px;
+  width: 100%; max-width: 1160px; margin: 36px auto 32px;
+  padding: 0 20px;
 }
 .hero-products-label {
   font-size: 1rem; font-weight: 600; color: #6b7080;
@@ -259,8 +260,8 @@ nav {
   margin-bottom: 20px;
 }
 .products-grid {
-  display: grid; grid-template-columns: repeat(3, minmax(360px, 1fr)); gap: 32px;
-  text-align: left;
+  display: grid; grid-template-columns: repeat(3, 360px); gap: 32px;
+  text-align: left; justify-content: center;
 }
 .product-card {
   background: rgba(255,255,255,0.025);
