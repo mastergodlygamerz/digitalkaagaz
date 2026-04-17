@@ -30,6 +30,51 @@
     window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <!-- Sign Up Modal (injected, theme-matching) -->
+  <div class="dk-modal" id="dk-signup-modal" hidden>
+    <div class="dk-modal-panel" role="dialog" aria-modal="true" aria-labelledby="dk-signup-title">
+      <button class="dk-modal-close" id="dk-signup-close" aria-label="Close">&times;</button>
+      <h3 id="dk-signup-title">Create your account</h3>
+      <form id="dk-signup-form" autocomplete="off" novalidate>
+        <div class="form-group">
+          <label for="su-name">Name</label>
+          <input id="su-name" type="text" maxlength="80" placeholder="Your full name">
+          <div class="su-role-badge" id="su-role-badge">Teacher</div>
+        </div>
+        <div class="form-group">
+          <label for="su-email">Email</label>
+          <input id="su-email" type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label for="su-pass">Password</label>
+          <input id="su-pass" type="password" placeholder="Min 6 characters">
+        </div>
+        <div class="form-group">
+          <label for="su-pass2">Retype Password</label>
+          <input id="su-pass2" type="password" placeholder="Retype password">
+        </div>
+        <div class="form-group">
+          <label for="su-role">User Type</label>
+          <select id="su-role"><option value="teacher">Teacher</option><option value="student">Student</option></select>
+        </div>
+        <div id="su-student-fields" hidden>
+          <div class="form-group">
+            <label for="su-standard">Reading Standard</label>
+            <select id="su-standard"><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select>
+          </div>
+          <div class="form-group">
+            <label for="su-board">Board</label>
+            <select id="su-board"><option>CBSE</option><option>ICSE</option><option>State Board</option></select>
+          </div>
+        </div>
+        <p class="form-error" id="su-error" hidden></p>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button type="submit" class="btn btn-primary" id="su-submit">Sign Up</button>
+          <button type="button" class="btn" id="su-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </head>
 <body>
 
@@ -39,7 +84,12 @@
       <a href="#hero" class="logo">Digital<span>Kagaaz</span></a>
       <ul class="nav-links" id="nav-links">
         <li><a href="#hero">Home</a></li>
-        <li><a href="#blogs">Blogs</a></li>
+        <li class="nav-dropdown">
+          <a href="#products">Products</a>
+          <ul class="dropdown-menu">
+            <li><a href="acadify.html">Acadify</a></li>
+          </ul>
+        </li>
         <li><a href="#news">News</a></li>
         <li><a href="#achievements">Achievements</a></li>
         <li><a href="#contact">Contact</a></li>
@@ -48,6 +98,7 @@
         <span></span><span></span><span></span>
       </button>
       <button class="btn btn-auth" id="auth-btn">Sign In</button>
+      <button class="btn btn-primary" id="signup-btn" style="margin-left:12px">Sign Up</button>
     </div>
   </nav>
 
@@ -154,18 +205,19 @@
           </a>
 
           <!-- CARD 3: Coming Soon -->
-          <div class="product-card product-card-soon">
+          <!-- CARD 3: Acadify (Coming Soon) -->
+          <a href="acadify.html" class="product-card product-card-acadify">
             <div class="product-card-top">
-              <h3>Coming Soon</h3>
-              <p>More exciting products are on the way.</p>
+              <h3>Acadify</h3>
+              <p>Acadify helps coaching institutes manage operations, classes and attendance. Free & paid plans; signup required.</p>
             </div>
             <div class="product-card-placeholder">
-              <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="24" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="5 5"/><text x="40" y="45" font-family="Poppins" font-size="18" fill="rgba(255,255,255,0.1)" text-anchor="middle">?</text></svg>
+              <svg viewBox="0 0 80 80" fill="none"><rect x="12" y="18" width="56" height="44" rx="6" stroke="rgba(255,255,255,0.08)" stroke-width="2"/><path d="M20 32h40M20 40h40M20 48h22" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/></svg>
             </div>
             <div class="product-card-footer">
-              <span class="product-link product-link-muted">Stay Tuned</span>
+              <span class="product-link">Click to Explore More</span>
             </div>
-          </div>
+          </a>
 
         </div>
       </div>

@@ -632,6 +632,94 @@ renderAchievements();
   });
 })();
 
+// ===== SIGNUP MODAL LOGIC (non-breaking, modular) =====
+(function signupModal() {
+  var signupBtn = document.getElementById('signup-btn');
+  if (!signupBtn) return;
+
+  var modal = document.getElementById('dk-signup-modal');
+  var close = document.getElementById('dk-signup-close');
+  var cancel = document.getElementById('su-cancel');
+  var form = document.getElementById('dk-signup-form');
+  var role = document.getElementById('su-role');
+  var studentFields = document.getElementById('su-student-fields');
+  var errorEl = document.getElementById('su-error');
+  var submitBtn = document.getElementById('su-submit');
+
+  function open() { modal.removeAttribute('hidden'); errorEl.hidden = true; }
+  function closeModal() { modal.setAttribute('hidden', ''); form.reset(); studentFields.hidden = true; }
+
+  signupBtn.addEventListener('click', function () { open(); });
+  close.addEventListener('click', closeModal);
+  cancel.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+
+  // dynamic fields show/hide with small animation
+  role.addEventListener('change', function () {
+    if (role.value === 'student') {
+      studentFields.hidden = false;
+      studentFields.style.animation = 'fadeSlide 160ms ease';
+    } else {
+      studentFields.style.animation = 'fadeSlideOut 120ms ease';
+      setTimeout(function () { studentFields.hidden = true; }, 120);
+    }
+    // update role badge under name
+    var badge = document.getElementById('su-role-badge');
+    if (badge) badge.textContent = role.value === 'student' ? 'Student' : 'Teacher';
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    var name = document.getElementById('su-name').value.trim();
+    var email = document.getElementById('su-email').value.trim();
+    var pass = document.getElementById('su-pass').value;
+    var pass2 = document.getElementById('su-pass2').value;
+    var roleVal = role.value;
+    var standard = document.getElementById('su-standard').value || '';
+    var board = document.getElementById('su-board').value || '';
+
+    if (!name || !email || !pass || !pass2 || !roleVal) {
+      errorEl.textContent = 'Please complete all required fields.'; errorEl.hidden = false; return;
+    }
+    if (pass.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; errorEl.hidden = false; return; }
+    if (pass !== pass2) { errorEl.textContent = 'Passwords do not match.'; errorEl.hidden = false; return; }
+    if (roleVal === 'student' && (!standard || !board)) { errorEl.textContent = 'Please select standard and board.'; errorEl.hidden = false; return; }
+
+    submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
+
+    // Use Firebase exposed helper in index (window._firebase)
+    var fb = window._firebase;
+    if (!fb) { errorEl.textContent = 'Firebase not ready.'; errorEl.hidden = false; submitBtn.disabled = false; submitBtn.textContent = 'Sign Up'; return; }
+
+    fb.createUserWithEmailAndPassword(fb.auth, email, pass)
+      .then(function (cred) {
+        return fb.updateProfile(cred.user, { displayName: name }).then(function () {
+          return fb.addDoc(fb.collection(fb.db, 'users'), {
+            uid: cred.user.uid,
+            name: name,
+            email: email,
+            role: roleVal,
+            standard: roleVal === 'student' ? standard : '',
+            board: roleVal === 'student' ? board : '',
+            createdAt: fb.serverTimestamp()
+          });
+        });
+      })
+      .then(function () {
+        closeModal();
+      })
+      .catch(function (err) {
+        errorEl.textContent = err.message.replace('Firebase: ', ''); errorEl.hidden = false;
+      })
+      .finally(function () { submitBtn.disabled = false; submitBtn.textContent = 'Sign Up'; });
+  });
+})();
+
+/* small animations */
+var ss = document.createElement('style'); ss.textContent = '@keyframes fadeSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}@keyframes fadeSlideOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-6px)}}'; document.head.appendChild(ss);
+
 // Re-observe newly added .reveal elements
 requestAnimationFrame(function () {
   var elements = document.querySelectorAll('.reveal:not(.visible)');
