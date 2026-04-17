@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acadify - Coaching Institute Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .proto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 60px auto 20px;
+            align-items: stretch;
+        }
+
+        .grid-card {
+            background: linear-gradient(135deg, rgba(7,7,13,0.5), rgba(12,12,20,0.5));
+            border: 1px solid rgba(0,229,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grid-card h2 {
+            color: #00e5ff;
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-window {
+            flex: 1;
+            min-height: 300px;
+            background: rgba(7,7,13,0.3);
+            border: 1px solid rgba(0,229,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            background: rgba(0,229,255,0.08);
+            border-left: 3px solid #00e5ff;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #eaf6ff;
+            word-wrap: break-word;
+        }
+
+        .chat-message.teacher {
+            background: rgba(124,58,237,0.08);
+            border-left-color: #7c3aed;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 12px;
+            background: rgba(7,7,13,0.6);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 8px;
+            color: #eaf6ff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+            border-color: rgba(0,229,255,0.3);
+        }
+
+        .btn-send {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #00e5ff, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: #07070d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,229,255,0.2);
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-section label {
+            display: block;
+            color: #00e5ff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 8px 10px;
+            background: rgba(7,7,13,0.6);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 8px;
+            color: #eaf6ff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .form-section input:focus,
+        .form-section select:focus {
+            outline: none;
+            box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+            border-color: rgba(0,229,255,0.3);
+        }
+
+        .calendar-list {
+            background: rgba(7,7,13,0.2);
+            border: 1px solid rgba(0,229,255,0.08);
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .calendar-list h3 {
+            color: #7c3aed;
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .cal-row {
+            --cal-entry-h: 36px;
+            padding: 8px 10px;
+            height: var(--cal-entry-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, rgba(0,229,255,0.02), rgba(124,58,237,0.02));
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
+            color: #eaf6ff;
+            font-size: 0.85rem;
+        }
+
+        .cal-row-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cal-row-title {
+            font-weight: 600;
+            color: #00e5ff;
+            margin-bottom: 2px;
+        }
+
+        .cal-row-meta {
+            font-size: 0.75rem;
+            color: rgba(234,246,255,0.6);
+        }
+
+        .cal-row-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            background: rgba(124,58,237,0.2);
+            border: 1px solid rgba(124,58,237,0.3);
+            color: #7c3aed;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .btn-small:hover {
+            background: rgba(124,58,237,0.4);
+        }
+
+        .btn-small.danger {
+            background: rgba(239,68,68,0.2);
+            border-color: rgba(239,68,68,0.3);
+            color: #ef4444;
+        }
+
+        .btn-small.danger:hover {
+            background: rgba(239,68,68,0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-primary-sm {
+            flex: 1;
+            padding: 8px;
+            background: linear-gradient(135deg, #00e5ff, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: #07070d;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-sm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,229,255,0.2);
+        }
+
+        .btn-primary-sm:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary-sm {
+            flex: 1;
+            padding: 8px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-sm:hover {
+            background: rgba(0,229,255,0.15);
+        }
+
+        .class-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .class-btn {
+            padding: 6px 12px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .class-btn.active {
+            background: #00e5ff;
+            color: #07070d;
+            border-color: #00e5ff;
+        }
+
+        @media (max-width: 768px) {
+            .proto-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scrollbar-styled::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-track {
+            background: rgba(0,229,255,0.02);
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-thumb {
+            background: rgba(0,229,255,0.15);
+            border-radius: 3px;
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,229,255,0.25);
+        }
+
+        .chat-window {
+            scrollbar-color: rgba(0,229,255,0.15) rgba(0,229,255,0.02);
+        }
+
+        .calendar-list {
+            scrollbar-color: rgba(0,229,255,0.15) rgba(0,229,255,0.02);
+        }
+
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .attendance-btn {
+            padding: 8px;
+            background: rgba(0,229,255,0.08);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 6px;
+            color: #eaf6ff;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .attendance-btn.present {
+            background: rgba(34,197,94,0.2);
+            border-color: rgba(34,197,94,0.3);
+            color: #22c55e;
+        }
+
+        .attendance-btn.absent {
+            background: rgba(239,68,68,0.2);
+            border-color: rgba(239,68,68,0.3);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">🎓 Acadify</h1>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="#acadify" class="nav-link">Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="proto-grid">
+        <!-- Chat Section -->
+        <div class="grid-card">
+            <h2>📱 Class Chat</h2>
+            <div class="form-section">
+                <label>Select Class:</label>
+                <select id="classSelect" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">Choose a class</option>
+                    <option value="10A">Class 10A</option>
+                    <option value="10B">Class 10B</option>
+                    <option value="11A">Class 11A</option>
+                    <option value="12A">Class 12A</option>
+                </select>
+            </div>
+            <div class="chat-container">
+                <div class="chat-window scrollbar-styled" id="chatWindow"></div>
+                <div class="chat-input-group">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type message...">
+                    <button class="btn-send" id="chatSendBtn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="grid-card">
+            <h2>📅 Class Calendar</h2>
+            <div class="form-section">
+                <label>Event Title:</label>
+                <input type="text" id="eventTitle" placeholder="e.g., Math Exam, Assignment Due">
+            </div>
+            <div class="form-section">
+                <label>Date:</label>
+                <input type="date" id="eventDate">
+            </div>
+            <div class="form-section">
+                <label>Time:</label>
+                <input type="time" id="eventTime">
+            </div>
+            <div class="form-section">
+                <label>Event Type:</label>
+                <select id="eventType">
+                    <option value="exam">Exam</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="class">Class</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-primary-sm" id="addEventBtn">Add Event</button>
+                <button class="btn-secondary-sm" id="clearEventsBtn">Clear All</button>
+            </div>
+            <div class="calendar-list scrollbar-styled" id="calendarList">
+                <h3>Upcoming Events</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Section -->
+    <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+        <div class="grid-card">
+            <h2>✓ Attendance</h2>
+            <div class="form-section">
+                <label>Class:</label>
+                <select id="attendanceClass" style="width: 100%; margin-bottom: 15px;">
+                    <option value="">Select class for attendance</option>
+                    <option value="10A">Class 10A</option>
+                    <option value="10B">Class 10B</option>
+                    <option value="11A">Class 11A</option>
+                    <option value="12A">Class 12A</option>
+                </select>
+            </div>
+            <div id="attendanceGrid" class="attendance-grid"></div>
+            <div class="action-buttons" style="margin-top: 15px;">
+                <button class="btn-primary-sm" id="saveAttendanceBtn">Save Attendance</button>
+                <button class="btn-secondary-sm" id="markAllPresentBtn">Mark All Present</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="acadify.js"></script>
+</body>
+</html>
