@@ -439,17 +439,17 @@ renderAchievements();
 
     // --- VISITOR TRACKING ---
     (function trackVisitor() {
-      fetch('https://ip-api.com/json/?fields=query,country,regionName,city,isp,org,as,mobile')
+      fetch('https://ipapi.co/json/')
         .then(function (r) { return r.json(); })
         .then(function (geo) {
           fb.addDoc(fb.collection(db, 'visitors'), {
-            ip: geo.query || 'unknown',
-            country: geo.country || 'unknown',
-            region: geo.regionName || '',
+            ip: geo.ip || 'unknown',
+            country: geo.country_name || 'unknown',
+            region: geo.region || '',
             city: geo.city || '',
-            isp: geo.isp || '',
+            isp: geo.org || '',
             org: geo.org || '',
-            mobile: geo.mobile || false,
+            mobile: false,
             userAgent: navigator.userAgent,
             referrer: document.referrer || 'direct',
             page: location.pathname,
