@@ -45,6 +45,7 @@ function submitLogin(){
 }
 
 function showDash(){
+  document.documentElement.setAttribute("data-ac-show",_role==="student"?"student":"teacher");
   sd("loginSection","none");
   if(_role==="student"){
     sd("studentDash","block");sd("teacherDash","none");
@@ -59,6 +60,7 @@ function showDash(){
 }
 
 function logout(){
+  document.documentElement.setAttribute("data-ac-show","login");
   if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
   ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
   _role="";_name="";_class="";_board="";
@@ -91,7 +93,7 @@ function listenStudentChat(){
         cw.appendChild(div);
       });
       cw.scrollTop=cw.scrollHeight;
-    },function(){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error. Check connection.</p>";});
+    },function(err){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error: "+(err.code==="permission-denied"?"Firestore rules block access — open Firebase Console \u2192 Firestore \u2192 Rules \u2192 set allow read,write:if true":err.message)+"</p>";});
   });
 }
 
@@ -214,7 +216,7 @@ function listenTeacherChat(cls){
         cw.appendChild(div);
       });
       cw.scrollTop=cw.scrollHeight;
-    },function(){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error. Check connection.</p>";});
+    },function(err){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error: "+(err.code==="permission-denied"?"Firestore rules block access — open Firebase Console → Firestore → Rules → set allow read,write:if true":err.message)+"</p>";});
   });
 }
 

@@ -7,8 +7,12 @@
   const db=getFirestore(app);
   window._adb={db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc};
 </script>
+<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"login");}());</script>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
-#loginSection{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#loginSection{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+html[data-ac-show=login] #loginSection{display:flex!important}
+html[data-ac-show=student] #studentDash{display:block!important}
+html[data-ac-show=teacher] #teacherDash{display:block!important}
 .login-logo{font-size:2.6rem;color:#00e5ff;margin-bottom:6px;text-align:center}
 .login-sub{color:#7c3aed;margin-bottom:28px;font-size:1rem}
 .login-box{width:100%;max-width:400px;background:linear-gradient(135deg,rgba(12,12,20,.9),rgba(7,7,13,.8));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:28px}
@@ -146,5 +150,5 @@
     </div>
   </div>
 </div>
-<script src="acadify.js?v=7"></script>
+<script src="acadify.js?v=8"></script>
 </body></html>
