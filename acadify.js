@@ -1,23 +1,140 @@
-﻿const STORAGE_KEYS={CHAT:'acadify_chat_',CALENDAR:'acadify_calendar',USER_ROLE:'acadify_user_role',USER_CLASS:'acadify_user_class',USER_BOARD:'acadify_user_board',USER_NAME:'acadify_user_name'};
-function sd(id,val){var e=document.getElementById(id);if(e)e.style.setProperty('display',val,'important');}
-document.addEventListener('DOMContentLoaded',function(){checkAuthenticationStatus();});
-function checkAuthenticationStatus(){var role=localStorage.getItem(STORAGE_KEYS.USER_ROLE);var name=localStorage.getItem(STORAGE_KEYS.USER_NAME);var cls=localStorage.getItem(STORAGE_KEYS.USER_CLASS);var board=localStorage.getItem(STORAGE_KEYS.USER_BOARD);if(role&&name){showMainContent(role,cls,board,name);}else{showSignup();}}
-function showSignup(){sd('signupContainer','flex');sd('userInfoBar','none');sd('studentContent','none');sd('teacherContent','none');}
-function showMainContent(r,c,b,n){sd('signupContainer','none');sd('userInfoBar','block');var uit=document.getElementById('userInfoText');var up=document.getElementById('userProfession');if(r==='student'){sd('studentContent','block');sd('teacherContent','none');if(uit)uit.textContent=n+' | Class: '+c+' | Board: '+b;if(up)up.textContent='Student';initStudentChat(n,c);initStudentCalendar(n);}else{sd('studentContent','none');sd('teacherContent','block');if(uit)uit.textContent=n;if(up)up.textContent='Teacher';initTeacherChat();initTeacherCalendar(n);}}
-function selectRole(role){document.getElementById('studentRoleBtn').classList.remove('active');document.getElementById('teacherRoleBtn').classList.remove('active');if(role==='student'){document.getElementById('studentRoleBtn').classList.add('active');document.getElementById('classSelectSignupContainer').classList.add('show');}else{document.getElementById('teacherRoleBtn').classList.add('active');document.getElementById('classSelectSignupContainer').classList.remove('show');}}
-function proceedToApp(){var nv=document.getElementById('nameInput').value.trim();if(!nv){alert('Please enter your name');return;}var sb=document.getElementById('studentRoleBtn');var tb=document.getElementById('teacherRoleBtn');if(!sb.classList.contains('active')&&!tb.classList.contains('active')){alert('Please select a role');return;}if(sb.classList.contains('active')){var sc=document.getElementById('classSelectSignup').value;var bo=document.getElementById('boardSelectSignup').value;if(!sc){alert('Please select your class');return;}if(!bo){alert('Please select your board');return;}localStorage.setItem(STORAGE_KEYS.USER_NAME,nv);localStorage.setItem(STORAGE_KEYS.USER_ROLE,'student');localStorage.setItem(STORAGE_KEYS.USER_CLASS,sc);localStorage.setItem(STORAGE_KEYS.USER_BOARD,bo);}else{localStorage.setItem(STORAGE_KEYS.USER_NAME,nv);localStorage.setItem(STORAGE_KEYS.USER_ROLE,'teacher');localStorage.setItem(STORAGE_KEYS.USER_CLASS,'');localStorage.setItem(STORAGE_KEYS.USER_BOARD,'');}checkAuthenticationStatus();}
-function logout(){localStorage.removeItem(STORAGE_KEYS.USER_NAME);localStorage.removeItem(STORAGE_KEYS.USER_ROLE);localStorage.removeItem(STORAGE_KEYS.USER_CLASS);localStorage.removeItem(STORAGE_KEYS.USER_BOARD);location.reload();}
-function initStudentChat(un,uc){var ci=document.getElementById('chatInput');var csb=document.getElementById('chatSendBtn');if(ci)ci.value='';if(csb)csb.onclick=function(){sendStudentChatMessage(un,uc);};var scn=document.getElementById('studentClassName');if(scn)scn.textContent=uc;loadStudentChat(un,uc);}
-function sendStudentChatMessage(un,uc){var ci=document.getElementById('chatInput');if(!ci)return;var msg=ci.value.trim();if(!msg)return;var key=STORAGE_KEYS.CHAT+un+'_'+uc;var msgs=JSON.parse(localStorage.getItem(key)||'[]');msgs.push({role:'student',name:un,message:msg,timestamp:new Date().toLocaleString()});localStorage.setItem(key,JSON.stringify(msgs));ci.value='';loadStudentChat(un,uc);}
-function loadStudentChat(un,uc){var cw=document.getElementById('chatWindow');if(!cw)return;var key=STORAGE_KEYS.CHAT+un+'_'+uc;var msgs=JSON.parse(localStorage.getItem(key)||'[]');cw.innerHTML='';if(msgs.length===0){cw.innerHTML='<p style="color:#999;">No messages yet</p>';return;}msgs.forEach(function(m){var d=document.createElement('div');d.className='chat-message'+(m.role==='teacher'?' teacher':'');d.innerHTML='<strong>'+(m.role==='student'?'You':'Teacher')+':</strong> '+m.message+'<br><small style="color:#888;">'+m.timestamp+'</small>';cw.appendChild(d);});cw.scrollTop=cw.scrollHeight;}
-function initTeacherChat(){var tcs=document.getElementById('teacherClassSelect');if(tcs)tcs.onchange=function(){onTeacherClassSelect();};var tcsb=document.getElementById('teacherChatSendBtn');if(tcsb)tcsb.onclick=function(){sendTeacherChatMessage();};}
-function onTeacherClassSelect(){var tcs=document.getElementById('teacherClassSelect');var sc=tcs.value;var scs=document.getElementById('teacherSelectedClass');if(scs)scs.textContent=sc||'None';loadTeacherChat(sc);updateStudentsList(sc);}
-function sendTeacherChatMessage(){var sc=document.getElementById('teacherClassSelect').value;if(!sc){alert('Please select a class');return;}var ci=document.getElementById('teacherChatInput');if(!ci)return;var msg=ci.value.trim();if(!msg)return;var key=STORAGE_KEYS.CHAT+sc;var msgs=JSON.parse(localStorage.getItem(key)||'[]');msgs.push({role:'teacher',message:msg,timestamp:new Date().toLocaleString()});localStorage.setItem(key,JSON.stringify(msgs));ci.value='';loadTeacherChat(sc);}
-function loadTeacherChat(sc){var cw=document.getElementById('teacherChatWindow');if(!cw)return;if(!sc){cw.innerHTML='<p style="color:#666;">Select a class to view chat</p>';return;}var key=STORAGE_KEYS.CHAT+sc;var msgs=JSON.parse(localStorage.getItem(key)||'[]');cw.innerHTML='';if(msgs.length===0){cw.innerHTML='<p style="color:#999;">No messages yet</p>';return;}msgs.forEach(function(m){var d=document.createElement('div');d.className='chat-message'+(m.role==='teacher'?' teacher':'');d.innerHTML='<strong>'+(m.role==='student'?'Student':'You (Teacher)')+':</strong> '+m.message+'<br><small style="color:#888;">'+m.timestamp+'</small>';cw.appendChild(d);});cw.scrollTop=cw.scrollHeight;}
-function updateStudentsList(sc){var sl=document.getElementById('studentsList');if(!sl)return;if(!sc){sl.innerHTML='<p style="color:#666;">No class selected</p>';return;}var students=['Rajesh Kumar','Priya Singh','Amit Patel','Neha Verma','Vikram Reddy'];sl.innerHTML='<ul style="list-style:none;padding:0;margin:0;">'+students.map(function(s,i){return'<li style="padding:5px;border-bottom:1px solid rgba(0,229,255,0.1);">'+(i+1)+'. '+s+'</li>';}).join('')+'</ul>';}
-function initStudentCalendar(un){var ab=document.getElementById('addEventBtn');var cb=document.getElementById('clearEventsBtn');var et=document.getElementById('eventTitle');var ed=document.getElementById('eventDate');var eti=document.getElementById('eventTime');if(!ab)return;ab.onclick=function(){var t=et.value.trim();var d=ed.value;var ti=eti.value||'00:00';if(!t||!d){alert('Please fill in title and date');return;}var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');evts.push({id:Date.now(),title:t,date:d,time:ti});localStorage.setItem(key,JSON.stringify(evts));et.value='';ed.value='';eti.value='';loadStudentCalendarList(un);};if(cb)cb.onclick=function(){if(confirm('Clear all events?')){localStorage.removeItem(STORAGE_KEYS.CALENDAR+'_'+un);loadStudentCalendarList(un);}};loadStudentCalendarList(un);}
-function loadStudentCalendarList(un){var cl=document.getElementById('calendarList');if(!cl)return;var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');cl.innerHTML='<h3 style="color:#00e5ff;margin-bottom:10px;">Events</h3>';if(evts.length===0){cl.innerHTML+='<p style="color:#999;">No events scheduled</p>';return;}evts.forEach(function(e){var d=document.createElement('div');d.style.cssText='padding:8px;background:rgba(0,229,255,0.05);margin-bottom:8px;border-radius:6px;';d.innerHTML='<strong>'+e.title+'</strong><br><small style="color:#888;">'+e.date+' at '+e.time+'</small><br><button onclick="deleteStudentEvent('+e.id+',this)" style="margin-top:5px;padding:3px 8px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:3px;cursor:pointer;">Delete</button>';cl.appendChild(d);});}
-function deleteStudentEvent(id,btn){var un=localStorage.getItem(STORAGE_KEYS.USER_NAME);var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify(evts.filter(function(e){return e.id!==id;})));loadStudentCalendarList(un);}
-function initTeacherCalendar(un){var ab=document.getElementById('teacherAddEventBtn');var cb=document.getElementById('teacherClearEventsBtn');var et=document.getElementById('teacherEventTitle');var ed=document.getElementById('teacherEventDate');var eti=document.getElementById('teacherEventTime');if(!ab)return;ab.onclick=function(){var t=et.value.trim();var d=ed.value;var ti=eti.value||'00:00';if(!t||!d){alert('Please fill in title and date');return;}var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');evts.push({id:Date.now(),title:t,date:d,time:ti});localStorage.setItem(key,JSON.stringify(evts));et.value='';ed.value='';eti.value='';loadTeacherCalendarList(un);};if(cb)cb.onclick=function(){if(confirm('Clear all events?')){localStorage.removeItem(STORAGE_KEYS.CALENDAR+'_'+un);loadTeacherCalendarList(un);}};loadTeacherCalendarList(un);}
-function loadTeacherCalendarList(un){var cl=document.getElementById('teacherCalendarList');if(!cl)return;var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');cl.innerHTML='<h3 style="color:#00e5ff;margin-bottom:10px;">Events</h3>';if(evts.length===0){cl.innerHTML+='<p style="color:#999;">No events scheduled</p>';return;}evts.forEach(function(e){var d=document.createElement('div');d.style.cssText='padding:8px;background:rgba(0,229,255,0.05);margin-bottom:8px;border-radius:6px;';d.innerHTML='<strong>'+e.title+'</strong><br><small style="color:#888;">'+e.date+' at '+e.time+'</small><br><button onclick="deleteTeacherEvent('+e.id+',this)" style="margin-top:5px;padding:3px 8px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:3px;cursor:pointer;">Delete</button>';cl.appendChild(d);});}
-function deleteTeacherEvent(id,btn){var un=localStorage.getItem(STORAGE_KEYS.USER_NAME);var key=STORAGE_KEYS.CALENDAR+'_'+un;var evts=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify(evts.filter(function(e){return e.id!==id;})));loadTeacherCalendarList(un);}
+var _role='',_name='',_class='',_board='',_loginRole='';
+function sd(id,v){var e=document.getElementById(id);if(e)e.style.setProperty('display',v,'important');}
+document.addEventListener('DOMContentLoaded',function(){
+  var r=localStorage.getItem('ac_role'),n=localStorage.getItem('ac_name'),c=localStorage.getItem('ac_class'),b=localStorage.getItem('ac_board');
+  if(r&&n){_role=r;_name=n;_class=c||'';_board=b||'';showDash();}
+});
+function showLoginForm(role){
+  _loginRole=role;
+  document.getElementById('loginFormTitle').textContent=role==='student'?'Student Login':'Teacher Login';
+  sd('studentFields',role==='student'?'block':'none');
+  sd('loginFormArea','block');
+  document.getElementById('loginName').focus();
+}
+function hideLoginForm(){sd('loginFormArea','none');_loginRole='';}
+function submitLogin(){
+  var n=document.getElementById('loginName').value.trim();
+  if(!n){alert('Please enter your name');return;}
+  if(_loginRole==='student'){
+    var c=document.getElementById('loginClass').value;
+    var b=document.getElementById('loginBoard').value;
+    if(!c){alert('Please select your class');return;}
+    if(!b){alert('Please select your board');return;}
+    localStorage.setItem('ac_class',c);localStorage.setItem('ac_board',b);_class=c;_board=b;
+  }
+  localStorage.setItem('ac_role',_loginRole);localStorage.setItem('ac_name',n);_role=_loginRole;_name=n;
+  showDash();
+}
+function showDash(){
+  sd('welcomePage','none');
+  if(_role==='student'){
+    sd('studentDash','block');sd('teacherDash','none');
+    document.getElementById('sUserInfo').textContent=_name+' | Class '+_class+' | '+_board;
+    loadStudentChat();loadStudentEvents();
+  } else {
+    sd('studentDash','none');sd('teacherDash','block');
+    document.getElementById('tUserInfo').textContent=_name;
+    loadTeacherChat();loadTeacherEvents();
+  }
+}
+function logout(){
+  localStorage.removeItem('ac_role');localStorage.removeItem('ac_name');localStorage.removeItem('ac_class');localStorage.removeItem('ac_board');
+  _role='';_name='';_class='';_board='';
+  sd('studentDash','none');sd('teacherDash','none');sd('welcomePage','flex');sd('loginFormArea','none');
+  document.getElementById('loginName').value='';
+}
+function loadStudentChat(){
+  var cw=document.getElementById('sChatWin');if(!cw)return;
+  var msgs=JSON.parse(localStorage.getItem('ac_chat_'+_class)||'[]');
+  cw.innerHTML='';
+  if(!msgs.length){cw.innerHTML='<p style="color:#555;font-size:0.88rem;padding:8px;">No messages yet</p>';return;}
+  msgs.forEach(function(m){var d=document.createElement('div');d.className='msg'+(m.role==='teacher'?' tmsg':'');d.innerHTML='<strong>'+(m.role==='teacher'?'Teacher':_name)+'</strong>'+m.text+'<br><small>'+m.time+'</small>';cw.appendChild(d);});
+  cw.scrollTop=cw.scrollHeight;
+}
+function sendStudentMsg(){
+  var i=document.getElementById('sChatInput');var msg=i.value.trim();if(!msg)return;
+  var msgs=JSON.parse(localStorage.getItem('ac_chat_'+_class)||'[]');
+  msgs.push({role:'student',name:_name,text:msg,time:new Date().toLocaleString()});
+  localStorage.setItem('ac_chat_'+_class,JSON.stringify(msgs));i.value='';loadStudentChat();
+}
+function loadStudentEvents(){
+  var el=document.getElementById('sEventList');if(!el)return;
+  var evts=JSON.parse(localStorage.getItem('ac_ev_s_'+_name+'_'+_class)||'[]');
+  var today=new Date();today.setHours(0,0,0,0);
+  var future=evts.filter(function(e){return new Date(e.date)>=today;});
+  future.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  el.innerHTML='';
+  if(!future.length){el.innerHTML='<p style="color:#555;font-size:0.88rem;">No upcoming events</p>';return;}
+  future.forEach(function(e){
+    var isT=new Date(e.date).toDateString()===new Date().toDateString();
+    var d=document.createElement('div');d.className='ev-item';
+    d.innerHTML='<div class="ev-title">'+e.title+(isT?'<span class="today-badge">Today</span>':'')+'</div><div class="ev-meta">'+e.date+(e.time?' at '+e.time:'')+'</div><button class="del-btn" onclick="delStudentEv('+e.id+')">Delete</button>';
+    el.appendChild(d);
+  });
+}
+function addStudentEvent(){
+  var t=document.getElementById('sEvTitle').value.trim(),d=document.getElementById('sEvDate').value,ti=document.getElementById('sEvTime').value;
+  if(!t||!d){alert('Please fill title and date');return;}
+  var key='ac_ev_s_'+_name+'_'+_class;
+  var evts=JSON.parse(localStorage.getItem(key)||'[]');
+  evts.push({id:Date.now(),title:t,date:d,time:ti||''});
+  localStorage.setItem(key,JSON.stringify(evts));
+  document.getElementById('sEvTitle').value='';document.getElementById('sEvDate').value='';document.getElementById('sEvTime').value='';
+  loadStudentEvents();
+}
+function delStudentEv(id){
+  var key='ac_ev_s_'+_name+'_'+_class;
+  var evts=JSON.parse(localStorage.getItem(key)||'[]');
+  localStorage.setItem(key,JSON.stringify(evts.filter(function(e){return e.id!==id;})));loadStudentEvents();
+}
+function clearStudentEvents(){if(!confirm('Clear all events?'))return;localStorage.removeItem('ac_ev_s_'+_name+'_'+_class);loadStudentEvents();}
+function loadTeacherChat(){
+  var cw=document.getElementById('tChatWin');if(!cw)return;
+  var cls=document.getElementById('tClassSel').value;
+  var msgs=JSON.parse(localStorage.getItem('ac_chat_'+(cls||'general'))||'[]');
+  cw.innerHTML='';
+  if(!msgs.length){cw.innerHTML='<p style="color:#555;font-size:0.88rem;padding:8px;">No messages</p>';return;}
+  msgs.forEach(function(m){var d=document.createElement('div');d.className='msg'+(m.role==='teacher'?' tmsg':'');d.innerHTML='<strong>'+(m.role==='teacher'?'You (Teacher)':'Student: '+m.name)+'</strong>'+m.text+'<br><small>'+m.time+'</small>';cw.appendChild(d);});
+  cw.scrollTop=cw.scrollHeight;
+}
+function sendTeacherMsg(){
+  var i=document.getElementById('tChatInput');var msg=i.value.trim();if(!msg)return;
+  var cls=document.getElementById('tClassSel').value;
+  var key='ac_chat_'+(cls||'general');
+  var msgs=JSON.parse(localStorage.getItem(key)||'[]');
+  msgs.push({role:'teacher',name:_name,text:msg,time:new Date().toLocaleString()});
+  localStorage.setItem(key,JSON.stringify(msgs));i.value='';loadTeacherChat();
+}
+function loadTeacherEvents(){
+  var el=document.getElementById('tEventList');if(!el)return;
+  var evts=JSON.parse(localStorage.getItem('ac_ev_t_'+_name)||'[]');
+  var today=new Date();today.setHours(0,0,0,0);
+  var future=evts.filter(function(e){return new Date(e.date)>=today;});
+  future.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  el.innerHTML='';
+  if(!future.length){el.innerHTML='<p style="color:#555;font-size:0.88rem;">No slots added</p>';return;}
+  future.forEach(function(e){
+    var isT=new Date(e.date).toDateString()===new Date().toDateString();
+    var meta=(e.cls?'Class '+e.cls:'')+(e.subject?' | '+e.subject:'');
+    var d=document.createElement('div');d.className='ev-item';
+    d.innerHTML='<div class="ev-title">'+e.title+(isT?'<span class="today-badge">Today</span>':'')+'</div><div class="ev-meta">'+e.date+(e.time?' at '+e.time:'')+(meta?' — '+meta:'')+'</div><button class="del-btn" onclick="delTeacherEv('+e.id+')">Delete</button>';
+    el.appendChild(d);
+  });
+}
+function addTeacherEvent(){
+  var t=document.getElementById('tEvTitle').value.trim(),d=document.getElementById('tEvDate').value,ti=document.getElementById('tEvTime').value;
+  var cls=document.getElementById('tEvClass').value,sub=document.getElementById('tEvSubject').value;
+  if(!t||!d){alert('Please fill title and date');return;}
+  var key='ac_ev_t_'+_name;
+  var evts=JSON.parse(localStorage.getItem(key)||'[]');
+  evts.push({id:Date.now(),title:t,date:d,time:ti||'',cls:cls,subject:sub});
+  localStorage.setItem(key,JSON.stringify(evts));
+  document.getElementById('tEvTitle').value='';document.getElementById('tEvDate').value='';document.getElementById('tEvTime').value='';
+  loadTeacherEvents();
+}
+function delTeacherEv(id){
+  var key='ac_ev_t_'+_name;
+  var evts=JSON.parse(localStorage.getItem(key)||'[]');
+  localStorage.setItem(key,JSON.stringify(evts.filter(function(e){return e.id!==id;})));loadTeacherEvents();
+}
+function clearTeacherEvents(){if(!confirm('Clear all slots?'))return;localStorage.removeItem('ac_ev_t_'+_name);loadTeacherEvents();}
