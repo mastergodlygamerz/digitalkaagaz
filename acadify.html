@@ -1,34 +1,87 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acadify</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}#welcomePage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}.wt{font-size:2.8rem;color:#00e5ff;margin-bottom:8px;text-align:center}.ws{color:#7c3aed;margin-bottom:50px;font-size:1.05rem}.lo{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;margin-bottom:30px}.lc{background:linear-gradient(135deg,rgba(12,12,20,0.8),rgba(7,7,13,0.6));border:2px solid rgba(0,229,255,0.2);border-radius:20px;padding:40px 50px;text-align:center;cursor:pointer;transition:border-color 0.3s,transform 0.2s;width:210px}.lc:hover{border-color:#00e5ff;transform:translateY(-4px)}.lc .ico{font-size:2.8rem;margin-bottom:12px}.lc h2{color:#00e5ff;font-size:1.3rem}.lc p{color:#888;font-size:0.82rem;margin-top:8px}#loginFormArea{width:100%;max-width:440px;background:linear-gradient(135deg,rgba(12,12,20,0.85),rgba(7,7,13,0.7));border:1px solid rgba(0,229,255,0.25);border-radius:16px;padding:30px;display:none}#loginFormArea h3{color:#00e5ff;margin-bottom:20px;font-size:1.2rem}.fr{margin-bottom:14px}.fr label{display:block;color:#7c3aed;font-size:0.78rem;margin-bottom:5px;font-weight:700;text-transform:uppercase}.fr input,.fr select{width:100%;padding:10px 13px;background:rgba(7,7,13,0.85);border:1px solid rgba(0,229,255,0.2);border-radius:8px;color:#eaf6ff;font-size:0.95rem}.fr select option{background:#0c0c14}.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:700;font-size:1rem;cursor:pointer;margin-top:4px}.back-link{text-align:center;margin-top:14px}.back-link a{color:#7c3aed;cursor:pointer;font-size:0.88rem}.top-bar{background:rgba(0,229,255,0.07);border-bottom:1px solid rgba(0,229,255,0.15);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}.top-bar-title{color:#00e5ff;font-size:1.25rem;font-weight:700}.top-bar-info{color:#eaf6ff;font-size:0.88rem}.top-bar-role{color:#7c3aed;font-size:0.78rem;margin-left:8px}.logout-btn{padding:7px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:6px;cursor:pointer;font-size:0.82rem}.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:20px;padding:24px;max-width:1400px;margin:0 auto}.card{background:linear-gradient(135deg,rgba(12,12,20,0.5),rgba(7,7,13,0.3));border:1px solid rgba(0,229,255,0.1);border-radius:15px;padding:24px}.card h2{color:#00e5ff;margin-bottom:16px;font-size:1.15rem}.chat-win{background:rgba(0,0,0,0.3);border:1px solid rgba(0,229,255,0.1);border-radius:8px;padding:10px;height:280px;overflow-y:auto;margin-bottom:10px}.msg{background:rgba(0,229,255,0.05);border-left:3px solid #00e5ff;padding:8px 10px;margin-bottom:8px;border-radius:4px;font-size:0.88rem}.msg.tmsg{border-left-color:#7c3aed}.msg strong{display:block;color:#00e5ff;font-size:0.76rem;margin-bottom:2px}.msg.tmsg strong{color:#7c3aed}.msg small{color:#555;font-size:0.72rem}.chat-row{display:flex;gap:8px}.chat-row input{flex:1;padding:9px 12px;background:rgba(7,7,13,0.8);border:1px solid rgba(0,229,255,0.2);border-radius:8px;color:#eaf6ff;font-size:0.9rem}.send-btn{padding:9px 18px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:600;cursor:pointer}.ev-item{padding:10px 12px;background:rgba(0,229,255,0.04);border-radius:8px;margin-bottom:8px;border-left:3px solid #00e5ff}.ev-title{color:#eaf6ff;font-weight:600;font-size:0.9rem}.ev-meta{color:#666;font-size:0.78rem;margin-top:3px}.del-btn{padding:3px 8px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:4px;cursor:pointer;font-size:0.72rem;margin-top:6px}.ev-wrap{max-height:210px;overflow-y:auto;margin-bottom:14px}.add-form{background:rgba(0,0,0,0.2);border-radius:8px;padding:14px}.add-form h3{color:#00e5ff;font-size:0.9rem;margin-bottom:12px}.add-form .fr{margin-bottom:9px}.add-form .fr label{font-size:0.74rem}.add-form input,.add-form select{padding:7px 11px;background:rgba(7,7,13,0.85);border:1px solid rgba(0,229,255,0.2);border-radius:6px;color:#eaf6ff;font-size:0.88rem;width:100%}.add-btns{display:flex;gap:8px;margin-top:10px}.add-btns button{flex:1;padding:8px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.82rem}.btn-add{background:linear-gradient(135deg,#00e5ff,#7c3aed);color:#07070d}.btn-clr{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}.filter-bar{background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.filter-bar label{color:#7c3aed;font-size:0.8rem;font-weight:700}.filter-bar select{padding:6px 10px;background:rgba(7,7,13,0.85);border:1px solid rgba(0,229,255,0.2);border-radius:6px;color:#eaf6ff;font-size:0.85rem}.today-badge{display:inline-block;background:rgba(0,229,255,0.15);color:#00e5ff;font-size:0.68rem;padding:2px 6px;border-radius:4px;margin-left:6px}#studentDash,#teacherDash{display:none}</style></head><body>
-<div id="welcomePage">
-  <h1 class="wt">&#127979; Acadify</h1>
-  <p class="ws">Your coaching management platform</p>
-  <div class="lo">
-    <div class="lc" onclick="showLoginForm('student')"><div class="ico">&#128100;</div><h2>Student</h2><p>Access chat &amp; events</p></div>
-    <div class="lc" onclick="showLoginForm('teacher')"><div class="ico">&#128104;&#8205;&#127979;</div><h2>Teacher</h2><p>Manage classes &amp; schedule</p></div>
-  </div>
-  <div id="loginFormArea">
-    <h3 id="loginFormTitle"></h3>
-    <div class="fr"><label>Your Name</label><input type="text" id="loginName" placeholder="Enter your name"></div>
-    <div id="studentFields">
-      <div class="fr"><label>Your Class</label><select id="loginClass"><option value="">Choose class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
-      <div class="fr"><label>Your Board</label><select id="loginBoard"><option value="">Choose board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acadify</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}#loginSection{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}.login-logo{font-size:2.8rem;color:#00e5ff;margin-bottom:6px;text-align:center}.login-sub{color:#7c3aed;margin-bottom:32px;font-size:1rem}.login-box{width:100%;max-width:400px;background:linear-gradient(135deg,rgba(12,12,20,.9),rgba(7,7,13,.8));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:28px}.role-row{display:flex;gap:10px;margin-bottom:16px}.role-btn{flex:1;padding:12px;background:rgba(0,229,255,.08);border:2px solid rgba(0,229,255,.2);border-radius:10px;color:#00e5ff;font-weight:600;cursor:pointer;font-size:.9rem;transition:all .2s}.role-btn.active{background:#00e5ff;color:#07070d;border-color:#00e5ff}.fr{margin-bottom:13px}.fr label{display:block;color:#7c3aed;font-size:.75rem;font-weight:700;text-transform:uppercase;margin-bottom:5px}.fr input,.fr select{width:100%;padding:9px 12px;background:rgba(7,7,13,.9);border:1px solid rgba(0,229,255,.2);border-radius:7px;color:#eaf6ff;font-size:.92rem}.fr select option{background:#0c0c14}.login-submit{width:100%;padding:11px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px}.top-bar{background:rgba(0,229,255,.06);border-bottom:1px solid rgba(0,229,255,.12);padding:13px 22px;display:flex;align-items:center;justify-content:space-between}.top-bar-left{color:#00e5ff;font-size:1.15rem;font-weight:700}.top-bar-right{display:flex;align-items:center;gap:12px}.user-pill{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);border-radius:20px;padding:5px 13px;font-size:.8rem;color:#eaf6ff}.role-tag{color:#7c3aed;margin-left:7px;font-size:.72rem}.logout-btn{padding:6px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:6px;cursor:pointer;font-size:.8rem}.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:20px;padding:22px;max-width:1400px;margin:0 auto}.card{background:linear-gradient(135deg,rgba(12,12,20,.5),rgba(7,7,13,.3));border:1px solid rgba(0,229,255,.1);border-radius:14px;padding:22px}.card h2{color:#00e5ff;margin-bottom:14px;font-size:1.05rem}.chat-win{background:rgba(0,0,0,.3);border:1px solid rgba(0,229,255,.1);border-radius:8px;padding:10px;height:300px;overflow-y:auto;margin-bottom:10px}.msg{padding:8px 10px;margin-bottom:7px;border-radius:6px;font-size:.87rem;border-left:3px solid #00e5ff;background:rgba(0,229,255,.04)}.msg.tmsg{border-left-color:#7c3aed;background:rgba(124,58,237,.04)}.msg .sender{font-weight:700;font-size:.76rem;margin-bottom:3px;color:#00e5ff}.msg.tmsg .sender{color:#7c3aed}.msg .mtime{color:#444;font-size:.7rem;margin-top:3px}.chat-row{display:flex;gap:8px}.chat-row input{flex:1;padding:8px 11px;background:rgba(7,7,13,.8);border:1px solid rgba(0,229,255,.2);border-radius:7px;color:#eaf6ff;font-size:.88rem}.send-btn{padding:8px 16px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:7px;color:#07070d;font-weight:600;cursor:pointer}.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.08);border-radius:8px}.filter-bar label{color:#7c3aed;font-size:.76rem;font-weight:700}.filter-bar select{padding:5px 9px;background:rgba(7,7,13,.85);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:#eaf6ff;font-size:.83rem}.ev-scroll{max-height:220px;overflow-y:auto;margin-bottom:12px}.ev-item{padding:9px 11px;background:rgba(0,229,255,.04);border-radius:7px;margin-bottom:7px;border-left:3px solid #00e5ff}.ev-item.ev-teacher{border-left-color:#7c3aed;background:rgba(124,58,237,.04)}.ev-item.ev-student{border-left-color:#10b981;background:rgba(16,185,129,.04)}.ev-title{font-weight:600;font-size:.88rem;color:#eaf6ff}.ev-meta{color:#555;font-size:.76rem;margin-top:2px}.ev-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 0 6px;margin-top:6px}.ev-label.lbl-t{color:#7c3aed}.ev-label.lbl-s{color:#10b981}.ev-label.lbl-my{color:#00e5ff}.del-btn{padding:2px 8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:4px;cursor:pointer;font-size:.7rem;margin-top:5px}.today-badge{display:inline-block;background:rgba(0,229,255,.15);color:#00e5ff;font-size:.65rem;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle}.add-form{background:rgba(0,0,0,.2);border-radius:8px;padding:13px}.add-form h3{color:#00e5ff;font-size:.85rem;margin-bottom:10px}.add-form .fr{margin-bottom:8px}.add-form .fr label{font-size:.72rem}.add-form input,.add-form select{padding:6px 10px;background:rgba(7,7,13,.85);border:1px solid rgba(0,229,255,.18);border-radius:6px;color:#eaf6ff;font-size:.85rem;width:100%}.add-btns{display:flex;gap:8px;margin-top:9px}.add-btns button{flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.8rem}.btn-add{background:linear-gradient(135deg,#00e5ff,#7c3aed);color:#07070d}.btn-clr{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3)}#studentFields{display:none}#studentDash,#teacherDash{display:none}</style></head><body>
+<div id="loginSection">
+  <h1 class="login-logo">&#127979; Acadify</h1>
+  <p class="login-sub">Coaching Management Platform</p>
+  <div class="login-box">
+    <div class="fr"><label>Your Name</label><input type="text" id="lName" placeholder="Enter your name"></div>
+    <p style="color:#7c3aed;font-size:.75rem;font-weight:700;text-transform:uppercase;margin-bottom:8px;">Choose Role</p>
+    <div class="role-row">
+      <button class="role-btn" id="lStudentBtn" onclick="selectRole('student')">&#128100; Student</button>
+      <button class="role-btn" id="lTeacherBtn" onclick="selectRole('teacher')">&#128104;&#8205;&#127979; Teacher</button>
     </div>
-    <button class="login-btn" onclick="submitLogin()">Login</button>
-    <div class="back-link"><a onclick="hideLoginForm()">&#8592; Back</a></div>
+    <input type="hidden" id="lRoleInput" value="">
+    <div id="studentFields">
+      <div class="fr"><label>Your Class</label><select id="lClass"><option value="">Choose class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
+      <div class="fr"><label>Your Board</label><select id="lBoard"><option value="">Choose board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
+    </div>
+    <button class="login-submit" onclick="submitLogin()">Login to Acadify</button>
   </div>
 </div>
 <div id="studentDash">
-  <div class="top-bar"><span class="top-bar-title">&#127979; Acadify</span><span><span id="sUserInfo" class="top-bar-info"></span><span class="top-bar-role">Student</span></span><button class="logout-btn" onclick="logout()">Logout</button></div>
+  <div class="top-bar">
+    <span class="top-bar-left">&#127979; Acadify</span>
+    <div class="top-bar-right">
+      <span class="user-pill"><span id="sUserName"></span><span class="role-tag">Student</span></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
   <div class="dash-grid">
-    <div class="card"><h2>&#128172; Class Chat</h2><div class="chat-win" id="sChatWin"></div><div class="chat-row"><input type="text" id="sChatInput" placeholder="Type a message..."><button class="send-btn" onclick="sendStudentMsg()">Send</button></div></div>
-    <div class="card"><h2>&#128197; Events &amp; Availability</h2><div class="ev-wrap" id="sEventList"></div><div class="add-form"><h3>Add Event</h3><div class="fr"><label>Title</label><input type="text" id="sEvTitle" placeholder="e.g. Math test"></div><div class="fr"><label>Date</label><input type="date" id="sEvDate"></div><div class="fr"><label>Time</label><input type="time" id="sEvTime"></div><div class="add-btns"><button class="btn-add" onclick="addStudentEvent()">Add</button><button class="btn-clr" onclick="clearStudentEvents()">Clear All</button></div></div></div>
+    <div class="card">
+      <h2>&#128172; Class Chat &nbsp;<small id="sChatLabel" style="font-size:.75rem;color:#7c3aed;font-weight:400;"></small></h2>
+      <div class="chat-win" id="sChatWin"></div>
+      <div class="chat-row">
+        <input type="text" id="sChatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendStudentMsg()">
+        <button class="send-btn" onclick="sendStudentMsg()">Send</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128197; Events &amp; Availability</h2>
+      <div class="ev-scroll" id="sEventList"></div>
+      <div class="add-form">
+        <h3>Add Your Event</h3>
+        <div class="fr"><label>Title</label><input type="text" id="sEvTitle" placeholder="e.g. Study session"></div>
+        <div class="fr"><label>Date</label><input type="date" id="sEvDate"></div>
+        <div class="fr"><label>Time (optional)</label><input type="time" id="sEvTime"></div>
+        <div class="add-btns"><button class="btn-add" onclick="addStudentEvent()">Add</button><button class="btn-clr" onclick="clearStudentEvents()">Clear Mine</button></div>
+      </div>
+    </div>
   </div>
 </div>
 <div id="teacherDash">
-  <div class="top-bar"><span class="top-bar-title">&#127979; Acadify</span><span><span id="tUserInfo" class="top-bar-info"></span><span class="top-bar-role">Teacher</span></span><button class="logout-btn" onclick="logout()">Logout</button></div>
+  <div class="top-bar">
+    <span class="top-bar-left">&#127979; Acadify</span>
+    <div class="top-bar-right">
+      <span class="user-pill"><span id="tUserName"></span><span class="role-tag">Teacher</span></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
   <div class="dash-grid">
-    <div class="card"><h2>&#128172; Class Chat</h2><div class="filter-bar"><label>Class:</label><select id="tClassSel" onchange="loadTeacherChat()"><option value="">All</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select><label>Subject:</label><select id="tSubSel"><option value="">All</option><option value="Math">Math</option><option value="Science">Science</option><option value="English">English</option><option value="Hindi">Hindi</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select></div><div class="chat-win" id="tChatWin"></div><div class="chat-row"><input type="text" id="tChatInput" placeholder="Message to class..."><button class="send-btn" onclick="sendTeacherMsg()">Send</button></div></div>
-    <div class="card"><h2>&#128197; My Availability</h2><div class="ev-wrap" id="tEventList"></div><div class="add-form"><h3>Add Availability Slot</h3><div class="fr"><label>Title / Topic</label><input type="text" id="tEvTitle" placeholder="e.g. Chapter 5 revision"></div><div class="fr"><label>Date</label><input type="date" id="tEvDate"></div><div class="fr"><label>Time</label><input type="time" id="tEvTime"></div><div class="fr"><label>Class</label><select id="tEvClass"><option value="">All classes</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div><div class="fr"><label>Subject</label><select id="tEvSubject"><option value="">General</option><option value="Math">Math</option><option value="Science">Science</option><option value="English">English</option><option value="Hindi">Hindi</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select></div><div class="add-btns"><button class="btn-add" onclick="addTeacherEvent()">Add Slot</button><button class="btn-clr" onclick="clearTeacherEvents()">Clear All</button></div></div></div>
+    <div class="card">
+      <h2>&#128172; Class Chat</h2>
+      <div class="filter-bar">
+        <label>Class:</label>
+        <select id="tClassSel" onchange="onTeacherClassChange()"><option value="">Select class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+      </div>
+      <div class="chat-win" id="tChatWin"><p style="color:#555;padding:8px;font-size:.87rem;">Select a class above to view chat</p></div>
+      <div class="chat-row">
+        <input type="text" id="tChatInput" placeholder="Message to class..." onkeydown="if(event.key==='Enter')sendTeacherMsg()">
+        <button class="send-btn" onclick="sendTeacherMsg()">Send</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128197; Events &amp; Availability</h2>
+      <div class="ev-scroll" id="tEventList"><p style="color:#555;font-size:.87rem;">Select a class above to view student events</p></div>
+      <div class="add-form">
+        <h3>Add Availability Slot</h3>
+        <div class="fr"><label>Title / Topic</label><input type="text" id="tEvTitle" placeholder="e.g. Chapter 5 revision"></div>
+        <div class="fr"><label>Date</label><input type="date" id="tEvDate"></div>
+        <div class="fr"><label>Time (optional)</label><input type="time" id="tEvTime"></div>
+        <div class="fr"><label>Class</label><select id="tEvClass"><option value="">All classes</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
+        <div class="fr"><label>Subject</label><select id="tEvSubject"><option value="">General</option><option value="Math">Math</option><option value="Science">Science</option><option value="English">English</option><option value="Hindi">Hindi</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select></div>
+        <div class="add-btns"><button class="btn-add" onclick="addTeacherEvent()">Add Slot</button><button class="btn-clr" onclick="clearTeacherEvents()">Clear Mine</button></div>
+      </div>
+    </div>
   </div>
 </div>
-<script src="acadify.js?v=5"></script></body></html>
+<script src="acadify.js?v=6"></script>
+</body></html>
