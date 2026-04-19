@@ -70,14 +70,12 @@ function showDash(){
 }
 
 function logout(){
-  document.documentElement.setAttribute("data-ac-show","login");
   if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
   ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
   _role="";_name="";_class="";_board="";
-  var el=document.getElementById("lName");if(el)el.value="";
-  var ri=document.getElementById("lRoleInput");if(ri)ri.value="";
-  ["lStudentBtn","lTeacherBtn"].forEach(function(id){var b=document.getElementById(id);if(b)b.classList.remove("active");});
-  sd("studentFields","none");sd("studentDash","none");sd("teacherDash","none");sd("loginSection","flex");
+  waitForDb(function(fb){
+    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="/";});
+  });
 }
 
 /* ---- STUDENT CHAT ---- */
@@ -122,14 +120,12 @@ function loadStudentEvents(){
   var el=document.getElementById("sEventList");if(!el)return;
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    var p1=fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+_class),fb.orderBy("date","asc")));
-    var p2=fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+_class),fb.orderBy("date","asc")));
-    Promise.all([p1,p2]).then(function(res){
-      var tevts=[],sevts=[];
-      res[0].forEach(function(d){var e=d.data();e._id=d.id;if(isFuture(e.date))tevts.push(e);});
-      res[1].forEach(function(d){var e=d.data();e._id=d.id;if(e.sname===_name&&isFuture(e.date))sevts.push(e);});
-      renderStudentEvents(tevts,sevts);
-    }).catch(function(){renderStudentEvents([],[]);});
+    fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+_class),fb.orderBy("date","asc")))
+    .then(function(snap){
+      var sevts=[];
+      snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.sname===_name&&isFuture(e.date))sevts.push(e);});
+      renderStudentEvents(sevts);
+    }).catch(function(){renderStudentEvents([]);});
   });
 }
 
@@ -139,31 +135,18 @@ function makeDelBtn(handler){var b=document.createElement("button");b.className=
 function makeTitleDiv(title,today){var d=document.createElement("div");d.className="ev-title";d.textContent=title;if(today){var s=document.createElement("span");s.className="today-badge";s.textContent="Today";d.appendChild(s);}return d;}
 function makeMetaDiv(text){var d=document.createElement("div");d.className="ev-meta";d.textContent=text;return d;}
 
-function renderStudentEvents(tevts,sevts){
+function renderStudentEvents(sevts){
   var el=document.getElementById("sEventList");if(!el)return;
-  el.innerHTML="";var empty=true;
-  if(tevts.length){
-    empty=false;el.appendChild(makeLabel("Teacher Availability","lbl-t"));
-    tevts.sort(function(a,b){return a.date<b.date?-1:1;});
-    tevts.forEach(function(e){
-      var item=makeEvItem("ev-t");
-      item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-      item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")+(e.tname?" — "+e.tname:"")));
-      el.appendChild(item);
-    });
-  }
-  if(sevts.length){
-    empty=false;el.appendChild(makeLabel("My Events","lbl-my"));
-    sevts.sort(function(a,b){return a.date<b.date?-1:1;});
-    sevts.forEach(function(e){
-      var item=makeEvItem("");
-      item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-      item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")));
-      item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e._id)));
-      el.appendChild(item);
-    });
-  }
-  if(empty)el.innerHTML="<p class=\"no-msg\">No upcoming events for your class</p>";
+  el.innerHTML="";
+  if(!sevts.length){el.innerHTML="<p class=\"no-msg\">No upcoming events yet. Add one below!</p>";return;}
+  sevts.sort(function(a,b){return a.date<b.date?-1:1;});
+  sevts.forEach(function(e){
+    var item=makeEvItem("");
+    item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
+    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")));
+    item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e._id)));
+    el.appendChild(item);
+  });
 }
 
 function addStudentEvent(){
@@ -251,43 +234,29 @@ function sendTeacherMsg(){
 /* ---- TEACHER EVENTS ---- */
 function loadTeacherEvents(cls){
   var el=document.getElementById("tEventList");if(!el)return;
-  if(!cls){el.innerHTML="<p class=\"no-msg\">Select a class to view student events</p>";return;}
+  if(!cls){el.innerHTML="<p class=\"no-msg\">Select a class to view events</p>";return;}
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    var p1=fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+cls),fb.orderBy("date","asc")));
-    var p2=fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+cls),fb.orderBy("date","asc")));
-    Promise.all([p1,p2]).then(function(results){
-      var myEvts=[],sEvts=[];
-      results[0].forEach(function(d){var e=d.data();e._id=d.id;if(e.tname===_name&&isFuture(e.date))myEvts.push(e);});
-      results[1].forEach(function(d){var e=d.data();e._id=d.id;if(isFuture(e.date))sEvts.push(e);});
-      renderTeacherEvents(myEvts,sEvts,cls);
-    }).catch(function(){renderTeacherEvents([],[],cls);});
+    fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+cls),fb.orderBy("date","asc")))
+    .then(function(snap){
+      var myEvts=[];
+      snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.tname===_name&&isFuture(e.date))myEvts.push(e);});
+      renderTeacherEvents(myEvts,cls);
+    }).catch(function(){renderTeacherEvents([],cls);});
   });
 }
 
-function renderTeacherEvents(myEvts,sEvts,cls){
+function renderTeacherEvents(myEvts,cls){
   var el=document.getElementById("tEventList");if(!el)return;
-  el.innerHTML="";var empty=true;
-  if(myEvts.length){
-    empty=false;el.appendChild(makeLabel("My Availability (Class "+cls+")","lbl-t"));
-    myEvts.forEach(function(e){
-      var item=makeEvItem("ev-t");
-      item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-      item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")));
-      item.appendChild(makeDelBtn((function(eid,ecls){return function(){delTeacherEv(eid,ecls);};})(e._id,cls)));
-      el.appendChild(item);
-    });
-  }
-  if(sEvts.length){
-    empty=false;el.appendChild(makeLabel("Student Events (Class "+cls+")","lbl-s"));
-    sEvts.forEach(function(e){
-      var item=makeEvItem("ev-s");
-      item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-      item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.sname?" — "+e.sname:"")));
-      el.appendChild(item);
-    });
-  }
-  if(empty)el.innerHTML="<p class=\"no-msg\">No events for Class "+cls+" yet</p>";
+  el.innerHTML="";
+  if(!myEvts.length){el.innerHTML="<p class=\"no-msg\">No availability slots for Class "+cls+" yet. Add one below!</p>";return;}
+  myEvts.forEach(function(e){
+    var item=makeEvItem("ev-t");
+    item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
+    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")));
+    item.appendChild(makeDelBtn((function(eid,ecls){return function(){delTeacherEv(eid,ecls);};})(e._id,cls)));
+    el.appendChild(item);
+  });
 }
 
 function addTeacherEvent(){
