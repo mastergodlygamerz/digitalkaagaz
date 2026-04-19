@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Acadify — Smart Platform for Coaching Institutes</title>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <style>
+    /* ── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0a0f;
+      color: #e8eaf6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Navbar ───────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(10,10,15,.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e8eaf6;
+    }
+    .nav-logo span { color: #7c3aed; }
+    .nav-back {
+      font-size: .85rem;
+      color: rgba(232,234,246,.55);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: #e8eaf6; }
+
+    /* ── Page wrapper ─────────────────────────────── */
+    .page { position: relative; z-index: 1; }
+
+    /* ── HERO ─────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      animation: blobFloat 8s ease-in-out infinite alternate;
+    }
+    .hero-blob-1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(124,58,237,.22) 0%, transparent 70%);
+      top: -100px; left: -120px;
+    }
+    .hero-blob-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0,229,255,.14) 0%, transparent 70%);
+      bottom: -60px; right: -80px;
+      animation-delay: -4s;
+    }
+    @keyframes blobFloat {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(30px,20px) scale(1.06); }
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,58,237,.12);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: .8rem;
+      font-weight: 600;
+      color: #a78bfa;
+      letter-spacing: .04em;
+      margin-bottom: 28px;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-badge-dot {
+      width: 7px; height: 7px;
+      background: #7c3aed;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.4); }
+    }
+    .hero-title {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      max-width: 820px;
+      animation: fadeUp .65s .1s ease both;
+    }
+    .hero-title span { color: #7c3aed; }
+    .hero-title .accent { color: #00e5ff; }
+    .hero-desc {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: rgba(232,234,246,.65);
+      max-width: 620px;
+      line-height: 1.7;
+      animation: fadeUp .65s .2s ease both;
+    }
+    .hero-divider {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg,#7c3aed,#00e5ff);
+      border-radius: 2px;
+      margin: 32px auto;
+      animation: fadeUp .65s .3s ease both;
+    }
+    .hero-cta-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: rgba(232,234,246,.8);
+      margin-bottom: 20px;
+      animation: fadeUp .65s .35s ease both;
+    }
+    .hero-cta-label strong { color: #00e5ff; }
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp .65s .4s ease both;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 24px rgba(124,58,237,.35);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,58,237,.5); }
+    .btn-secondary {
+      background: transparent;
+      color: #e8eaf6;
+      border: 1.5px solid rgba(255,255,255,.15);
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { border-color: rgba(124,58,237,.5); background: rgba(124,58,237,.08); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Features strip ──────────────────────────── */
+    .features-strip {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 48px;
+      animation: fadeUp .65s .5s ease both;
+    }
+    .feature-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 100px;
+      padding: 8px 16px;
+      font-size: .82rem;
+      color: rgba(232,234,246,.7);
+    }
+    .feature-chip-icon { font-size: .95rem; }
+
+    /* ── Section shared ───────────────────────────── */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-tag {
+      display: inline-block;
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(124,58,237,.25);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: .75rem;
+      font-weight: 700;
+      color: #a78bfa;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+    .section-sub {
+      margin-top: 10px;
+      color: rgba(232,234,246,.55);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* ── How it works ─────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+    .step-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .step-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); }
+    .step-num {
+      font-size: 3rem;
+      font-weight: 900;
+      color: rgba(124,58,237,.12);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .step-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .step-desc { font-size: .85rem; color: rgba(232,234,246,.55); line-height: 1.6; }
+
+    /* ── Code Section ─────────────────────────────── */
+    .code-section {
+      background: rgba(255,255,255,.02);
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .code-box {
+      max-width: 540px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 36px 32px;
+    }
+    .code-box h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .code-box p {
+      font-size: .9rem;
+      color: rgba(232,234,246,.55);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+    .code-input {
+      flex: 1;
+      background: rgba(255,255,255,.06);
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #e8eaf6;
+      font-size: .95rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: .05em;
+      transition: border-color .2s;
+      outline: none;
+      text-transform: uppercase;
+    }
+    .code-input::placeholder { color: rgba(232,234,246,.3); text-transform: none; letter-spacing: 0; }
+    .code-input:focus { border-color: rgba(124,58,237,.6); }
+    .btn-validate {
+      background: linear-gradient(135deg,#7c3aed,#5b21b6);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 20px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .2s;
+    }
+    .btn-validate:disabled { opacity: .5; cursor: not-allowed; }
+    .code-msg {
+      margin-top: 14px;
+      font-size: .88rem;
+      font-weight: 600;
+      min-height: 22px;
+      display: none;
+    }
+    .code-msg.valid { color: #4ade80; display: block; }
+    .code-msg.invalid { color: #f87171; display: block; }
+    .code-actions {
+      margin-top: 20px;
+      display: none;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .code-actions.show { display: flex; }
+    .code-institute-name {
+      background: rgba(0,229,255,.06);
+      border: 1px solid rgba(0,229,255,.15);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      font-size: .9rem;
+      display: none;
+    }
+    .code-institute-name.show { display: block; }
+    .code-institute-name strong { color: #00e5ff; }
+
+    /* ── Modal ────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn .2s ease;
+    }
+    .modal-overlay.open { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: #12121a;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      color: rgba(232,234,246,.4);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color .2s;
+    }
+    .modal-close:hover { color: #e8eaf6; }
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: .88rem;
+      color: rgba(232,234,246,.5);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .form-field {
+      margin-bottom: 18px;
+    }
+    .form-field label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: rgba(232,234,246,.7);
+      margin-bottom: 7px;
+      letter-spacing: .02em;
+    }
+    .form-field input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #e8eaf6;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-field input:focus { border-color: rgba(124,58,237,.6); }
+    .form-field input::placeholder { color: rgba(232,234,246,.28); }
+    .form-submit {
+      width: 100%;
+      background: linear-gradient(135deg,#7c3aed,#5b21b6);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity .2s, transform .15s;
+      box-shadow: 0 4px 20px rgba(124,58,237,.3);
+    }
+    .form-submit:hover:not(:disabled) { transform: translateY(-1px); }
+    .form-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .form-error {
+      color: #f87171;
+      font-size: .84rem;
+      margin-top: 10px;
+      display: none;
+    }
+    .form-error.show { display: block; }
+
+    /* ── Success card (post-registration) ─────────── */
+    .success-card {
+      display: none;
+      text-align: center;
+    }
+    .success-card.show { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: 16px; }
+    .success-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #4ade80;
+    }
+    .success-desc {
+      font-size: .9rem;
+      color: rgba(232,234,246,.6);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .code-display {
+      background: rgba(0,229,255,.07);
+      border: 1.5px dashed rgba(0,229,255,.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .code-display-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(232,234,246,.4);
+      margin-bottom: 6px;
+    }
+    .code-display-value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      color: #00e5ff;
+      letter-spacing: .1em;
+    }
+    .code-copy-btn {
+      background: rgba(0,229,255,.1);
+      border: 1px solid rgba(0,229,255,.2);
+      border-radius: 8px;
+      padding: 8px 18px;
+      color: #00e5ff;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .2s;
+    }
+    .code-copy-btn:hover { background: rgba(0,229,255,.18); }
+    .code-share-note {
+      background: rgba(255,255,255,.04);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: .84rem;
+      color: rgba(232,234,246,.6);
+      line-height: 1.6;
+      text-align: left;
+      margin-top: 16px;
+    }
+    .code-share-note strong { color: #e8eaf6; }
+
+    /* ── Registration form inside modal ───────────── */
+    .modal-form { display: block; }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: .82rem;
+      color: rgba(232,234,246,.25);
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    footer a { color: rgba(232,234,246,.4); text-decoration: none; }
+
+    /* ── Scroll reveal ────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 600px) {
+      .nav { padding: 14px 20px; }
+      .hero { padding: 100px 20px 60px; }
+      .modal { padding: 28px 22px; }
+      .input-group { flex-direction: column; }
+      .section { padding: 56px 20px; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .btn-primary, .btn-secondary { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────── -->
+<nav class="nav">
+  <a class="nav-logo" href="index.html">Digital<span>Kaagaz</span></a>
+  <a class="nav-back" href="index.html">← Back to Home</a>
+</nav>
+
+<div class="page">
+
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now in Early Access
+    </div>
+
+    <h1 class="hero-title">
+      <span>Acadify</span> — Smart Platform<br>for <span class="accent">Coaching Institutes</span>
+    </h1>
+    <p class="hero-desc">
+      A unified platform to manage classes, schedules, students, and teachers — all in one place.
+      Built for modern coaching institutes running both offline and online.
+    </p>
+    <div class="hero-divider"></div>
+
+    <p class="hero-cta-label">Own a Coaching Institute? <strong>What are you waiting for?</strong></p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openRegModal()">
+        🏫 Register Your Institute
+      </button>
+      <a class="btn-secondary" href="#enter-code">
+        🔑 I Have a Code
+      </a>
+    </div>
+
+    <div class="features-strip">
+      <div class="feature-chip"><span class="feature-chip-icon">📚</span> Class Management</div>
+      <div class="feature-chip"><span class="feature-chip-icon">💬</span> Live Chat</div>
+      <div class="feature-chip"><span class="feature-chip-icon">📅</span> Schedules & Events</div>
+      <div class="feature-chip"><span class="feature-chip-icon">👨‍🎓</span> Student Tracking</div>
+      <div class="feature-chip"><span class="feature-chip-icon">🔒</span> Institute Isolation</div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ──────────────────────────────── -->
+  <section class="section">
+    <div class="section-header reveal">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-title">Get started in minutes</h2>
+      <p class="section-sub">Three simple steps to bring your institute online.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon">🏫</div>
+        <div class="step-title">Register Institute</div>
+        <div class="step-desc">Owner registers the institute and receives a unique code. No technical setup needed.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔑</div>
+        <div class="step-title">Share Code</div>
+        <div class="step-desc">Share the institute code with all teachers and students so they can join and sign up.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon">🚀</div>
+        <div class="step-title">Start Managing</div>
+        <div class="step-desc">Teachers post events, students chat in class rooms — all data is scoped to your institute.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ENTER CODE ────────────────────────────────── -->
+  <section class="section code-section" id="enter-code">
+    <div class="section-header reveal">
+      <div class="section-tag">Access Acadify</div>
+      <h2 class="section-title">Already have an Institute Code?</h2>
+      <p class="section-sub">Enter the code your institute provided to sign up or sign in.</p>
+    </div>
+
+    <div class="code-box reveal">
+      <h3>Enter Your Institute Code</h3>
+      <p>Get this code from your institute owner or teacher. It identifies which institute you belong to.</p>
+      <div class="input-group">
+        <input
+          type="text"
+          class="code-input"
+          id="instituteCodeInput"
+          placeholder="e.g. VEDIKA_EDU_001"
+          maxlength="40"
+          autocomplete="off"
+          oninput="resetCodeState()"
+        >
+        <button class="btn-validate" id="validateBtn" onclick="validateCode()">Validate →</button>
+      </div>
+      <div class="code-msg" id="codeMsg"></div>
+      <div class="code-institute-name" id="codeInstituteName"></div>
+      <div class="code-actions" id="codeActions">
+        <button class="btn-primary" onclick="goSignup()">🎓 Sign Up</button>
+        <button class="btn-secondary" onclick="goSignin()">→ Sign In</button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<!-- ── Footer ──────────────────────────────────────── -->
+<footer>
+  <p>&copy; 2026 DigitalKaagaz · <a href="index.html">Home</a> · <a href="mailto:support@digitalkaagaz.com">Support</a></p>
+</footer>
+
+<!-- ── REGISTRATION MODAL ─────────────────────────── -->
+<div class="modal-overlay" id="regModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRegModal()" aria-label="Close">&times;</button>
+
+    <!-- Registration Form -->
+    <div id="modalForm" class="modal-form">
+      <div class="modal-title">🏫 Register Your Institute</div>
+      <div class="modal-sub">Fill in the details below. Your unique institute code will be generated instantly.</div>
+
+      <div class="form-field">
+        <label for="reg-institute">Institute Name *</label>
+        <input type="text" id="reg-institute" placeholder="e.g. Vedika Educational Institution" autocomplete="organization">
+      </div>
+      <div class="form-field">
+        <label for="reg-owner">Owner / Admin Name *</label>
+        <input type="text" id="reg-owner" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="form-field">
+        <label for="reg-email">Email Address *</label>
+        <input type="email" id="reg-email" placeholder="owner@institute.com" autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label for="reg-pass">Password *</label>
+        <input type="password" id="reg-pass" placeholder="Min 8 characters" autocomplete="new-password">
+      </div>
+
+      <div class="form-error" id="regError"></div>
+      <button class="form-submit" id="regSubmitBtn" onclick="submitRegistration()">
+        Register &amp; Get Code →
+      </button>
+    </div>
+
+    <!-- Success State -->
+    <div id="modalSuccess" class="success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Institute Registered!</div>
+      <div class="success-desc">
+        Your institute has been successfully registered on Acadify.<br>
+        Save and share the code below with your teachers and students.
+      </div>
+      <div class="code-display">
+        <div class="code-display-label">Your Institute Code</div>
+        <div class="code-display-value" id="generatedCodeDisplay"></div>
+        <button class="code-copy-btn" onclick="copyCode()">📋 Copy Code</button>
+      </div>
+      <div class="code-share-note">
+        <strong>📢 Share this code</strong><br>
+        Send this code to all your <strong>teachers</strong> and <strong>students</strong>.
+        They will use it when signing up to automatically join your institute.
+        All their data (chats, events) will be scoped to your institute only.
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:20px;justify-content:center;" onclick="closeRegModal()">
+        Done ✓
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Firebase + Logic ────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  const cfg = {
+    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
+    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
+    projectId: "digitalkaagaz-c8263",
+    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
+    messagingSenderId: "18588901735",
+    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
+  };
+  const app = initializeApp(cfg);
+  const db  = getFirestore(app);
+
+  // ── Helpers ──────────────────────────────────────
+  function generateCode(instituteName) {
+    // Take first word of each significant word, max 3 words, uppercase, then 3-digit random
+    const words = instituteName
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 2)
+      .slice(0, 3)
+      .map(w => w.substring(0, 5).toUpperCase());
+    const num = String(Math.floor(Math.random() * 900) + 100);
+    return words.join('_') + '_' + num;
+  }
+
+  function setError(msg) {
+    const el = document.getElementById('regError');
+    el.textContent = msg;
+    el.classList.toggle('show', !!msg);
+  }
+
+  function setBusy(busy) {
+    const btn = document.getElementById('regSubmitBtn');
+    btn.disabled = busy;
+    btn.textContent = busy ? 'Registering…' : 'Register & Get Code →';
+  }
+
+  // ── Registration ─────────────────────────────────
+  window.submitRegistration = async function () {
+    const instituteName = document.getElementById('reg-institute').value.trim();
+    const ownerName     = document.getElementById('reg-owner').value.trim();
+    const email         = document.getElementById('reg-email').value.trim();
+    const pass          = document.getElementById('reg-pass').value;
+
+    if (!instituteName) { setError('Please enter the institute name.'); return; }
+    if (!ownerName)     { setError('Please enter the owner name.'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Please enter a valid email.'); return; }
+    if (pass.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    setError('');
+    setBusy(true);
+
+    try {
+      // Check if institute name already registered
+      const dup = await getDocs(
+        query(collection(db, 'ac_institutes'), where('instituteName', '==', instituteName))
+      );
+      if (!dup.empty) {
+        setError('An institute with this name is already registered.');
+        setBusy(false);
+        return;
+      }
+
+      // Generate unique code (retry if collision, max 5 attempts)
+      let code, codeExists = true, attempts = 0;
+      while (codeExists && attempts < 5) {
+        code = generateCode(instituteName);
+        const cq = await getDocs(query(collection(db, 'ac_institutes'), where('code', '==', code)));
+        codeExists = !cq.empty;
+        attempts++;
+      }
+      if (codeExists) { code = code + '_' + Date.now().toString().slice(-4); }
+
+      // Hash password — simple SHA-256 via Web Crypto (not stored in plaintext)
+      const enc = new TextEncoder();
+      const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(pass));
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      const passHash = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      await addDoc(collection(db, 'ac_institutes'), {
+        instituteName,
+        ownerName,
+        email,
+        passHash,
+        code,
+        createdAt: serverTimestamp()
+      });
+
+      // Show success
+      document.getElementById('generatedCodeDisplay').textContent = code;
+      document.getElementById('modalForm').style.display = 'none';
+      document.getElementById('modalSuccess').classList.add('show');
+
+      // Pre-fill code entry field
+      document.getElementById('instituteCodeInput').value = code;
+
+      window._lastGeneratedCode = code;
+      window._lastInstituteName = instituteName;
+
+    } catch (e) {
+      console.error(e);
+      setError('Registration failed. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // ── Code validation ───────────────────────────────
+  window.validateCode = async function () {
+    const code = document.getElementById('instituteCodeInput').value.trim().toUpperCase();
+    const btn  = document.getElementById('validateBtn');
+    const msg  = document.getElementById('codeMsg');
+    const inst = document.getElementById('codeInstituteName');
+    const acts = document.getElementById('codeActions');
+
+    if (!code) {
+      msg.textContent = 'Please enter an institute code.';
+      msg.className = 'code-msg invalid';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+    msg.className = 'code-msg';
+    inst.className = 'code-institute-name';
+    acts.className = 'code-actions';
+
+    try {
+      const snap = await getDocs(
+        query(collection(db, 'ac_institutes'), where('code', '==', code))
+      );
+
+      if (snap.empty) {
+        msg.textContent = '❌ Invalid Institute Code. Please check or contact your institute.';
+        msg.className = 'code-msg invalid';
+      } else {
+        const data = snap.docs[0].data();
+        const name = data.instituteName || 'Unknown Institute';
+
+        msg.textContent = '✅ Valid code!';
+        msg.className = 'code-msg valid';
+
+        inst.innerHTML = `Joining: <strong>${name}</strong>`;
+        inst.className = 'code-institute-name show';
+
+        acts.className = 'code-actions show';
+
+        // Save validated code + institute name to sessionStorage for signup/signin page
+        sessionStorage.setItem('ac_entry_code', code);
+        sessionStorage.setItem('ac_entry_institute', name);
+      }
+    } catch (e) {
+      console.error(e);
+      msg.textContent = 'Error validating code. Please try again.';
+      msg.className = 'code-msg invalid';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Validate →';
+    }
+  };
+
+  window.resetCodeState = function () {
+    document.getElementById('codeMsg').className = 'code-msg';
+    document.getElementById('codeInstituteName').className = 'code-institute-name';
+    document.getElementById('codeActions').className = 'code-actions';
+  };
+
+  // Allow Enter key to trigger validation
+  document.getElementById('instituteCodeInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') validateCode();
+  });
+
+  // Copy code to clipboard
+  window.copyCode = function () {
+    const code = document.getElementById('generatedCodeDisplay').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.querySelector('.code-copy-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy Code'; }, 2000);
+    });
+  };
+
+  // Navigation post-code-validation
+  window.goSignup = function () {
+    window.location.href = 'index.html#signup';
+  };
+  window.goSignin = function () {
+    window.location.href = 'index.html#signin';
+  };
+</script>
+
+<script>
+  // ── Modal ─────────────────────────────────────────
+  function openRegModal() {
+    document.getElementById('regModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Reset to form state
+    document.getElementById('modalForm').style.display = 'block';
+    document.getElementById('modalSuccess').classList.remove('show');
+    document.getElementById('regError').classList.remove('show');
+  }
+  function closeRegModal() {
+    document.getElementById('regModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close on overlay click
+  document.getElementById('regModal').addEventListener('click', function (e) {
+    if (e.target === this) closeRegModal();
+  });
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeRegModal();
+  });
+
+  // ── Scroll reveal ─────────────────────────────────
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add('visible'); observer.unobserve(en.target); }
+    }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Auto-scroll to #enter-code if hash present ────
+  if (location.hash === '#enter-code') {
+    setTimeout(() => document.getElementById('enter-code').scrollIntoView({ behavior: 'smooth' }), 300);
+  }
+</script>
+</body>
+</html>

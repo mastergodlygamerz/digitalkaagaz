@@ -712,8 +712,8 @@ renderAchievements();
     }
     if (pass.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; errorEl.hidden = false; return; }
     if (pass !== pass2) { errorEl.textContent = 'Passwords do not match.'; errorEl.hidden = false; return; }
-    var institute = document.getElementById('su-institute').value || '';
-    if (!institute) { errorEl.textContent = 'Please select your coaching institute.'; errorEl.hidden = false; return; }
+    var institute = document.getElementById('su-institute').value || sessionStorage.getItem('ac_entry_institute') || '';
+    if (!institute) { errorEl.textContent = 'Please enter an institute code on the Acadify entry page first.'; errorEl.hidden = false; return; }
     if (roleVal === 'student' && (!standard || !board)) { errorEl.textContent = 'Please select standard and board.'; errorEl.hidden = false; return; }
 
     submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
