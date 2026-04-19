@@ -420,20 +420,48 @@ renderAchievements();
     });
 
     logoutBtn.addEventListener('click', function () {
+      ['ac_role','ac_name','ac_class','ac_board'].forEach(function(k){localStorage.removeItem(k);});
       fb.signOut(auth);
     });
 
     // --- AUTH STATE ---
     fb.onAuthStateChanged(auth, function (user) {
       if (user) {
-        authBtn.textContent = user.displayName || user.email.split('@')[0];
+        var displayName = user.displayName || user.email.split('@')[0];
+        authBtn.textContent = displayName;
         authBtn.classList.add('logged-in');
         userBar.removeAttribute('hidden');
-        userBarName.textContent = user.displayName || user.email;
+        // Always update name in localStorage so Acadify picks up the current user
+        localStorage.setItem('ac_name', displayName);
+        // Build user info: check localStorage first, else query Firestore
+        function showUserBar(role, cls, board) {
+          var label = role === 'student' ? 'Student' : 'Teacher';
+          var info = label + ' | ' + displayName;
+          if (role === 'student' && cls) info += ' | Class ' + cls;
+          if (role === 'student' && board) info += ' | ' + board;
+          userBarName.textContent = info;
+          localStorage.setItem('ac_role', role);
+          if (cls) localStorage.setItem('ac_class', cls);
+          if (board) localStorage.setItem('ac_board', board);
+        }
+        var cachedRole = localStorage.getItem('ac_role');
+        if (cachedRole) {
+          showUserBar(cachedRole, localStorage.getItem('ac_class') || '', localStorage.getItem('ac_board') || '');
+        } else {
+          // Query Firestore for this user's role/class/board
+          fb.getDocs(fb.query(fb.collection(db, 'users'), fb.where('uid', '==', user.uid)))
+            .then(function (snap) {
+              var role = 'student', cls = '', board = '';
+              snap.forEach(function (d) { role = d.data().role || 'student'; cls = d.data().standard || ''; board = d.data().board || ''; });
+              showUserBar(role, cls, board);
+            })
+            .catch(function () { showUserBar('student', '', ''); });
+        }
       } else {
         authBtn.textContent = 'Sign In';
         authBtn.classList.remove('logged-in');
         userBar.setAttribute('hidden', '');
+        ['ac_role','ac_name','ac_class','ac_board'].forEach(function(k){localStorage.removeItem(k);});
       }
     });
 
@@ -664,8 +692,7 @@ renderAchievements();
       setTimeout(function () { studentFields.hidden = true; }, 120);
     }
     // update role badge under name
-    var badge = document.getElementById('su-role-badge');
-    if (badge) badge.textContent = role.value === 'student' ? 'Student' : 'Teacher';
+
   });
 
   form.addEventListener('submit', function (e) {
@@ -708,6 +735,9 @@ renderAchievements();
         });
       })
       .then(function () {
+        localStorage.setItem('ac_role', roleVal);
+        localStorage.setItem('ac_name', name);
+        if (roleVal === 'student') { localStorage.setItem('ac_class', standard); localStorage.setItem('ac_board', board); }
         closeModal();
       })
       .catch(function (err) {

@@ -7,34 +7,25 @@ function isFuture(ds){var d=new Date(ds);d.setHours(0,0,0,0);var t=new Date();t.
 function waitForDb(cb){if(window._adb&&window._adb.db){cb(window._adb);}else{setTimeout(function(){waitForDb(cb);},80);}}
 
 document.addEventListener("DOMContentLoaded",function(){
-  var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");
-  var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");
-  var c=localStorage.getItem("ac_class")||localStorage.getItem("acadify_user_class");
-  var b=localStorage.getItem("ac_board")||localStorage.getItem("acadify_user_board");
-  if(r&&n){
-    localStorage.setItem("ac_role",r);localStorage.setItem("ac_name",n);
-    if(c)localStorage.setItem("ac_class",c);if(b)localStorage.setItem("ac_board",b);
-    _role=r;_name=n;_class=c||"";_board=b||"";
-    showDash();
-  } else {
-    waitForDb(function(fb){
-      var unsub=fb.onAuthStateChanged(fb.auth,function(user){
-        unsub();
-        if(user){
-          var autoName=user.displayName||user.email.split("@")[0];
-          var autoRole=localStorage.getItem("ac_role")||"student";
-          var autoClass=localStorage.getItem("ac_class")||"";
-          var autoBoard=localStorage.getItem("ac_board")||"";
-          localStorage.setItem("ac_role",autoRole);
-          localStorage.setItem("ac_name",autoName);
-          _role=autoRole;_name=autoName;_class=autoClass;_board=autoBoard;
-          showDash();
-        } else {
-          document.documentElement.setAttribute("data-ac-show","login");
-        }
-      });
+  // Always verify identity from Firebase Auth - never trust stale localStorage name
+  waitForDb(function(fb){
+    var unsub=fb.onAuthStateChanged(fb.auth,function(user){
+      unsub();
+      if(user){
+        var authName=user.displayName||user.email.split("@")[0];
+        var r=localStorage.getItem("ac_role")||"student";
+        var c=localStorage.getItem("ac_class")||"";
+        var b=localStorage.getItem("ac_board")||"";
+        localStorage.setItem("ac_role",r);
+        localStorage.setItem("ac_name",authName);
+        _role=r;_name=authName;_class=c;_board=b;
+        showDash();
+      } else {
+        ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
+        document.documentElement.setAttribute("data-ac-show","login");
+      }
     });
-  }
+  });
 });
 
 function selectRole(role){
@@ -67,13 +58,13 @@ function showDash(){
   sd("loginSection","none");
   if(_role==="student"){
     sd("studentDash","block");sd("teacherDash","none");
-    document.getElementById("sUserName").textContent=_name+" | Class "+_class+" | "+_board;
+    document.getElementById("sUserName").textContent="Student | "+_name+(_class?" | Class "+_class:"")+(_board?" | "+_board:"");
     var lbl=document.getElementById("sChatLabel");if(lbl)lbl.textContent="(Class "+_class+")";
     listenStudentChat();
     loadStudentEvents();
   }else{
     sd("studentDash","none");sd("teacherDash","block");
-    document.getElementById("tUserName").textContent=_name;
+    document.getElementById("tUserName").textContent="Teacher | "+_name;
   }
 }
 

@@ -11,7 +11,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
@@ -27,7 +27,7 @@
     const db = getFirestore(app);
 
     // Expose to global for app.js
-    window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy };
+    window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy, where };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- Sign Up Modal (injected, theme-matching) -->
@@ -39,7 +39,7 @@
         <div class="form-group">
           <label for="su-name">Name</label>
           <input id="su-name" type="text" maxlength="80" placeholder="Your full name">
-          <div class="su-role-badge" id="su-role-badge">Teacher</div>
+
         </div>
         <div class="form-group">
           <label for="su-email">Email</label>
