@@ -983,6 +983,195 @@
   if (location.hash === '#enter-code') {
     setTimeout(() => document.getElementById('enter-code').scrollIntoView({ behavior: 'smooth' }), 300);
   }
+
+  // ── Auth modal openers (replace old redirect logic) ──
+  function openAuthModal(mode) {
+    var code = sessionStorage.getItem('ac_entry_code') || document.getElementById('instituteCodeInput').value.trim().toUpperCase();
+    var inst = sessionStorage.getItem('ac_entry_institute') || '';
+    if (code) localStorage.setItem('ac_institute_code', code);
+    if (inst) localStorage.setItem('ac_institute', inst);
+    document.getElementById('authModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setAuthMode(mode === 'signup');
+  }
+  window.goSignup = function () { openAuthModal('signup'); };
+  window.goSignin = function () { openAuthModal('signin'); };
+
+  function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('authModalError').textContent = '';
+    document.getElementById('authModalError').style.display = 'none';
+  }
+  document.getElementById('authModal').addEventListener('click', function (e) {
+    if (e.target === this) closeAuthModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeAuthModal(); closeRegModal(); }
+  });
+
+  var _isSignUp = false;
+  function setAuthMode(signup) {
+    _isSignUp = signup;
+    document.getElementById('authModalTitle').textContent = signup ? '🎓 Create Account' : '🔑 Sign In';
+    document.getElementById('authModalSubmitBtn').textContent = signup ? 'Sign Up →' : 'Sign In →';
+    document.getElementById('authModalNameGroup').style.display = signup ? 'block' : 'none';
+    document.getElementById('authModalRoleGroup').style.display = signup ? 'block' : 'none';
+    document.getElementById('authModalStudentFields').style.display = 'none';
+    document.getElementById('authModalSwitch').innerHTML = signup
+      ? 'Already have an account? <a href="#" id="authSwitchLink">Sign In</a>'
+      : 'New here? <a href="#" id="authSwitchLink">Sign Up</a>';
+    document.getElementById('authSwitchLink').onclick = function(e){ e.preventDefault(); setAuthMode(!_isSignUp); };
+    // Pre-fill institute
+    var inst = localStorage.getItem('ac_institute') || sessionStorage.getItem('ac_entry_institute') || '';
+    document.getElementById('authModalInstitute').value = inst;
+    document.getElementById('authModalRole').dispatchEvent(new Event('change'));
+  }
+  document.getElementById('authModalRole').addEventListener('change', function () {
+    document.getElementById('authModalStudentFields').style.display =
+      (_isSignUp && this.value === 'student') ? 'block' : 'none';
+  });
+</script>
+
+<!-- ── Auth Modal (Signup / Signin) ─────────────────── -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" onclick="closeAuthModal()" aria-label="Close">&times;</button>
+    <div class="modal-title" id="authModalTitle">Sign In</div>
+    <div class="modal-sub" id="authModalSub">Enter your credentials to continue.</div>
+
+    <div id="authModalNameGroup" style="display:none" class="form-field">
+      <label for="authModalName">Full Name *</label>
+      <input type="text" id="authModalName" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="form-field">
+      <label for="authModalEmail">Email *</label>
+      <input type="email" id="authModalEmail" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="form-field">
+      <label for="authModalPass">Password *</label>
+      <input type="password" id="authModalPass" placeholder="Min 6 characters" autocomplete="current-password">
+    </div>
+    <div id="authModalRoleGroup" style="display:none" class="form-field">
+      <label for="authModalRole">Role *</label>
+      <select id="authModalRole">
+        <option value="teacher">Teacher</option>
+        <option value="student">Student</option>
+      </select>
+    </div>
+    <div id="authModalStudentFields" style="display:none">
+      <div class="form-field">
+        <label for="authModalClass">Class *</label>
+        <select id="authModalClass">
+          <option value="">Select class</option>
+          <option>7</option><option>8</option><option>9</option>
+          <option>10</option><option>11</option><option>12</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="authModalBoard">Board *</label>
+        <select id="authModalBoard">
+          <option>CBSE</option><option>ICSE</option><option>State Board</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label for="authModalInstitute">Institute</label>
+      <input type="text" id="authModalInstitute" placeholder="Auto-filled from code" readonly style="opacity:.7;cursor:not-allowed;">
+    </div>
+
+    <div id="authModalError" class="form-error" style="display:none;color:#f87171;font-size:.84rem;margin-bottom:10px;"></div>
+    <button class="form-submit" id="authModalSubmitBtn" onclick="submitAuthModal()">Sign In →</button>
+    <p id="authModalSwitch" style="margin-top:14px;font-size:.85rem;color:rgba(232,234,246,.5);text-align:center;">
+      New here? <a href="#" id="authSwitchLink" style="color:#a78bfa;">Sign Up</a>
+    </p>
+  </div>
+</div>
+
+<!-- ── Auth Firebase Logic ───────────────────────────── -->
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  const cfg = {
+    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
+    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
+    projectId: "digitalkaagaz-c8263",
+    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
+    messagingSenderId: "18588901735",
+    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
+  };
+  // Re-use existing app if already initialized (registration modal also inits Firebase)
+  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  window.submitAuthModal = async function () {
+    const email = document.getElementById('authModalEmail').value.trim();
+    const pass  = document.getElementById('authModalPass').value;
+    const errEl = document.getElementById('authModalError');
+    const btn   = document.getElementById('authModalSubmitBtn');
+    const inst  = document.getElementById('authModalInstitute').value.trim()
+                  || localStorage.getItem('ac_institute') || '';
+
+    errEl.style.display = 'none';
+    if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display = 'block'; return; }
+    if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Please wait…';
+
+    try {
+      if (window._isSignUp) {
+        const name  = document.getElementById('authModalName').value.trim();
+        const role  = document.getElementById('authModalRole').value;
+        const cls   = document.getElementById('authModalClass').value;
+        const board = document.getElementById('authModalBoard').value;
+
+        if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
+        if (!inst) { errEl.textContent = 'No institute found. Please validate your code first.'; errEl.style.display = 'block'; return; }
+        if (role === 'student' && !cls) { errEl.textContent = 'Please select your class.'; errEl.style.display = 'block'; return; }
+
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+        await addDoc(collection(db, 'users'), {
+          uid: cred.user.uid,
+          name, email, role,
+          standard: role === 'student' ? cls : '',
+          board: role === 'student' ? board : '',
+          institute: inst,
+          createdAt: serverTimestamp()
+        });
+
+        // Save session
+        localStorage.setItem('ac_name', name);
+        localStorage.setItem('ac_role', role);
+        localStorage.setItem('ac_institute', inst);
+        if (role === 'student') { localStorage.setItem('ac_class', cls); localStorage.setItem('ac_board', board); }
+
+        window.location.href = 'acadify.html';
+
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass);
+        // ac_name / ac_role will be set by acadify.html's onAuthStateChanged
+        window.location.href = 'acadify.html';
+      }
+    } catch (e) {
+      errEl.textContent = e.message.replace('Firebase: ', '').replace(/ \(auth\/[^)]+\)/, '');
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = window._isSignUp ? 'Sign Up →' : 'Sign In →';
+    }
+  };
+
+  // Allow Enter key in password field to submit
+  document.getElementById('authModalPass').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') window.submitAuthModal();
+  });
 </script>
 </body>
 </html>
