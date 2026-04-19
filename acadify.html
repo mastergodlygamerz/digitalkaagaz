@@ -2,12 +2,12 @@
 <script type="module">
   import{initializeApp}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
   import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  import{getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+  import{getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
   const cfg={apiKey:"AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",authDomain:"digitalkaagaz-c8263.firebaseapp.com",projectId:"digitalkaagaz-c8263",storageBucket:"digitalkaagaz-c8263.firebasestorage.app",messagingSenderId:"18588901735",appId:"1:18588901735:web:dfdafad03fc875ed890fc2"};
   const app=initializeApp(cfg);
   const auth=getAuth(app);
   const db=getFirestore(app);
-  window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,onAuthStateChanged};
+  window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where,onAuthStateChanged};
 </script>
 <script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"loading");}());</script>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
@@ -67,6 +67,10 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
 .btn-clr{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
 .no-msg{color:#555;padding:8px;font-size:.87rem}
 #studentFields{display:none}#studentDash,#teacherDash{display:none}
+.grp-block{margin-bottom:16px}.grp-block:first-child .grp-header{margin-top:0}
+.grp-header{font-size:.88rem;font-weight:700;padding:8px 0 5px;border-bottom:1px solid rgba(0,229,255,.15);margin-bottom:8px;margin-top:14px}
+.grp-header.grp-t{color:#7c3aed;border-bottom-color:rgba(124,58,237,.25)}
+.grp-header.grp-s{color:#10b981;border-bottom-color:rgba(16,185,129,.25)}
 </style></head><body>
 <div id="loginSection">
   <h1 class="login-logo">&#127979; Acadify</h1>
@@ -152,5 +156,9 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
     </div>
   </div>
 </div>
-<script src="acadify.js?v=8"></script>
+<!-- Teacher: grouped student events card (shown when class is selected) -->
+<div id="tStudentSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128100; Student Events &mdash; <span id="tStudentSummaryClass" style="color:#10b981;font-size:.9rem;font-weight:400"></span></h2><div class="ev-scroll" style="max-height:400px" id="tStudentGroupList"><p class="no-msg">Select a class above to see student events grouped by name</p></div></div>
+<!-- Student: grouped teacher events card -->
+<div id="sTeacherSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128104;&#8205;&#127979; Teacher Events for Your Class</h2><div class="ev-scroll" style="max-height:400px" id="sTeacherGroupList"><p class="no-msg">Loading teacher events...</p></div></div>
+<script src="acadify.js?v=9"></script>
 </body></html>

@@ -62,6 +62,7 @@ function showDash(){
     var lbl=document.getElementById("sChatLabel");if(lbl)lbl.textContent="(Class "+_class+")";
     listenStudentChat();
     loadStudentEvents();
+    loadStudentTeacherGrouped();
   }else{
     sd("studentDash","none");sd("teacherDash","block");
     document.getElementById("tUserName").textContent="Teacher | "+_name;
@@ -121,17 +122,14 @@ function loadStudentEvents(){
   var el=document.getElementById("sEventList");if(!el)return;
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+_class),fb.orderBy("date","asc")))
-    .then(function(snap){
-      var tevts=[];
-      snap.forEach(function(d){var e=d.data();e._id=d.id;if(isFuture(e.date))tevts.push(e);});
-      var sevts=JSON.parse(localStorage.getItem("ac_sev_s_"+_name+"_"+_class)||"[]").filter(function(e){return isFuture(e.date);});
+    var p1=fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+_class),fb.orderBy("date","asc")));
+    var p2=fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+_class),fb.orderBy("date","asc")));
+    Promise.all([p1,p2]).then(function(res){
+      var tevts=[],sevts=[];
+      res[0].forEach(function(d){var e=d.data();e._id=d.id;if(isFuture(e.date))tevts.push(e);});
+      res[1].forEach(function(d){var e=d.data();e._id=d.id;if(e.sname===_name&&isFuture(e.date))sevts.push(e);});
       renderStudentEvents(tevts,sevts);
-    })
-    .catch(function(){
-      var sevts=JSON.parse(localStorage.getItem("ac_sev_s_"+_name+"_"+_class)||"[]").filter(function(e){return isFuture(e.date);});
-      renderStudentEvents([],sevts);
-    });
+    }).catch(function(){renderStudentEvents([],[]);});
   });
 }
 
@@ -161,7 +159,7 @@ function renderStudentEvents(tevts,sevts){
       var item=makeEvItem("");
       item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
       item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")));
-      item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e.id)));
+      item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e._id)));
       el.appendChild(item);
     });
   }
@@ -173,25 +171,33 @@ function addStudentEvent(){
   var d=document.getElementById("sEvDate").value;
   var ti=document.getElementById("sEvTime").value;
   if(!t||!d){alert("Please fill title and date");return;}
-  var key="ac_sev_s_"+_name+"_"+_class;
-  var evts=JSON.parse(localStorage.getItem(key)||"[]");
-  evts.push({id:Date.now(),title:t,date:d,time:ti||""});
-  localStorage.setItem(key,JSON.stringify(evts));
-  document.getElementById("sEvTitle").value="";document.getElementById("sEvDate").value="";document.getElementById("sEvTime").value="";
-  loadStudentEvents();
+  waitForDb(function(fb){
+    fb.addDoc(fb.collection(fb.db,"ac_sev_"+_class),{sname:_name,title:t,date:d,time:ti||"",ts:fb.serverTimestamp()})
+    .then(function(){
+      document.getElementById("sEvTitle").value="";document.getElementById("sEvDate").value="";document.getElementById("sEvTime").value="";
+      loadStudentEvents();
+    })
+    .catch(function(e){alert("Failed to add: "+e.message);});
+  });
 }
 
 function delStudentEv(id){
-  var key="ac_sev_s_"+_name+"_"+_class;
-  var evts=JSON.parse(localStorage.getItem(key)||"[]");
-  localStorage.setItem(key,JSON.stringify(evts.filter(function(e){return e.id!==id;})));
-  loadStudentEvents();
+  waitForDb(function(fb){
+    fb.deleteDoc(fb.doc(fb.db,"ac_sev_"+_class,id))
+    .then(function(){loadStudentEvents();})
+    .catch(function(e){alert("Delete failed: "+e.message);});
+  });
 }
 
 function clearStudentEvents(){
   if(!confirm("Clear your events?"))return;
-  localStorage.removeItem("ac_sev_s_"+_name+"_"+_class);
-  loadStudentEvents();
+  waitForDb(function(fb){
+    fb.getDocs(fb.collection(fb.db,"ac_sev_"+_class)).then(function(snap){
+      var promises=[];
+      snap.forEach(function(d){if(d.data().sname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,"ac_sev_"+_class,d.id)));});
+      Promise.all(promises).then(function(){loadStudentEvents();});
+    });
+  });
 }
 
 /* ---- TEACHER CLASS CHANGE ---- */
@@ -201,6 +207,7 @@ function onTeacherClassChange(){
   if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
   if(cls){listenTeacherChat(cls);}else{document.getElementById("tChatWin").innerHTML="<p class=\"no-msg\">Select a class above to view chat</p>";}
   loadTeacherEvents(cls);
+  loadTeacherStudentGrouped(cls);
 }
 
 /* ---- TEACHER CHAT ---- */
@@ -320,5 +327,82 @@ function clearTeacherEvents(){
       snap.forEach(function(d){if(d.data().tname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,"ac_tev_"+cls,d.id)));});
       Promise.all(promises).then(function(){loadTeacherEvents(cls);});
     });
+  });
+}
+/* ---- GROUPED: TEACHER sees each student's upcoming events ---- */
+function loadTeacherStudentGrouped(cls){
+  var card=document.getElementById("tStudentSummaryCard");if(!card)return;
+  if(!cls){card.style.display="none";return;}
+  card.style.display="";
+  var lbl=document.getElementById("tStudentSummaryClass");if(lbl)lbl.textContent="Class "+cls;
+  var el=document.getElementById("tStudentGroupList");if(!el)return;
+  el.innerHTML="<p class=\"no-msg\">Loading...</p>";
+  waitForDb(function(fb){
+    fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+cls),fb.orderBy("date","asc")))
+    .then(function(snap){
+      var byStudent={};
+      snap.forEach(function(d){
+        var e=d.data();
+        if(!isFuture(e.date))return;
+        var nm=e.sname||"Unknown Student";
+        if(!byStudent[nm])byStudent[nm]=[];
+        byStudent[nm].push(e);
+      });
+      el.innerHTML="";
+      var names=Object.keys(byStudent).sort();
+      if(!names.length){el.innerHTML="<p class=\"no-msg\">No student events for Class "+cls+" yet</p>";return;}
+      names.forEach(function(nm){
+        var grp=document.createElement("div");grp.className="grp-block";
+        var hdr=document.createElement("div");hdr.className="grp-header grp-s";hdr.textContent=nm+" Events";
+        grp.appendChild(hdr);
+        byStudent[nm].forEach(function(e){
+          var item=document.createElement("div");item.className="ev-item ev-s";
+          var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
+          if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
+          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"");
+          item.appendChild(title);item.appendChild(meta);
+          grp.appendChild(item);
+        });
+        el.appendChild(grp);
+      });
+    }).catch(function(){el.innerHTML="<p class=\"no-msg\">Could not load student events</p>";});
+  });
+}
+
+/* ---- GROUPED: STUDENT sees each teacher's upcoming events ---- */
+function loadStudentTeacherGrouped(){
+  var card=document.getElementById("sTeacherSummaryCard");if(!card)return;
+  card.style.display="";
+  var el=document.getElementById("sTeacherGroupList");if(!el)return;
+  el.innerHTML="<p class=\"no-msg\">Loading teacher events...</p>";
+  waitForDb(function(fb){
+    fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+_class),fb.orderBy("date","asc")))
+    .then(function(snap){
+      var byTeacher={};
+      snap.forEach(function(d){
+        var e=d.data();
+        if(!isFuture(e.date))return;
+        var nm=e.tname||"Unknown Teacher";
+        if(!byTeacher[nm])byTeacher[nm]=[];
+        byTeacher[nm].push(e);
+      });
+      el.innerHTML="";
+      var names=Object.keys(byTeacher).sort();
+      if(!names.length){el.innerHTML="<p class=\"no-msg\">No teacher events for Class "+_class+" yet</p>";return;}
+      names.forEach(function(nm){
+        var grp=document.createElement("div");grp.className="grp-block";
+        var hdr=document.createElement("div");hdr.className="grp-header grp-t";hdr.textContent=nm+" Events";
+        grp.appendChild(hdr);
+        byTeacher[nm].forEach(function(e){
+          var item=document.createElement("div");item.className="ev-item ev-t";
+          var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
+          if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
+          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"");
+          item.appendChild(title);item.appendChild(meta);
+          grp.appendChild(item);
+        });
+        el.appendChild(grp);
+      });
+    }).catch(function(){el.innerHTML="<p class=\"no-msg\">Could not load teacher events</p>";});
   });
 }
