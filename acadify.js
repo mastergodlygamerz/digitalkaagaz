@@ -16,6 +16,24 @@ document.addEventListener("DOMContentLoaded",function(){
     if(c)localStorage.setItem("ac_class",c);if(b)localStorage.setItem("ac_board",b);
     _role=r;_name=n;_class=c||"";_board=b||"";
     showDash();
+  } else {
+    waitForDb(function(fb){
+      var unsub=fb.onAuthStateChanged(fb.auth,function(user){
+        unsub();
+        if(user){
+          var autoName=user.displayName||user.email.split("@")[0];
+          var autoRole=localStorage.getItem("ac_role")||"student";
+          var autoClass=localStorage.getItem("ac_class")||"";
+          var autoBoard=localStorage.getItem("ac_board")||"";
+          localStorage.setItem("ac_role",autoRole);
+          localStorage.setItem("ac_name",autoName);
+          _role=autoRole;_name=autoName;_class=autoClass;_board=autoBoard;
+          showDash();
+        } else {
+          document.documentElement.setAttribute("data-ac-show","login");
+        }
+      });
+    });
   }
 });
 

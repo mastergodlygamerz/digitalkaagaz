@@ -1,13 +1,15 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acadify</title>
 <script type="module">
   import{initializeApp}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
   import{getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
   const cfg={apiKey:"AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",authDomain:"digitalkaagaz-c8263.firebaseapp.com",projectId:"digitalkaagaz-c8263",storageBucket:"digitalkaagaz-c8263.firebasestorage.app",messagingSenderId:"18588901735",appId:"1:18588901735:web:dfdafad03fc875ed890fc2"};
   const app=initializeApp(cfg);
+  const auth=getAuth(app);
   const db=getFirestore(app);
-  window._adb={db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc};
+  window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,onAuthStateChanged};
 </script>
-<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"login");}());</script>
+<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"loading");}());</script>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
 #loginSection{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
 html[data-ac-show=login] #loginSection{display:flex!important}
