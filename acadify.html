@@ -9,7 +9,7 @@
   const db=getFirestore(app);
   window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where,onAuthStateChanged};
 </script>
-<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"loading");}());</script>
+<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"login");}());</script>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#07070d;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
 #loginSection{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
 html[data-ac-show=login] #loginSection{display:flex!important}
@@ -75,14 +75,46 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
 body::before{content:'';position:fixed;top:-15%;left:10%;width:550px;height:550px;background:rgba(0,229,255,.07);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;bottom:-10%;right:8%;width:400px;height:400px;background:rgba(0,144,255,.05);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
 body{background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:64px 64px;}
-#loginSection,#studentDash,#teacherDash,#tStudentSummaryCard,#sTeacherSummaryCard{position:relative;z-index:1;}
+#loginSection,#studentDash,#teacherDash,#tStudentSummaryCard,#sTeacherSummaryCard,#proSection,#comingSoonSection{position:relative;z-index:1;}
 /* === Fix date/time input visibility === */
 input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;color:#eaf6ff!important;}
 /* === Chat: Teachers LEFT, Students RIGHT === */
 .chat-win{display:flex!important;flex-direction:column;gap:4px;}
 .msg{align-self:flex-end;max-width:80%;border-left:none;border-right:3px solid #00e5ff;border-radius:10px 3px 3px 10px;background:rgba(0,229,255,.06);}
 .msg.tmsg{align-self:flex-start;border-right:none;border-left:3px solid #7c3aed;border-radius:3px 10px 10px 3px;background:rgba(124,58,237,.06);}
-.msg.mymsg{align-self:flex-start;border-right:none;border-left:3px solid #10b981;border-radius:3px 10px 10px 3px;background:rgba(16,185,129,.06);}</style></head><body>
+.msg.mymsg{align-self:flex-start;border-right:none;border-left:3px solid #10b981;border-radius:3px 10px 10px 3px;background:rgba(16,185,129,.06);}
+/* === Hero Section === */
+.hero-section{max-width:1400px;margin:0 auto;padding:48px 22px 28px;text-align:center;}
+.hero-title{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#00e5ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;line-height:1.3;}
+.hero-desc{color:rgba(234,246,255,.75);font-size:.93rem;line-height:1.75;max-width:780px;margin:0 auto 10px;}
+.hero-badge{display:inline-block;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:#00e5ff;font-size:.82rem;font-weight:600;padding:6px 16px;border-radius:20px;margin:10px 0 22px;}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+.btn-hero-primary{padding:11px 26px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 20px rgba(0,229,255,.2);}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,229,255,.3);}
+.btn-hero-secondary{padding:11px 26px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);border-radius:8px;color:#00e5ff;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s ease;}
+.btn-hero-secondary:hover{background:rgba(0,229,255,.14);box-shadow:0 4px 18px rgba(0,229,255,.15);}
+.hero-divider{width:80px;height:2px;background:linear-gradient(90deg,#00e5ff,#7c3aed);margin:28px auto 0;border-radius:2px;}
+/* === Pro Section === */
+#proSection{display:none;max-width:1400px;margin:22px auto;padding:0 22px;}
+html[data-ac-show=student] #proSection,html[data-ac-show=teacher] #proSection{display:block;}
+.pro-card{background:linear-gradient(135deg,rgba(12,12,20,.7),rgba(7,7,13,.5));border:1px solid rgba(124,58,237,.35);border-radius:16px;padding:30px 26px;box-shadow:0 0 40px rgba(124,58,237,.1),0 0 80px rgba(0,229,255,.04);text-align:center;}
+.pro-title{font-size:1.45rem;font-weight:700;background:linear-gradient(135deg,#7c3aed,#00e5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px;}
+.pro-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:0 auto 26px;max-width:900px;text-align:left;}
+.pro-feature-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:8px;font-size:.86rem;color:#eaf6ff;}
+.pro-feature-item::before{content:'✦';color:#00e5ff;font-size:.72rem;flex-shrink:0;}
+.btn-pro-upgrade{padding:12px 34px;background:linear-gradient(135deg,#7c3aed,#00e5ff);border:none;border-radius:10px;color:#07070d;font-weight:700;font-size:.92rem;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 24px rgba(124,58,237,.3);letter-spacing:.5px;}
+.btn-pro-upgrade:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,58,237,.4);}
+/* === Coming Soon Section === */
+#comingSoonSection{display:none;max-width:1400px;margin:22px auto 38px;padding:0 22px;}
+html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #comingSoonSection{display:block;}
+.coming-card{background:linear-gradient(135deg,rgba(7,7,13,.6),rgba(12,12,20,.4));border:1px solid rgba(0,229,255,.12);border-radius:16px;padding:30px 26px;text-align:center;}
+.coming-title{font-size:1.35rem;font-weight:700;color:#00e5ff;margin-bottom:20px;}
+.coming-features{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px;}
+.coming-feature-item{padding:9px 16px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.12);border-radius:20px;font-size:.83rem;color:rgba(234,246,255,.8);display:flex;align-items:center;gap:6px;}
+.coming-feature-item::before{content:'⏳';font-size:.72rem;}
+.coming-note{color:rgba(234,246,255,.5);font-size:.85rem;font-style:italic;}
+@media(max-width:600px){.hero-title{font-size:1.3rem}.pro-title{font-size:1.15rem}.coming-title{font-size:1.1rem}.pro-card,.coming-card,.hero-section{padding:20px 14px}}
+</style></head><body>
 <div id="loginSection">
   <h1 class="login-logo">&#127979; Acadify</h1>
   <p class="login-sub">Coaching Management Platform</p>
@@ -109,6 +141,7 @@ input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;colo
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
+<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
   <div class="dash-grid">
     <div class="card">
       <h2>&#128172; Class Chat &nbsp;<small id="sChatLabel" style="font-size:.75rem;color:#7c3aed;font-weight:400;"></small></h2>
@@ -140,6 +173,7 @@ input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;colo
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
+<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
   <div class="dash-grid">
     <div class="card">
       <h2>&#128172; Class Chat</h2>
@@ -173,5 +207,5 @@ input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;colo
 <div id="tStudentSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128100; Student Events &mdash; <span id="tStudentSummaryClass" style="color:#10b981;font-size:.9rem;font-weight:400"></span></h2><div class="ev-scroll" style="max-height:400px" id="tStudentGroupList"><p class="no-msg">Select a class above to see student events grouped by name</p></div></div>
 <!-- Student: grouped teacher events card -->
 <div id="sTeacherSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128104;&#8205;&#127979; Teacher Events for Your Class</h2><div class="ev-scroll" style="max-height:400px" id="sTeacherGroupList"><p class="no-msg">Loading teacher events...</p></div></div>
-<script src="acadify.js?v=9"></script>
+<div id="proSection"><div class="pro-card"><div class="pro-title">🌟 Unlock More with Acadify Pro</div><div class="pro-features"><div class="pro-feature-item">Unlimited class chat groups</div><div class="pro-feature-item">Real-time notifications for students</div><div class="pro-feature-item">Advanced analytics &amp; performance tracking</div><div class="pro-feature-item">Attendance reports &amp; insights</div><div class="pro-feature-item">Multi-teacher coordination tools</div><div class="pro-feature-item">Priority support</div></div><button class="btn-pro-upgrade">Upgrade to Pro</button></div></div><div id="comingSoonSection"><div class="coming-card"><div class="coming-title">Coming Soon 🚀</div><div class="coming-features"><div class="coming-feature-item">Live online classes integration</div><div class="coming-feature-item">AI-powered doubt solving assistant</div><div class="coming-feature-item">Automated timetable generation</div><div class="coming-feature-item">Parent dashboard access</div><div class="coming-feature-item">Fee management system</div></div><p class="coming-note">We are constantly improving Acadify. Stay tuned — bigger updates are on the way!</p></div></div><script src="acadify.js?v=9"></script>
 </body></html>
