@@ -114,6 +114,251 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
 .coming-feature-item::before{content:'⏳';font-size:.72rem;}
 .coming-note{color:rgba(234,246,255,.5);font-size:.85rem;font-style:italic;}
 @media(max-width:600px){.hero-title{font-size:1.3rem}.pro-title{font-size:1.15rem}.coming-title{font-size:1.1rem}.pro-card,.coming-card,.hero-section{padding:20px 14px}}
+
+/* =====================================================
+   ACADIFY — PREMIUM ANIMATION LAYER
+   ===================================================== */
+
+/* ── Keyframes ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes msgSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); }
+  50%      { box-shadow: 0 0 18px 4px rgba(0,229,255,0.22); }
+}
+@keyframes pulseGlowPurple {
+  0%,100% { box-shadow: 0 4px 24px rgba(124,58,237,.3); }
+  50%      { box-shadow: 0 4px 36px rgba(124,58,237,.55), 0 0 40px rgba(0,229,255,.18); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes blobFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-18px) scale(1.04); }
+}
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: .6; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+@keyframes navUnderline {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ── TASK 1: Page-load entrance animations ── */
+.anim-hero {
+  animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both;
+}
+.anim-from-left {
+  animation: fadeInLeft 0.6s cubic-bezier(.22,.68,0,1.1) both;
+}
+.anim-from-right {
+  animation: fadeInRight 0.6s cubic-bezier(.22,.68,0,1.1) both;
+}
+/* scroll-reveal — starts hidden, JS adds .is-visible */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.22,.68,0,1.1);
+}
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── TASK 2: Button hover micro-interactions ── */
+.send-btn,
+.btn-add,
+.btn-clr,
+.login-submit,
+.logout-btn,
+.role-btn,
+.btn-hero-primary,
+.btn-hero-secondary,
+.btn-pro-upgrade {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+.send-btn:hover,
+.btn-add:hover,
+.login-submit:hover,
+.role-btn:hover {
+  transform: scale(1.05) translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(0,229,255,.28) !important;
+}
+.logout-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 14px rgba(239,68,68,.3) !important;
+}
+.btn-clr:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 14px rgba(239,68,68,.25) !important;
+}
+.btn-hero-secondary:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,229,255,.22) !important;
+}
+
+/* ── TASK 2: Card hover lift ── */
+.card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 12px 40px rgba(0,229,255,.12), 0 4px 16px rgba(0,0,0,.4) !important;
+  border-color: rgba(0,229,255,.25) !important;
+}
+
+/* ── TASK 2: Navbar top-bar brand hover ── */
+.top-bar-left {
+  position: relative;
+  cursor: default;
+  transition: color 0.2s ease;
+}
+.top-bar-left:hover { color: #7c3aed; }
+
+/* ── TASK 3: Chat input focus glow + expand ── */
+.chat-row input {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, width 0.25s ease !important;
+}
+.chat-row input:focus {
+  border-color: rgba(0,229,255,.45) !important;
+  box-shadow: 0 0 0 3px rgba(0,229,255,.12) !important;
+  outline: none;
+}
+
+/* ── TASK 3: Send button click press animation ── */
+.send-btn:active {
+  transform: scale(0.93) !important;
+  box-shadow: 0 2px 8px rgba(0,229,255,.15) !important;
+}
+
+/* ── TASK 3: New chat message animation ── */
+.msg-anim {
+  animation: msgSlideUp 0.3s ease both;
+}
+
+/* ── TASK 4: Event card hover ── */
+.ev-item {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.ev-item:hover {
+  transform: scale(1.018) !important;
+  border-color: rgba(0,229,255,.35) !important;
+  box-shadow: 0 4px 16px rgba(0,229,255,.1) !important;
+}
+
+/* ── TASK 4: Delete button shake on hover ── */
+.del-btn {
+  transition: background 0.2s ease, color 0.2s ease !important;
+}
+.del-btn:hover {
+  animation: shake 0.35s ease !important;
+  background: rgba(239,68,68,.25) !important;
+  color: #ff6b6b !important;
+}
+
+/* ── TASK 4: Add slot button ripple container ── */
+.btn-add {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  width: 10px; height: 10px;
+  background: rgba(255,255,255,.35);
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple 0.55s ease-out forwards;
+}
+
+/* ── TASK 5: CTA hero buttons — shimmer + pulse ── */
+.btn-hero-primary {
+  background-size: 200% auto !important;
+  background-image: linear-gradient(135deg, #00e5ff 0%, #7c3aed 40%, #00e5ff 100%) !important;
+  animation: shimmer 3s linear infinite, pulseGlow 3s ease-in-out infinite !important;
+}
+.btn-hero-primary:hover {
+  transform: scale(1.06) translateY(-2px) !important;
+  animation: shimmer 1.2s linear infinite !important;
+}
+
+/* ── TASK 5: Upgrade to Pro — shimmer + purple pulse ── */
+.btn-pro-upgrade {
+  background-size: 200% auto !important;
+  background-image: linear-gradient(135deg, #7c3aed 0%, #00e5ff 40%, #7c3aed 100%) !important;
+  animation: shimmer 3.5s linear infinite, pulseGlowPurple 3s ease-in-out infinite !important;
+}
+.btn-pro-upgrade:hover {
+  transform: scale(1.06) translateY(-2px) !important;
+  animation: shimmer 1.2s linear infinite !important;
+}
+
+/* ── TASK 6: Hero animated background blobs ── */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-blob-1 {
+  width: 340px; height: 340px;
+  background: rgba(0,229,255,.07);
+  top: -80px; left: -60px;
+  animation: blobFloat 7s ease-in-out infinite;
+}
+.hero-blob-2 {
+  width: 260px; height: 260px;
+  background: rgba(124,58,237,.07);
+  bottom: -60px; right: -40px;
+  animation: blobFloat 9s ease-in-out infinite reverse;
+}
+.hero-section > *:not(.hero-blob) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── TASK 6: Pro section animated glow border ── */
+.pro-card {
+  animation: pulseGlowPurple 4s ease-in-out infinite !important;
+}
+
+/* ── Stagger delays for dash-grid cards ── */
+.anim-from-left  { animation-delay: 0.1s; }
+.anim-from-right { animation-delay: 0.25s; }
+
 </style></head><body>
 <div id="loginSection">
   <h1 class="login-logo">&#127979; Acadify</h1>
@@ -133,7 +378,7 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
     <button class="login-submit" onclick="submitLogin()">Login to Acadify</button>
   </div>
 </div>
-<div id="studentDash">
+<div id="studentDash" class="scroll-reveal">
   <div class="top-bar">
     <span class="top-bar-left">&#127979; Acadify</span>
     <div class="top-bar-right">
@@ -141,7 +386,7 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
-<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
+<div class="hero-section anim-hero"><div class="hero-blob hero-blob-1"></div><div class="hero-blob hero-blob-2"></div><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
   <div class="dash-grid">
     <div class="card">
       <h2>&#128172; Class Chat &nbsp;<small id="sChatLabel" style="font-size:.75rem;color:#7c3aed;font-weight:400;"></small></h2>
@@ -165,7 +410,7 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
     </div>
   </div>
 </div>
-<div id="teacherDash">
+<div id="teacherDash" class="scroll-reveal">
   <div class="top-bar">
     <span class="top-bar-left">&#127979; Acadify</span>
     <div class="top-bar-right">
@@ -204,8 +449,59 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
   </div>
 </div>
 <!-- Teacher: grouped student events card (shown when class is selected) -->
-<div id="tStudentSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128100; Student Events &mdash; <span id="tStudentSummaryClass" style="color:#10b981;font-size:.9rem;font-weight:400"></span></h2><div class="ev-scroll" style="max-height:400px" id="tStudentGroupList"><p class="no-msg">Select a class above to see student events grouped by name</p></div></div>
+<div id="tStudentSummaryCard" class="card scroll-reveal" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128100; Student Events &mdash; <span id="tStudentSummaryClass" style="color:#10b981;font-size:.9rem;font-weight:400"></span></h2><div class="ev-scroll" style="max-height:400px" id="tStudentGroupList"><p class="no-msg">Select a class above to see student events grouped by name</p></div></div>
 <!-- Student: grouped teacher events card -->
-<div id="sTeacherSummaryCard" class="card" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128104;&#8205;&#127979; Teacher Events for Your Class</h2><div class="ev-scroll" style="max-height:400px" id="sTeacherGroupList"><p class="no-msg">Loading teacher events...</p></div></div>
-<div id="proSection"><div class="pro-card"><div class="pro-title">🌟 Unlock More with Acadify Pro</div><div class="pro-features"><div class="pro-feature-item">Unlimited class chat groups</div><div class="pro-feature-item">Real-time notifications for students</div><div class="pro-feature-item">Advanced analytics &amp; performance tracking</div><div class="pro-feature-item">Attendance reports &amp; insights</div><div class="pro-feature-item">Multi-teacher coordination tools</div><div class="pro-feature-item">Priority support</div></div><button class="btn-pro-upgrade">Upgrade to Pro</button></div></div><div id="comingSoonSection"><div class="coming-card"><div class="coming-title">Coming Soon 🚀</div><div class="coming-features"><div class="coming-feature-item">Live online classes integration</div><div class="coming-feature-item">AI-powered doubt solving assistant</div><div class="coming-feature-item">Automated timetable generation</div><div class="coming-feature-item">Parent dashboard access</div><div class="coming-feature-item">Fee management system</div></div><p class="coming-note">We are constantly improving Acadify. Stay tuned — bigger updates are on the way!</p></div></div><script src="acadify.js?v=9"></script>
+<div id="sTeacherSummaryCard" class="card scroll-reveal" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128104;&#8205;&#127979; Teacher Events for Your Class</h2><div class="ev-scroll" style="max-height:400px" id="sTeacherGroupList"><p class="no-msg">Loading teacher events...</p></div></div>
+<div id="proSection" class="scroll-reveal"><div class="pro-card"><div class="pro-title">🌟 Unlock More with Acadify Pro</div><div class="pro-features"><div class="pro-feature-item">Unlimited class chat groups</div><div class="pro-feature-item">Real-time notifications for students</div><div class="pro-feature-item">Advanced analytics &amp; performance tracking</div><div class="pro-feature-item">Attendance reports &amp; insights</div><div class="pro-feature-item">Multi-teacher coordination tools</div><div class="pro-feature-item">Priority support</div></div><button class="btn-pro-upgrade">Upgrade to Pro</button></div></div><div id="comingSoonSection" class="scroll-reveal"><div class="coming-card"><div class="coming-title">Coming Soon 🚀</div><div class="coming-features"><div class="coming-feature-item">Live online classes integration</div><div class="coming-feature-item">AI-powered doubt solving assistant</div><div class="coming-feature-item">Automated timetable generation</div><div class="coming-feature-item">Parent dashboard access</div><div class="coming-feature-item">Fee management system</div></div><p class="coming-note">We are constantly improving Acadify. Stay tuned — bigger updates are on the way!</p></div></div><script src="acadify.js?v=9"></script>
+
+<script>
+/* ── Intersection Observer: scroll-reveal ── */
+(function(){
+  var els = document.querySelectorAll('.scroll-reveal');
+  if(!els.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); }
+    });
+  }, {threshold: 0.12});
+  els.forEach(function(el){ io.observe(el); });
+})();
+
+/* ── Ripple on .btn-add click ── */
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('.btn-add');
+  if(!btn) return;
+  var r = document.createElement('span');
+  r.className = 'ripple-circle';
+  var rect = btn.getBoundingClientRect();
+  var size = Math.max(rect.width, rect.height);
+  r.style.width = r.style.height = size + 'px';
+  r.style.left = (e.clientX - rect.left - size/2) + 'px';
+  r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+  btn.appendChild(r);
+  setTimeout(function(){ r.remove(); }, 600);
+});
+
+/* ── Chat message entrance animation ── */
+(function(){
+  var observer = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      m.addedNodes.forEach(function(n){
+        if(n.nodeType===1 && n.classList && n.classList.contains('msg')){
+          n.classList.add('msg-anim');
+        }
+      });
+    });
+  });
+  function watchChatWin(id){
+    var el = document.getElementById(id);
+    if(el) observer.observe(el, {childList:true});
+  }
+  // Try immediately and also after auth resolves
+  ['sChatWin','tChatWin'].forEach(watchChatWin);
+  document.addEventListener('DOMContentLoaded', function(){
+    ['sChatWin','tChatWin'].forEach(watchChatWin);
+  });
+})();
+</script>
 </body></html>
