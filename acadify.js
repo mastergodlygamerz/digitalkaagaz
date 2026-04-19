@@ -90,9 +90,9 @@ function listenStudentChat(){
       cw.innerHTML="";
       if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages yet. Be the first!</p>";return;}
       snap.forEach(function(d){
-        var m=d.data();var isMine=m.name===_name&&m.role==="student";
+        var m=d.data();
         var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?" tmsg":isMine?" mymsg":"");
+        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
         var senderDiv=document.createElement("div");senderDiv.className="sender";
         senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
         var textNode=document.createTextNode(m.text);
@@ -205,9 +205,9 @@ function listenTeacherChat(cls){
       cw.innerHTML="";
       if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages for Class "+cls+" yet</p>";return;}
       snap.forEach(function(d){
-        var m=d.data();var isMine=m.name===_name&&m.role==="teacher";
+        var m=d.data();
         var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?(isMine?" mymsg":" tmsg"):"");
+        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
         var senderDiv=document.createElement("div");senderDiv.className="sender";
         senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
         var textNode=document.createTextNode(m.text);

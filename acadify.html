@@ -79,10 +79,20 @@ body{background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),
 /* === Fix date/time input visibility === */
 input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;color:#eaf6ff!important;}
 /* === Chat: Teachers LEFT, Students RIGHT === */
-.chat-win{display:flex!important;flex-direction:column;gap:4px;}
-.msg{align-self:flex-end;max-width:80%;border-left:none;border-right:3px solid #00e5ff;border-radius:10px 3px 3px 10px;background:rgba(0,229,255,.06);}
-.msg.tmsg{align-self:flex-start;border-right:none;border-left:3px solid #7c3aed;border-radius:3px 10px 10px 3px;background:rgba(124,58,237,.06);}
-.msg.mymsg{align-self:flex-start;border-right:none;border-left:3px solid #10b981;border-radius:3px 10px 10px 3px;background:rgba(16,185,129,.06);}
+/* Teacher = LEFT, Student = RIGHT — role-based, not user-based */
+.chat-win{display:flex!important;flex-direction:column;gap:6px;}
+/* Student messages — RIGHT */
+.msg{align-self:flex-end;max-width:78%;border-left:none;border-right:3px solid #10b981;border-radius:14px 3px 14px 14px;background:rgba(16,185,129,.08);padding:9px 13px;}
+/* Teacher messages — LEFT */
+.msg.tmsg{align-self:flex-start;border-right:none;border-left:3px solid #7c3aed;border-radius:3px 14px 14px 14px;background:rgba(124,58,237,.08);}
+/* mymsg = student (right) — same as base .msg */
+.msg.mymsg{align-self:flex-end;border-right:3px solid #10b981;border-left:none;border-radius:14px 3px 14px 14px;background:rgba(16,185,129,.08);}
+/* Dark theme scrollbar for chat-win */
+.chat-win{scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.2) rgba(7,7,13,.4);}
+.chat-win::-webkit-scrollbar{width:5px;}
+.chat-win::-webkit-scrollbar-track{background:rgba(7,7,13,.4);border-radius:8px;}
+.chat-win::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(0,229,255,.3),rgba(124,58,237,.3));border-radius:8px;}
+.chat-win::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(0,229,255,.5),rgba(124,58,237,.5));}
 /* === Hero Section === */
 .hero-section{max-width:1400px;margin:0 auto;padding:48px 22px 28px;text-align:center;}
 .hero-title{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#00e5ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;line-height:1.3;}
