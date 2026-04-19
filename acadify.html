@@ -385,6 +385,7 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
       <div class="fr"><label>Your Class</label><select id="lClass"><option value="">Choose class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
       <div class="fr"><label>Your Board</label><select id="lBoard"><option value="">Choose board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
     </div>
+    <div class="fr"><label>Coaching Institute</label><select id="lInstitute"><option value="">Select institute</option><option value="Vedika Educational Institution">Vedika Educational Institution</option></select></div>
     <button class="login-submit" onclick="submitLogin()">Login to Acadify</button>
   </div>
 </div>
@@ -392,11 +393,11 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
   <div class="top-bar">
     <span class="top-bar-left">&#127979; Acadify</span>
     <div class="top-bar-right">
-      <span class="user-pill"><span id="sUserName"></span></span>
+      <span class="user-pill"><span id="sUserName"></span></span><span id="sInstitutePill" style="display:none;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#7c3aed;font-weight:600;"></span>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
-<div class="hero-section anim-hero"><div class="hero-blob hero-blob-1"></div><div class="hero-blob hero-blob-2"></div><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
+<div class="hero-section anim-hero"><div class="hero-blob hero-blob-1"></div><div class="hero-blob hero-blob-2"></div><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div><p id="heroInstituteWrap" style="margin-top:18px;font-size:1rem;color:rgba(234,246,255,.75);">Welcome to <strong id="heroInstituteName" style="color:#00e5ff;font-weight:700;"></strong> <span style="color:#7c3aed;">🎓</span></p></div>
   <div class="dash-grid">
     <div class="card">
       <h2>&#128172; Class Chat &nbsp;<small id="sChatLabel" style="font-size:.75rem;color:#7c3aed;font-weight:400;"></small></h2>
@@ -424,11 +425,11 @@ html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #coming
   <div class="top-bar">
     <span class="top-bar-left">&#127979; Acadify</span>
     <div class="top-bar-right">
-      <span class="user-pill"><span id="tUserName"></span></span>
+      <span class="user-pill"><span id="tUserName"></span></span><span id="tInstitutePill" style="display:none;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#7c3aed;font-weight:600;"></span>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
-<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div></div>
+<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div><p id="heroInstituteWrap" style="margin-top:18px;font-size:1rem;color:rgba(234,246,255,.75);">Welcome to <strong id="heroInstituteName" style="color:#00e5ff;font-weight:700;"></strong> <span style="color:#7c3aed;">🎓</span></p></div>
   <div class="dash-grid">
     <div class="card">
       <h2>&#128172; Class Chat</h2>
