@@ -1004,6 +1004,7 @@
     document.getElementById('authModalNameGroup').style.display = signup ? 'block' : 'none';
     document.getElementById('authModalRoleGroup').style.display = signup ? 'block' : 'none';
     document.getElementById('authModalStudentFields').style.display = 'none';
+    document.getElementById('authModalRole').value = 'teacher';
     document.getElementById('authModalSwitch').innerHTML = signup
       ? 'Already have an account? <a href="#" id="authSwitchLink">Sign In</a>'
       : 'New here? <a href="#" id="authSwitchLink">Sign Up</a>';
@@ -1011,12 +1012,11 @@
     // Pre-fill institute
     var inst = localStorage.getItem('ac_institute') || sessionStorage.getItem('ac_entry_institute') || '';
     document.getElementById('authModalInstitute').value = inst;
-    document.getElementById('authModalRole').dispatchEvent(new Event('change'));
   }
-  document.getElementById('authModalRole').addEventListener('change', function () {
+  window._onRoleChange = function(sel) {
     document.getElementById('authModalStudentFields').style.display =
-      (_isSignUp && this.value === 'student') ? 'block' : 'none';
-  });
+      (_isSignUp && sel.value === 'student') ? 'block' : 'none';
+  };
 </script>
 
 <!-- ── Auth Modal (Signup / Signin) ─────────────────── -->
@@ -1040,7 +1040,7 @@
     </div>
     <div id="authModalRoleGroup" style="display:none" class="form-field">
       <label for="authModalRole">Role *</label>
-      <select id="authModalRole">
+      <select id="authModalRole" onchange="_onRoleChange(this)">
         <option value="teacher">Teacher</option>
         <option value="student">Student</option>
       </select>
