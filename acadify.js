@@ -60,6 +60,7 @@ function showDash(){
     sd("studentDash","block");sd("teacherDash","none");
     document.getElementById("sUserName").textContent="Student | "+_name+(_class?" | Class "+_class:"")+(_board?" | "+_board:"");
     var lbl=document.getElementById("sChatLabel");if(lbl)lbl.textContent="(Class "+_class+")";
+    var sb=document.getElementById("sEvBoard");if(sb&&_board)sb.value=_board;
     listenStudentChat();
     loadStudentEvents();
     loadStudentTeacherGrouped();
@@ -143,7 +144,7 @@ function renderStudentEvents(sevts){
   sevts.forEach(function(e){
     var item=makeEvItem("");
     item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")));
+    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.board?" | "+e.board:"")));
     item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e._id)));
     el.appendChild(item);
   });
@@ -154,8 +155,9 @@ function addStudentEvent(){
   var d=document.getElementById("sEvDate").value;
   var ti=document.getElementById("sEvTime").value;
   if(!t||!d){alert("Please fill title and date");return;}
+  var board=document.getElementById("sEvBoard")?document.getElementById("sEvBoard").value||_board||"":_board||"";
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_sev_"+_class),{sname:_name,title:t,date:d,time:ti||"",ts:fb.serverTimestamp()})
+    fb.addDoc(fb.collection(fb.db,"ac_sev_"+_class),{sname:_name,title:t,date:d,time:ti||"",board:board,ts:fb.serverTimestamp()})
     .then(function(){
       document.getElementById("sEvTitle").value="";document.getElementById("sEvDate").value="";document.getElementById("sEvTime").value="";
       loadStudentEvents();
@@ -253,7 +255,7 @@ function renderTeacherEvents(myEvts,cls){
   myEvts.forEach(function(e){
     var item=makeEvItem("ev-t");
     item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")));
+    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")+(e.board?" | "+e.board:"")));
     item.appendChild(makeDelBtn((function(eid,ecls){return function(){delTeacherEv(eid,ecls);};})(e._id,cls)));
     el.appendChild(item);
   });
@@ -265,10 +267,11 @@ function addTeacherEvent(){
   var ti=document.getElementById("tEvTime").value;
   var cls=document.getElementById("tEvClass").value||document.getElementById("tClassSel").value;
   var sub=document.getElementById("tEvSubject").value;
+  var board=document.getElementById("tEvBoard")?document.getElementById("tEvBoard").value||"":"";
   if(!t||!d){alert("Please fill title and date");return;}
   if(!cls){alert("Please select a class first");return;}
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_tev_"+cls),{tname:_name,title:t,date:d,time:ti||"",subject:sub,ts:fb.serverTimestamp()})
+    fb.addDoc(fb.collection(fb.db,"ac_tev_"+cls),{tname:_name,title:t,date:d,time:ti||"",subject:sub,board:board,ts:fb.serverTimestamp()})
     .then(function(){
       document.getElementById("tEvTitle").value="";document.getElementById("tEvDate").value="";document.getElementById("tEvTime").value="";
       loadTeacherEvents(document.getElementById("tClassSel").value);
@@ -328,7 +331,7 @@ function loadTeacherStudentGrouped(cls){
           var item=document.createElement("div");item.className="ev-item ev-s";
           var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
           if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
-          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"");
+          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.board?" | "+e.board:"");
           item.appendChild(title);item.appendChild(meta);
           grp.appendChild(item);
         });
@@ -366,7 +369,7 @@ function loadStudentTeacherGrouped(){
           var item=document.createElement("div");item.className="ev-item ev-t";
           var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
           if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
-          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"");
+          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")+(e.board?" | "+e.board:"");
           item.appendChild(title);item.appendChild(meta);
           grp.appendChild(item);
         });

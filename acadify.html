@@ -10,7 +10,7 @@
   window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where,onAuthStateChanged};
 </script>
 <script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"loading");}());</script>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#070709;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#07070d;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
 #loginSection{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
 html[data-ac-show=login] #loginSection{display:flex!important}
 html[data-ac-show=student] #studentDash{display:block!important}
@@ -40,7 +40,7 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
 .msg.mymsg{border-left-color:#10b981;background:rgba(16,185,129,.04)}
 .sender{font-weight:700;font-size:.76rem;margin-bottom:3px;color:#00e5ff}
 .tmsg .sender{color:#7c3aed}.mymsg .sender{color:#10b981}
-.mtime{color:#444;font-size:.7rem;margin-top:3px}
+.mtime{color:#8899bb;font-size:.7rem;margin-top:3px}
 .chat-row{display:flex;gap:8px}
 .chat-row input{flex:1;padding:8px 11px;background:rgba(7,7,13,.8);border:1px solid rgba(0,229,255,.2);border-radius:7px;color:#eaf6ff;font-size:.88rem}
 .send-btn{padding:8px 16px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:7px;color:#07070d;font-weight:600;cursor:pointer}
@@ -52,7 +52,7 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
 .ev-item.ev-t{border-left-color:#7c3aed;background:rgba(124,58,237,.04)}
 .ev-item.ev-s{border-left-color:#10b981;background:rgba(16,185,129,.04)}
 .ev-title{font-weight:600;font-size:.88rem;color:#eaf6ff}
-.ev-meta{color:#555;font-size:.76rem;margin-top:2px}
+.ev-meta{color:#a8b8cc;font-size:.76rem;margin-top:2px}
 .ev-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 0 5px;margin-top:4px}
 .ev-label.lbl-t{color:#7c3aed}.ev-label.lbl-s{color:#10b981}.ev-label.lbl-my{color:#00e5ff}
 .del-btn{padding:2px 8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:4px;cursor:pointer;font-size:.7rem;margin-top:5px;display:block}
@@ -65,13 +65,24 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
 .add-btns button{flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.8rem}
 .btn-add{background:linear-gradient(135deg,#00e5ff,#7c3aed);color:#07070d}
 .btn-clr{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
-.no-msg{color:#555;padding:8px;font-size:.87rem}
+.no-msg{color:#6b7a90;padding:8px;font-size:.87rem}
 #studentFields{display:none}#studentDash,#teacherDash{display:none}
 .grp-block{margin-bottom:16px}.grp-block:first-child .grp-header{margin-top:0}
 .grp-header{font-size:.88rem;font-weight:700;padding:8px 0 5px;border-bottom:1px solid rgba(0,229,255,.15);margin-bottom:8px;margin-top:14px}
 .grp-header.grp-t{color:#7c3aed;border-bottom-color:rgba(124,58,237,.25)}
 .grp-header.grp-s{color:#10b981;border-bottom-color:rgba(16,185,129,.25)}
-</style></head><body>
+/* === Background: match Welcome page glow effects === */
+body::before{content:'';position:fixed;top:-15%;left:10%;width:550px;height:550px;background:rgba(0,229,255,.07);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-10%;right:8%;width:400px;height:400px;background:rgba(0,144,255,.05);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+body{background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:64px 64px;}
+#loginSection,#studentDash,#teacherDash,#tStudentSummaryCard,#sTeacherSummaryCard{position:relative;z-index:1;}
+/* === Fix date/time input visibility === */
+input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;color:#eaf6ff!important;}
+/* === Chat: Teachers LEFT, Students RIGHT === */
+.chat-win{display:flex!important;flex-direction:column;gap:4px;}
+.msg{align-self:flex-end;max-width:80%;border-left:none;border-right:3px solid #00e5ff;border-radius:10px 3px 3px 10px;background:rgba(0,229,255,.06);}
+.msg.tmsg{align-self:flex-start;border-right:none;border-left:3px solid #7c3aed;border-radius:3px 10px 10px 3px;background:rgba(124,58,237,.06);}
+.msg.mymsg{align-self:flex-start;border-right:none;border-left:3px solid #10b981;border-radius:3px 10px 10px 3px;background:rgba(16,185,129,.06);}</style></head><body>
 <div id="loginSection">
   <h1 class="login-logo">&#127979; Acadify</h1>
   <p class="login-sub">Coaching Management Platform</p>
@@ -115,6 +126,7 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
         <div class="fr"><label>Title</label><input type="text" id="sEvTitle" placeholder="e.g. Study session"></div>
         <div class="fr"><label>Date</label><input type="date" id="sEvDate"></div>
         <div class="fr"><label>Time (optional)</label><input type="time" id="sEvTime"></div>
+        <div class="fr"><label>Board</label><select id="sEvBoard"><option value="">Select board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
         <div class="add-btns"><button class="btn-add" onclick="addStudentEvent()">Add</button><button class="btn-clr" onclick="clearStudentEvents()">Clear Mine</button></div>
       </div>
     </div>
@@ -151,6 +163,7 @@ html[data-ac-show=teacher] #teacherDash{display:block!important}
         <div class="fr"><label>Time (optional)</label><input type="time" id="tEvTime"></div>
         <div class="fr"><label>Class</label><select id="tEvClass"><option value="">All classes</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
         <div class="fr"><label>Subject</label><select id="tEvSubject"><option value="">General</option><option value="Math">Math</option><option value="Science">Science</option><option value="English">English</option><option value="Hindi">Hindi</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select></div>
+        <div class="fr"><label>Board</label><select id="tEvBoard"><option value="">All boards</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
         <div class="add-btns"><button class="btn-add" onclick="addTeacherEvent()">Add Slot</button><button class="btn-clr" onclick="clearTeacherEvents()">Clear Mine</button></div>
       </div>
     </div>
