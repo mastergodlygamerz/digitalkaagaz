@@ -30,55 +30,6 @@
     window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy, where };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <!-- Sign Up Modal (injected, theme-matching) -->
-  <div class="dk-modal" id="dk-signup-modal" hidden>
-    <div class="dk-modal-panel" role="dialog" aria-modal="true" aria-labelledby="dk-signup-title">
-      <button class="dk-modal-close" id="dk-signup-close" aria-label="Close">&times;</button>
-      <h3 id="dk-signup-title">Create your account</h3>
-      <form id="dk-signup-form" autocomplete="off" novalidate>
-        <div class="form-group">
-          <label for="su-name">Name</label>
-          <input id="su-name" type="text" maxlength="80" placeholder="Your full name">
-
-        </div>
-        <div class="form-group">
-          <label for="su-email">Email</label>
-          <input id="su-email" type="email" placeholder="you@example.com">
-        </div>
-        <div class="form-group">
-          <label for="su-pass">Password</label>
-          <input id="su-pass" type="password" placeholder="Min 6 characters">
-        </div>
-        <div class="form-group">
-          <label for="su-pass2">Retype Password</label>
-          <input id="su-pass2" type="password" placeholder="Retype password">
-        </div>
-        <div class="form-group">
-          <label for="su-role">User Type</label>
-          <select id="su-role"><option value="teacher">Teacher</option><option value="student">Student</option></select>
-        </div>
-        <div class="form-group">
-          <label for="su-institute">Coaching Institute</label>
-          <input type="text" id="su-institute" placeholder="Enter institute code on Acadify page first" readonly style="cursor:not-allowed;opacity:.7;" required>
-        </div>
-        <div id="su-student-fields" hidden>
-          <div class="form-group">
-            <label for="su-standard">Reading Standard</label>
-            <select id="su-standard"><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select>
-          </div>
-          <div class="form-group">
-            <label for="su-board">Board</label>
-            <select id="su-board"><option>CBSE</option><option>ICSE</option><option>State Board</option></select>
-          </div>
-        </div>
-        <p class="form-error" id="su-error" hidden></p>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button type="submit" class="btn btn-primary" id="su-submit">Sign Up</button>
-          <button type="button" class="btn" id="su-cancel">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </head>
 <body>
 
@@ -101,44 +52,9 @@
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
-      <button class="btn btn-auth" id="auth-btn">Sign In</button>
-      <button class="btn btn-primary" id="signup-btn" style="margin-left:12px">Sign Up</button>
+      
     </div>
   </nav>
-
-  <!-- ========== AUTH PANEL ========== -->
-  <div class="dk-auth-screen" id="dk-auth-screen" hidden>
-    <div class="auth-panel">
-      <button class="auth-close" id="auth-close">&times;</button>
-      <h3 id="auth-title">Sign In</h3>
-      <form id="auth-form" autocomplete="off" novalidate>
-        <div class="form-group auth-name-group" id="auth-name-group" hidden>
-          <label for="auth-name">Full Name</label>
-          <input type="text" id="auth-name" placeholder="Your name" maxlength="80">
-        </div>
-        <div class="form-group">
-          <label for="auth-email">Email</label>
-          <input type="email" id="auth-email" placeholder="you@example.com" maxlength="120">
-        </div>
-        <div class="form-group">
-          <label for="auth-password">Password</label>
-          <input type="password" id="auth-password" placeholder="Min 6 characters" maxlength="100">
-        </div>
-        <p class="form-error" id="auth-error" hidden></p>
-        <button type="submit" class="btn btn-primary auth-submit" id="auth-submit">Sign In</button>
-      </form>
-      <p class="auth-switch">
-        <span id="auth-switch-text">Don't have an account?</span>
-        <a href="#" id="auth-switch-link">Sign Up</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- ========== USER BAR (shown when logged in) ========== -->
-  <div class="user-bar" id="user-bar" hidden>
-    <span id="user-bar-name"></span>
-    <button class="btn btn-small" id="logout-btn">Logout</button>
-  </div>
 
   <!-- ========== HERO ========== -->
   <section id="hero" class="hero">
@@ -336,28 +252,6 @@
   </footer>
 
   <script src="app.js"></script>
-  <script>
-    // Pre-fill institute from sessionStorage (set by acadify-entry.html after code validation)
-    (function () {
-      var inst = sessionStorage.getItem('ac_entry_institute');
-      var code = sessionStorage.getItem('ac_entry_code');
-      var el = document.getElementById('su-institute');
-      if (el && inst) {
-        el.value = inst;
-        el.style.cursor = '';
-        el.style.opacity = '';
-        el.removeAttribute('readonly');
-      }
-      // Auto-open signup or signin modal based on hash
-      if (location.hash === '#signup') {
-        var btn = document.querySelector('[data-open="signup"], .signup-btn, #openSignup, [onclick*="signup"], [onclick*="Signup"]');
-        if (btn) btn.click();
-        else window.addEventListener('DOMContentLoaded', function () {
-          var b = document.querySelector('[data-open="signup"], .signup-btn, #openSignup');
-          if (b) b.click();
-        });
-      }
-    })();
-  </script>
+
 </body>
 </html>
