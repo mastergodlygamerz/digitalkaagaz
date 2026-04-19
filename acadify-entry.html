@@ -989,14 +989,24 @@
     document.getElementById('authModalError').textContent = '';
     document.getElementById('authModalError').style.display = 'none';
   }
-  document.getElementById('authModal').addEventListener('click', function (e) {
-    if (e.target === this) closeAuthModal();
+
+  // These must be assigned BEFORE the authModal DOM listener below
+  var _isSignUp = false;
+  window._onRoleChange = function(sel) {
+    document.getElementById('authModalStudentFields').style.display =
+      (_isSignUp && sel.value === 'student') ? 'block' : 'none';
+  };
+
+  // #authModal is rendered after this script block, so defer its listener
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('authModal').addEventListener('click', function (e) {
+      if (e.target === this) closeAuthModal();
+    });
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { closeAuthModal(); closeRegModal(); }
   });
 
-  var _isSignUp = false;
   function setAuthMode(signup) {
     _isSignUp = signup;
     document.getElementById('authModalTitle').textContent = signup ? '🎓 Create Account' : '🔑 Sign In';
@@ -1013,10 +1023,6 @@
     var inst = localStorage.getItem('ac_institute') || sessionStorage.getItem('ac_entry_institute') || '';
     document.getElementById('authModalInstitute').value = inst;
   }
-  window._onRoleChange = function(sel) {
-    document.getElementById('authModalStudentFields').style.display =
-      (_isSignUp && sel.value === 'student') ? 'block' : 'none';
-  };
 </script>
 
 <!-- ── Auth Modal (Signup / Signin) ─────────────────── -->
