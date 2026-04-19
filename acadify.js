@@ -1,389 +1,391 @@
-var _role="",_name="",_class="",_board="",_institute="";
-var _chatUnsub=null;
-function _iSlug(i){return(i||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").substring(0,20)||"default";}
-function _iCol(base,key){return base+(_institute?_iSlug(_institute)+"_":"")+key;}
-function sd(id,v){var e=document.getElementById(id);if(e)e.style.setProperty("display",v,"important");}
-function escH(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function isToday(ds){return new Date(ds).toDateString()===new Date().toDateString();}
-function isFuture(ds){var d=new Date(ds);d.setHours(0,0,0,0);var t=new Date();t.setHours(0,0,0,0);return d>=t;}
-function waitForDb(cb){if(window._adb&&window._adb.db){cb(window._adb);}else{setTimeout(function(){waitForDb(cb);},80);}}
+﻿// Acadify — Firestore-backed Chat & Events
+(function () {
 
-document.addEventListener("DOMContentLoaded",function(){
-  // Always verify identity from Firebase Auth - never trust stale localStorage name
-  waitForDb(function(fb){
-    var unsub=fb.onAuthStateChanged(fb.auth,function(user){
-      unsub();
-      if(user){
-        var authName=user.displayName||user.email.split("@")[0];
-        var r=localStorage.getItem("ac_role")||"student";
-        var c=localStorage.getItem("ac_class")||"";
-        var b=localStorage.getItem("ac_board")||"";
-        var inst=localStorage.getItem("ac_institute")||"";
-        localStorage.setItem("ac_role",r);
-        localStorage.setItem("ac_name",authName);
-        _role=r;_name=authName;_class=c;_board=b;_institute=inst;
-        showDash();
-      } else {
-        ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
-        document.documentElement.setAttribute("data-ac-show","login");
+  /* ── Wait for Firebase (window._adb set by module script) ── */
+  function waitForDB(cb) {
+    if (window._adb && window._adb.db) { cb(); }
+    else { setTimeout(function () { waitForDB(cb); }, 60); }
+  }
+
+  /* ── User info from localStorage ─────────────────────── */
+  var role      = localStorage.getItem("ac_role")      || "";
+  var userName  = localStorage.getItem("ac_name")      || "User";
+  var userClass = localStorage.getItem("ac_class")     || "";
+  var userBoard = localStorage.getItem("ac_board")     || "";
+  var institute = localStorage.getItem("ac_institute") || "";
+
+  /* ── Firestore collection name helpers ───────────────── */
+  function instCode() {
+    return (localStorage.getItem("ac_institute_code") || "").toUpperCase().trim();
+  }
+  function chatCol(cls) { return "ac_chat_" + instCode() + "_" + cls; }
+  function sEvCol()     { return "ac_sev_"  + instCode(); }
+  function tEvCol()     { return "ac_tev_"  + instCode(); }
+
+  /* ── Misc helpers ────────────────────────────────────── */
+  function todayStr() {
+    var d  = new Date();
+    var mm = String(d.getMonth() + 1).padStart(2, "0");
+    var dd = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + mm + "-" + dd;
+  }
+  function fmtDate(s) {
+    if (!s) return "";
+    return new Date(s + "T00:00:00")
+      .toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+  }
+  function esc(s) {
+    return String(s || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+  function currentUid() {
+    return (window._adb && window._adb.auth && window._adb.auth.currentUser)
+      ? window._adb.auth.currentUser.uid : null;
+  }
+
+  /* ── Top-bar names ───────────────────────────────────── */
+  document.addEventListener("DOMContentLoaded", function () {
+    var sn = document.getElementById("sUserName");
+    var tn = document.getElementById("tUserName");
+    if (sn) sn.textContent = userName;
+    if (tn) tn.textContent = userName;
+    var lbl = document.getElementById("sChatLabel");
+    if (lbl && userClass) lbl.textContent = "— Class " + userClass;
+    ["sInstitutePill","tInstitutePill"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && institute) { el.textContent = "🏫 " + institute; el.style.display = ""; }
+    });
+  });
+
+  /* ── Login (local form) ──────────────────────────────── */
+  window.selectRole = function (r) {
+    var sb = document.getElementById("lStudentBtn");
+    var tb = document.getElementById("lTeacherBtn");
+    if (sb) sb.classList.toggle("active", r === "student");
+    if (tb) tb.classList.toggle("active", r === "teacher");
+    var ri = document.getElementById("lRoleInput");
+    if (ri) ri.value = r;
+    var sf = document.getElementById("studentFields");
+    if (sf) sf.style.display = r === "student" ? "block" : "none";
+  };
+
+  window.submitLogin = function () {
+    var name  = ((document.getElementById("lName")      || {}).value || "").trim();
+    var r     =  (document.getElementById("lRoleInput") || {}).value || "";
+    if (!name || !r) { alert("Please enter your name and choose a role."); return; }
+    var cls   = r === "student" ? ((document.getElementById("lClass") || {}).value || "") : "";
+    var board = r === "student" ? ((document.getElementById("lBoard") || {}).value || "") : "";
+    var inst  = ((document.getElementById("lInstitute") || {}).value || "");
+    if (r === "student" && (!cls || !board)) { alert("Please select your class and board."); return; }
+    localStorage.setItem("ac_name", name);
+    localStorage.setItem("ac_role", r);
+    if (cls)   localStorage.setItem("ac_class", cls);
+    if (board) localStorage.setItem("ac_board", board);
+    if (inst)  localStorage.setItem("ac_institute", inst);
+    window.location.reload();
+  };
+
+  /* ── Logout ──────────────────────────────────────────── */
+  window.logout = function () {
+    ["ac_role","ac_name","ac_class","ac_board","ac_institute","ac_institute_code",
+     "ac_entry_code","ac_entry_institute"].forEach(function (k) {
+      localStorage.removeItem(k); sessionStorage.removeItem(k);
+    });
+    if (window._adb && window._adb.auth) window._adb.auth.signOut().catch(function(){});
+    window.location.href = "acadify-entry.html";
+  };
+
+  /* ══════════ CHAT (real-time onSnapshot) ════════════════
+     Collection : ac_chat_{INST_CODE}_{class}
+     Doc fields : { text, senderName, role, ts }
+     Teacher msgs → LEFT  (.msg.tmsg)
+     Student msgs → RIGHT (.msg.mymsg)
+  ════════════════════════════════════════════════════════*/
+  var _chatUnsub = null;
+
+  function subscribeChat(colName, winEl) {
+    if (_chatUnsub) { _chatUnsub(); _chatUnsub = null; }
+    winEl.innerHTML = "<p class=\"no-msg\">Loading chat…</p>";
+    waitForDB(function () {
+      var _r = window._adb;
+      var q  = _r.query(_r.collection(_r.db, colName), _r.orderBy("ts","asc"));
+      _chatUnsub = _r.onSnapshot(q, function (snap) {
+        if (snap.empty) {
+          winEl.innerHTML = "<p class=\"no-msg\">No messages yet — say hello! 👋</p>";
+          return;
+        }
+        winEl.innerHTML = "";
+        snap.forEach(function (d) {
+          var data      = d.data();
+          var isTeacher = data.role === "teacher";
+          var div       = document.createElement("div");
+          div.className = "msg " + (isTeacher ? "tmsg" : "mymsg");
+          var t = data.ts
+            ? new Date(data.ts.seconds*1000)
+                .toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})
+            : "";
+          div.innerHTML =
+            "<div class=\"sender\">" + esc(data.senderName||"Unknown") +
+              " <span style=\"font-size:.68rem;opacity:.6;font-weight:400\">" +
+                (isTeacher ? "[Teacher]" : "[Student]") +
+              "</span></div>" +
+            esc(data.text) +
+            "<div class=\"mtime\">" + t + "</div>";
+          winEl.appendChild(div);
+        });
+        winEl.scrollTop = winEl.scrollHeight;
+      }, function () {
+        winEl.innerHTML = "<p class=\"no-msg\">⚠ Could not load chat.</p>";
+      });
+    });
+  }
+
+  function sendMsg(colName, text) {
+    if (!text.trim()) return;
+    waitForDB(function () {
+      var _r = window._adb;
+      _r.addDoc(_r.collection(_r.db, colName), {
+        text: text.trim(), senderName: userName, role: role, ts: _r.serverTimestamp()
+      });
+    });
+  }
+
+  /* Student — auto-subscribe on load */
+  if (role === "student" && userClass) {
+    document.addEventListener("DOMContentLoaded", function () {
+      subscribeChat(chatCol(userClass), document.getElementById("sChatWin"));
+    });
+  }
+  window.sendStudentMsg = function () {
+    var inp = document.getElementById("sChatInput");
+    sendMsg(chatCol(userClass), inp.value);
+    inp.value = "";
+  };
+
+  /* Teacher — subscribe when class is selected */
+  var _tClass = "";
+  window.onTeacherClassChange = function () {
+    var sel = document.getElementById("tClassSel");
+    _tClass = sel ? sel.value : "";
+    var win = document.getElementById("tChatWin");
+    if (!_tClass) {
+      if (_chatUnsub) { _chatUnsub(); _chatUnsub = null; }
+      win.innerHTML = "<p class=\"no-msg\">Select a class above to view chat</p>";
+      loadTeacherEvents();
+      return;
+    }
+    subscribeChat(chatCol(_tClass), win);
+    loadTeacherEvents();
+  };
+  window.sendTeacherMsg = function () {
+    if (!_tClass) { alert("Please select a class first."); return; }
+    var inp = document.getElementById("tChatInput");
+    sendMsg(chatCol(_tClass), inp.value);
+    inp.value = "";
+  };
+
+  /* ══════════ EVENTS ══════════════════════════════════════
+     Student events : ac_sev_{INST_CODE}  (fields: title,date,time,board,class,createdByUid,...)
+     Teacher events : ac_tev_{INST_CODE}  (fields: title,date,time,board,class,subject,createdByUid,...)
+     Show only events with date >= today (YYYY-MM-DD string compare).
+     Student sees : own events + teacher events matching their class & board
+     Teacher sees : own events + student events for the selected class
+  ════════════════════════════════════════════════════════*/
+  var TYPE_EMOJI = { exam:"📝", assignment:"📋", class:"👥", slot:"📌", other:"📌" };
+
+  function evCard(ev) {
+    var isTeacher = ev.role === "teacher";
+    var isOwn     = ev.createdByUid && ev.createdByUid === currentUid();
+    var itemCls   = "ev-item " + (isTeacher ? "ev-t" : "ev-s");
+    var lblCls    = "ev-label " + (isTeacher ? "lbl-t" : (isOwn ? "lbl-my" : "lbl-s"));
+    var lblTxt    = isTeacher ? "👩‍🏫 Teacher" : "👤 Student";
+    var emoji     = TYPE_EMOJI[ev.type] || "📌";
+    var isToday   = ev.date === todayStr();
+    var delFn     = isTeacher ? "deleteTeacherEvent" : "deleteStudentEvent";
+    var clsTag    = (ev.class && ev.class !== "All") ? " · Class " + esc(ev.class) : "";
+    return "<div class=\"" + itemCls + "\">" +
+      "<div class=\"ev-body\">" +
+        "<div class=\"ev-title\">" + emoji + " " + esc(ev.title) +
+          (isToday ? " <span class=\"today-badge\">Today</span>" : "") + "</div>" +
+        "<div class=\"ev-meta\">" + fmtDate(ev.date) +
+          (ev.time    ? " · " + esc(ev.time)    : "") +
+          (ev.subject ? " · " + esc(ev.subject) : "") + "</div>" +
+        "<div class=\"" + lblCls + "\">" + lblTxt + clsTag + "</div>" +
+      "</div>" +
+      (isOwn ? "<button class=\"del-btn\" onclick=\"" + delFn + "('" + ev._id + "')\">✕</button>" : "") +
+    "</div>";
+  }
+
+  /* ── Student Events ──────────────────────────────────── */
+  function loadStudentEvents() {
+    var listEl = document.getElementById("sEventList");
+    if (!listEl) return;
+    listEl.innerHTML = "<p class=\"no-msg\">Loading events…</p>";
+    waitForDB(async function () {
+      var _r    = window._adb;
+      var today = todayStr();
+      try {
+        var sSnap = await _r.getDocs(
+          _r.query(_r.collection(_r.db, sEvCol()),
+            _r.where("date",">=",today), _r.orderBy("date","asc"))
+        );
+        var uid  = currentUid();
+        var sEvs = [];
+        sSnap.forEach(function(d){
+          var ev = d.data();
+          if ((uid && ev.createdByUid===uid) || !ev.class || ev.class===userClass)
+            sEvs.push(Object.assign({},ev,{_id:d.id,role:"student"}));
+        });
+
+        var tSnap = await _r.getDocs(
+          _r.query(_r.collection(_r.db, tEvCol()),
+            _r.where("date",">=",today), _r.orderBy("date","asc"))
+        );
+        var tEvs = [];
+        tSnap.forEach(function(d){
+          var ev      = d.data();
+          var classOk = !ev.class || ev.class==="All" || ev.class===userClass;
+          var boardOk = !ev.board || ev.board==="All" || ev.board===userBoard;
+          if (classOk && boardOk) tEvs.push(Object.assign({},ev,{_id:d.id,role:"teacher"}));
+        });
+
+        var all = sEvs.concat(tEvs).sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
+        listEl.innerHTML = all.length
+          ? all.map(evCard).join("")
+          : "<p class=\"no-msg\">No upcoming events for your class 🎉</p>";
+      } catch(err) {
+        console.error("loadStudentEvents", err);
+        listEl.innerHTML = "<p class=\"no-msg\">⚠ Could not load events.</p>";
       }
     });
-  });
-});
-
-function selectRole(role){
-  document.getElementById("lStudentBtn").classList.toggle("active",role==="student");
-  document.getElementById("lTeacherBtn").classList.toggle("active",role==="teacher");
-  document.getElementById("lRoleInput").value=role;
-  sd("studentFields",role==="student"?"block":"none");
-}
-
-function submitLogin(){
-  var n=document.getElementById("lName").value.trim();
-  var role=document.getElementById("lRoleInput").value;
-  if(!n){alert("Please enter your name");return;}
-  if(!role){alert("Please select Student or Teacher");return;}
-  if(role==="student"){
-    var c=document.getElementById("lClass").value;
-    var b=document.getElementById("lBoard").value;
-    if(!c){alert("Please select your class");return;}
-    if(!b){alert("Please select your board");return;}
-    _class=c;_board=b;
-    localStorage.setItem("ac_class",c);localStorage.setItem("ac_board",b);
   }
-  _role=role;_name=n;
-  var inst=document.getElementById("lInstitute")?document.getElementById("lInstitute").value:localStorage.getItem("ac_institute")||"";
-  if(inst){_institute=inst;localStorage.setItem("ac_institute",inst);}
-  localStorage.setItem("ac_role",role);localStorage.setItem("ac_name",n);
-  showDash();
-}
 
-function showDash(){
-  document.documentElement.setAttribute("data-ac-show",_role==="student"?"student":"teacher");
-  sd("loginSection","none");
-  if(_role==="student"){
-    sd("studentDash","block");sd("teacherDash","none");
-    document.getElementById("sUserName").textContent="Student | "+_name+(_class?" | Class "+_class:"")+(_board?" | "+_board:"")+(_institute?" | "+_institute:"");
-    var sHeroInst=document.getElementById("heroInstituteName");if(sHeroInst)sHeroInst.textContent=_institute||"";
-    var sInstPill=document.getElementById("sInstitutePill");if(sInstPill){sInstPill.textContent=_institute||"";sInstPill.style.display=_institute?"inline-block":"none";}
-    var lbl=document.getElementById("sChatLabel");if(lbl)lbl.textContent="(Class "+_class+")";
-    var sb=document.getElementById("sEvBoard");if(sb&&_board)sb.value=_board;
-    listenStudentChat();
-    loadStudentEvents();
-    loadStudentTeacherGrouped();
-  }else{
-    sd("studentDash","none");sd("teacherDash","block");
-    document.getElementById("tUserName").textContent="Teacher | "+_name;
-    var tHeroInst=document.getElementById("heroInstituteName");if(tHeroInst)tHeroInst.textContent=_institute||"";
-    var tInstPill=document.getElementById("tInstitutePill");if(tInstPill){tInstPill.textContent=_institute||"";tInstPill.style.display=_institute?"inline-block":"none";}
-  }
-}
-
-function logout(){
-  if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
-  ["ac_role","ac_name","ac_class","ac_board","ac_institute","ac_institute_code"].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
-  _role="";_name="";_class="";_board="";_institute="";
-  waitForDb(function(fb){
-    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="acadify-entry.html";});
-  });
-}
-
-/* ---- STUDENT CHAT ---- */
-function listenStudentChat(){
-  if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
-  var cw=document.getElementById("sChatWin");if(!cw)return;
-  cw.innerHTML="<p class=\"no-msg\">Connecting...</p>";
-  waitForDb(function(fb){
-    var q=fb.query(fb.collection(fb.db,_iCol("ac_chat_",_class)),fb.orderBy("ts","asc"));
-    _chatUnsub=fb.onSnapshot(q,function(snap){
-      cw.innerHTML="";
-      if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages yet. Be the first!</p>";return;}
-      snap.forEach(function(d){
-        var m=d.data();
-        var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
-        var senderDiv=document.createElement("div");senderDiv.className="sender";
-        senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
-        var textNode=document.createTextNode(m.text);
-        var timeDiv=document.createElement("div");timeDiv.className="mtime";
-        timeDiv.textContent=(m.ts&&m.ts.toDate?m.ts.toDate().toLocaleString():m.clientTime||"");
-        div.appendChild(senderDiv);div.appendChild(textNode);div.appendChild(timeDiv);
-        cw.appendChild(div);
+  window.addStudentEvent = function () {
+    var title = (document.getElementById("sEvTitle").value||"").trim();
+    var date  =  document.getElementById("sEvDate").value;
+    var time  =  document.getElementById("sEvTime").value;
+    var board =  document.getElementById("sEvBoard").value || userBoard;
+    if (!title||!date) { alert("Please fill in title and date."); return; }
+    waitForDB(async function(){
+      var _r = window._adb;
+      await _r.addDoc(_r.collection(_r.db, sEvCol()), {
+        title, date, time, board, class: userClass, type: "other",
+        createdByUid: currentUid()||"", createdByName: userName, ts: _r.serverTimestamp()
       });
-      cw.scrollTop=cw.scrollHeight;
-    },function(err){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error: "+(err.code==="permission-denied"?"Firestore rules block access — open Firebase Console \u2192 Firestore \u2192 Rules \u2192 set allow read,write:if true":err.message)+"</p>";});
-  });
-}
-
-function sendStudentMsg(){
-  var i=document.getElementById("sChatInput");var msg=i.value.trim();if(!msg)return;
-  i.value="";i.disabled=true;
-  waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,_iCol("ac_chat_",_class)),{role:"student",name:_name,text:msg,institute:_institute,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
-    .catch(function(e){i.disabled=false;alert("Send failed: "+e.message);})
-    .finally(function(){i.disabled=false;});
-  });
-}
-
-/* ---- STUDENT EVENTS ---- */
-function loadStudentEvents(){
-  var el=document.getElementById("sEventList");if(!el)return;
-  el.innerHTML="<p class=\"no-msg\">Loading...</p>";
-  waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_sev_",_class)),fb.orderBy("date","asc")))
-    .then(function(snap){
-      var sevts=[];
-      snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.sname===_name&&isFuture(e.date))sevts.push(e);});
-      renderStudentEvents(sevts);
-    }).catch(function(){renderStudentEvents([]);});
-  });
-}
-
-function makeEvItem(cls,extra){var d=document.createElement("div");d.className="ev-item"+(cls?" "+cls:"");if(extra)Object.assign(d.dataset,extra);return d;}
-function makeLabel(text,cls){var d=document.createElement("div");d.className="ev-label "+cls;d.textContent=text;return d;}
-function makeDelBtn(handler){var b=document.createElement("button");b.className="del-btn";b.textContent="Delete";b.onclick=handler;return b;}
-function makeTitleDiv(title,today){var d=document.createElement("div");d.className="ev-title";d.textContent=title;if(today){var s=document.createElement("span");s.className="today-badge";s.textContent="Today";d.appendChild(s);}return d;}
-function makeMetaDiv(text){var d=document.createElement("div");d.className="ev-meta";d.textContent=text;return d;}
-
-function renderStudentEvents(sevts){
-  var el=document.getElementById("sEventList");if(!el)return;
-  el.innerHTML="";
-  if(!sevts.length){el.innerHTML="<p class=\"no-msg\">No upcoming events yet. Add one below!</p>";return;}
-  sevts.sort(function(a,b){return a.date<b.date?-1:1;});
-  sevts.forEach(function(e){
-    var item=makeEvItem("");
-    item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.board?" | "+e.board:"")));
-    item.appendChild(makeDelBtn((function(id){return function(){delStudentEv(id);};})(e._id)));
-    el.appendChild(item);
-  });
-}
-
-function addStudentEvent(){
-  var t=document.getElementById("sEvTitle").value.trim();
-  var d=document.getElementById("sEvDate").value;
-  var ti=document.getElementById("sEvTime").value;
-  if(!t||!d){alert("Please fill title and date");return;}
-  var board=document.getElementById("sEvBoard")?document.getElementById("sEvBoard").value||_board||"":_board||"";
-  waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,_iCol("ac_sev_",_class)),{sname:_name,title:t,date:d,time:ti||"",board:board,institute:_institute,ts:fb.serverTimestamp()})
-    .then(function(){
-      document.getElementById("sEvTitle").value="";document.getElementById("sEvDate").value="";document.getElementById("sEvTime").value="";
+      document.getElementById("sEvTitle").value =
+      document.getElementById("sEvDate").value  =
+      document.getElementById("sEvTime").value  = "";
       loadStudentEvents();
-    })
-    .catch(function(e){alert("Failed to add: "+e.message);});
-  });
-}
-
-function delStudentEv(id){
-  waitForDb(function(fb){
-    fb.deleteDoc(fb.doc(fb.db,_iCol("ac_sev_",_class),id))
-    .then(function(){loadStudentEvents();})
-    .catch(function(e){alert("Delete failed: "+e.message);});
-  });
-}
-
-function clearStudentEvents(){
-  if(!confirm("Clear your events?"))return;
-  waitForDb(function(fb){
-    fb.getDocs(fb.collection(fb.db,_iCol("ac_sev_",_class))).then(function(snap){
-      var promises=[];
-      snap.forEach(function(d){if(d.data().sname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,_iCol("ac_sev_",_class),d.id)));});
-      Promise.all(promises).then(function(){loadStudentEvents();});
     });
-  });
-}
+  };
 
-/* ---- TEACHER CLASS CHANGE ---- */
-function onTeacherClassChange(){
-  var cls=document.getElementById("tClassSel").value;
-  var tec=document.getElementById("tEvClass");if(tec&&cls)tec.value=cls;
-  if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
-  if(cls){listenTeacherChat(cls);}else{document.getElementById("tChatWin").innerHTML="<p class=\"no-msg\">Select a class above to view chat</p>";}
-  loadTeacherEvents(cls);
-  loadTeacherStudentGrouped(cls);
-}
-
-/* ---- TEACHER CHAT ---- */
-function listenTeacherChat(cls){
-  var cw=document.getElementById("tChatWin");if(!cw)return;
-  cw.innerHTML="<p class=\"no-msg\">Connecting...</p>";
-  waitForDb(function(fb){
-    var q=fb.query(fb.collection(fb.db,_iCol("ac_chat_",cls)),fb.orderBy("ts","asc"));
-    _chatUnsub=fb.onSnapshot(q,function(snap){
-      cw.innerHTML="";
-      if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages for Class "+cls+" yet</p>";return;}
-      snap.forEach(function(d){
-        var m=d.data();
-        var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
-        var senderDiv=document.createElement("div");senderDiv.className="sender";
-        senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
-        var textNode=document.createTextNode(m.text);
-        var timeDiv=document.createElement("div");timeDiv.className="mtime";
-        timeDiv.textContent=(m.ts&&m.ts.toDate?m.ts.toDate().toLocaleString():m.clientTime||"");
-        div.appendChild(senderDiv);div.appendChild(textNode);div.appendChild(timeDiv);
-        cw.appendChild(div);
-      });
-      cw.scrollTop=cw.scrollHeight;
-    },function(err){cw.innerHTML="<p class=\"no-msg\" style=\"color:#ef4444;\">Chat error: "+(err.code==="permission-denied"?"Firestore rules block access — open Firebase Console → Firestore → Rules → set allow read,write:if true":err.message)+"</p>";});
-  });
-}
-
-function sendTeacherMsg(){
-  var cls=document.getElementById("tClassSel").value;
-  if(!cls){alert("Please select a class first");return;}
-  var i=document.getElementById("tChatInput");var msg=i.value.trim();if(!msg)return;
-  i.value="";i.disabled=true;
-  waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,_iCol("ac_chat_",cls)),{role:"teacher",name:_name,text:msg,institute:_institute,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
-    .catch(function(e){i.disabled=false;alert("Send failed: "+e.message);})
-    .finally(function(){i.disabled=false;});
-  });
-}
-
-/* ---- TEACHER EVENTS ---- */
-function loadTeacherEvents(cls){
-  var el=document.getElementById("tEventList");if(!el)return;
-  if(!cls){el.innerHTML="<p class=\"no-msg\">Select a class to view events</p>";return;}
-  el.innerHTML="<p class=\"no-msg\">Loading...</p>";
-  waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_tev_",cls)),fb.orderBy("date","asc")))
-    .then(function(snap){
-      var myEvts=[];
-      snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.tname===_name&&isFuture(e.date))myEvts.push(e);});
-      renderTeacherEvents(myEvts,cls);
-    }).catch(function(){renderTeacherEvents([],cls);});
-  });
-}
-
-function renderTeacherEvents(myEvts,cls){
-  var el=document.getElementById("tEventList");if(!el)return;
-  el.innerHTML="";
-  if(!myEvts.length){el.innerHTML="<p class=\"no-msg\">No availability slots for Class "+cls+" yet. Add one below!</p>";return;}
-  myEvts.forEach(function(e){
-    var item=makeEvItem("ev-t");
-    item.appendChild(makeTitleDiv(e.title,isToday(e.date)));
-    item.appendChild(makeMetaDiv(e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")+(e.board?" | "+e.board:"")));
-    item.appendChild(makeDelBtn((function(eid,ecls){return function(){delTeacherEv(eid,ecls);};})(e._id,cls)));
-    el.appendChild(item);
-  });
-}
-
-function addTeacherEvent(){
-  var t=document.getElementById("tEvTitle").value.trim();
-  var d=document.getElementById("tEvDate").value;
-  var ti=document.getElementById("tEvTime").value;
-  var cls=document.getElementById("tEvClass").value||document.getElementById("tClassSel").value;
-  var sub=document.getElementById("tEvSubject").value;
-  var board=document.getElementById("tEvBoard")?document.getElementById("tEvBoard").value||"":"";
-  if(!t||!d){alert("Please fill title and date");return;}
-  if(!cls){alert("Please select a class first");return;}
-  waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,_iCol("ac_tev_",cls)),{tname:_name,title:t,date:d,time:ti||"",subject:sub,board:board,institute:_institute,ts:fb.serverTimestamp()})
-    .then(function(){
-      document.getElementById("tEvTitle").value="";document.getElementById("tEvDate").value="";document.getElementById("tEvTime").value="";
-      loadTeacherEvents(document.getElementById("tClassSel").value);
-    })
-    .catch(function(e){alert("Failed to add: "+e.message);});
-  });
-}
-
-function delTeacherEv(id,cls){
-  if(!confirm("Delete this slot?"))return;
-  waitForDb(function(fb){
-    fb.deleteDoc(fb.doc(fb.db,_iCol("ac_tev_",cls),id))
-    .then(function(){loadTeacherEvents(cls);})
-    .catch(function(e){alert("Delete failed: "+e.message);});
-  });
-}
-
-function clearTeacherEvents(){
-  var cls=document.getElementById("tClassSel").value;
-  if(!cls){alert("Please select a class first");return;}
-  if(!confirm("Clear all your slots for Class "+cls+"?"))return;
-  waitForDb(function(fb){
-    fb.getDocs(fb.collection(fb.db,_iCol("ac_tev_",cls))).then(function(snap){
-      var promises=[];
-      snap.forEach(function(d){if(d.data().tname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,_iCol("ac_tev_",cls),d.id)));});
-      Promise.all(promises).then(function(){loadTeacherEvents(cls);});
+  window.deleteStudentEvent = function (id) {
+    waitForDB(async function(){
+      var _r = window._adb;
+      await _r.deleteDoc(_r.doc(_r.db, sEvCol(), id));
+      loadStudentEvents();
     });
-  });
-}
-/* ---- GROUPED: TEACHER sees each student's upcoming events ---- */
-function loadTeacherStudentGrouped(cls){
-  var card=document.getElementById("tStudentSummaryCard");if(!card)return;
-  if(!cls){card.style.display="none";return;}
-  card.style.display="";
-  var lbl=document.getElementById("tStudentSummaryClass");if(lbl)lbl.textContent="Class "+cls;
-  var el=document.getElementById("tStudentGroupList");if(!el)return;
-  el.innerHTML="<p class=\"no-msg\">Loading...</p>";
-  waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_sev_",cls)),fb.orderBy("date","asc")))
-    .then(function(snap){
-      var byStudent={};
-      snap.forEach(function(d){
-        var e=d.data();
-        if(!isFuture(e.date))return;
-        var nm=e.sname||"Unknown Student";
-        if(!byStudent[nm])byStudent[nm]=[];
-        byStudent[nm].push(e);
-      });
-      el.innerHTML="";
-      var names=Object.keys(byStudent).sort();
-      if(!names.length){el.innerHTML="<p class=\"no-msg\">No student events for Class "+cls+" yet</p>";return;}
-      names.forEach(function(nm){
-        var grp=document.createElement("div");grp.className="grp-block";
-        var hdr=document.createElement("div");hdr.className="grp-header grp-s";hdr.textContent=nm+" Events";
-        grp.appendChild(hdr);
-        byStudent[nm].forEach(function(e){
-          var item=document.createElement("div");item.className="ev-item ev-s";
-          var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
-          if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
-          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.board?" | "+e.board:"");
-          item.appendChild(title);item.appendChild(meta);
-          grp.appendChild(item);
-        });
-        el.appendChild(grp);
-      });
-    }).catch(function(){el.innerHTML="<p class=\"no-msg\">Could not load student events</p>";});
-  });
-}
+  };
 
-/* ---- GROUPED: STUDENT sees each teacher's upcoming events ---- */
-function loadStudentTeacherGrouped(){
-  var card=document.getElementById("sTeacherSummaryCard");if(!card)return;
-  card.style.display="";
-  var el=document.getElementById("sTeacherGroupList");if(!el)return;
-  el.innerHTML="<p class=\"no-msg\">Loading teacher events...</p>";
-  waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_tev_",_class)),fb.orderBy("date","asc")))
-    .then(function(snap){
-      var byTeacher={};
-      snap.forEach(function(d){
-        var e=d.data();
-        if(!isFuture(e.date))return;
-        var nm=e.tname||"Unknown Teacher";
-        if(!byTeacher[nm])byTeacher[nm]=[];
-        byTeacher[nm].push(e);
-      });
-      el.innerHTML="";
-      var names=Object.keys(byTeacher).sort();
-      if(!names.length){el.innerHTML="<p class=\"no-msg\">No teacher events for Class "+_class+" yet</p>";return;}
-      names.forEach(function(nm){
-        var grp=document.createElement("div");grp.className="grp-block";
-        var hdr=document.createElement("div");hdr.className="grp-header grp-t";hdr.textContent=nm+" Events";
-        grp.appendChild(hdr);
-        byTeacher[nm].forEach(function(e){
-          var item=document.createElement("div");item.className="ev-item ev-t";
-          var title=document.createElement("div");title.className="ev-title";title.textContent=e.title;
-          if(isToday(e.date)){var badge=document.createElement("span");badge.className="today-badge";badge.textContent="Today";title.appendChild(badge);}
-          var meta=document.createElement("div");meta.className="ev-meta";meta.textContent=e.date+(e.time?" at "+e.time:"")+(e.subject?" | "+e.subject:"")+(e.board?" | "+e.board:"");
-          item.appendChild(title);item.appendChild(meta);
-          grp.appendChild(item);
+  window.clearStudentEvents = function () {
+    if (!confirm("Delete all your events?")) return;
+    var uid = currentUid();
+    if (!uid) { alert("Not signed in."); return; }
+    waitForDB(async function(){
+      var _r = window._adb;
+      var snap = await _r.getDocs(_r.query(_r.collection(_r.db,sEvCol()),_r.where("createdByUid","==",uid)));
+      await Promise.all(Array.from(snap.docs).map(function(d){ return _r.deleteDoc(_r.doc(_r.db,sEvCol(),d.id)); }));
+      loadStudentEvents();
+    });
+  };
+
+  if (role === "student") document.addEventListener("DOMContentLoaded", loadStudentEvents);
+
+  /* ── Teacher Events ──────────────────────────────────── */
+  function loadTeacherEvents() {
+    var listEl = document.getElementById("tEventList");
+    if (!listEl) return;
+    listEl.innerHTML = "<p class=\"no-msg\">Loading events…</p>";
+    var selClass = _tClass;
+    waitForDB(async function(){
+      var _r    = window._adb;
+      var today = todayStr();
+      try {
+        var tSnap = await _r.getDocs(
+          _r.query(_r.collection(_r.db, tEvCol()),
+            _r.where("date",">=",today), _r.orderBy("date","asc"))
+        );
+        var tEvs = [];
+        tSnap.forEach(function(d){
+          var ev = d.data();
+          var ok = !selClass || !ev.class || ev.class==="All" || ev.class===selClass;
+          if (ok) tEvs.push(Object.assign({},ev,{_id:d.id,role:"teacher"}));
         });
-        el.appendChild(grp);
+
+        var sSnap = await _r.getDocs(
+          _r.query(_r.collection(_r.db, sEvCol()),
+            _r.where("date",">=",today), _r.orderBy("date","asc"))
+        );
+        var sEvs = [];
+        sSnap.forEach(function(d){
+          var ev = d.data();
+          var ok = !selClass || !ev.class || ev.class===selClass;
+          if (ok) sEvs.push(Object.assign({},ev,{_id:d.id,role:"student"}));
+        });
+
+        var all   = tEvs.concat(sEvs).sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
+        var label = selClass ? " for Class "+selClass : "";
+        listEl.innerHTML = all.length
+          ? all.map(evCard).join("")
+          : "<p class=\"no-msg\">No upcoming events"+label+"</p>";
+      } catch(err) {
+        console.error("loadTeacherEvents", err);
+        listEl.innerHTML = "<p class=\"no-msg\">⚠ Could not load events.</p>";
+      }
+    });
+  }
+
+  window.addTeacherEvent = function () {
+    var title   = (document.getElementById("tEvTitle").value  ||"").trim();
+    var date    =  document.getElementById("tEvDate").value;
+    var time    =  document.getElementById("tEvTime").value;
+    var cls     =  document.getElementById("tEvClass").value   || "All";
+    var subject =  document.getElementById("tEvSubject").value || "";
+    var board   =  document.getElementById("tEvBoard").value   || "All";
+    if (!title||!date) { alert("Please fill in title and date."); return; }
+    waitForDB(async function(){
+      var _r = window._adb;
+      await _r.addDoc(_r.collection(_r.db, tEvCol()), {
+        title, date, time, class: cls, subject, board, type: "slot",
+        createdByUid: currentUid()||"", createdByName: userName, ts: _r.serverTimestamp()
       });
-    }).catch(function(){el.innerHTML="<p class=\"no-msg\">Could not load teacher events</p>";});
-  });
-}
+      document.getElementById("tEvTitle").value =
+      document.getElementById("tEvDate").value  =
+      document.getElementById("tEvTime").value  = "";
+      loadTeacherEvents();
+    });
+  };
+
+  window.deleteTeacherEvent = function (id) {
+    waitForDB(async function(){
+      var _r = window._adb;
+      await _r.deleteDoc(_r.doc(_r.db, tEvCol(), id));
+      loadTeacherEvents();
+    });
+  };
+
+  window.clearTeacherEvents = function () {
+    if (!confirm("Delete all your events?")) return;
+    var uid = currentUid();
+    if (!uid) { alert("Not signed in."); return; }
+    waitForDB(async function(){
+      var _r = window._adb;
+      var snap = await _r.getDocs(_r.query(_r.collection(_r.db,tEvCol()),_r.where("createdByUid","==",uid)));
+      await Promise.all(Array.from(snap.docs).map(function(d){ return _r.deleteDoc(_r.doc(_r.db,tEvCol(),d.id)); }));
+      loadTeacherEvents();
+    });
+  };
+
+  if (role === "teacher") document.addEventListener("DOMContentLoaded", loadTeacherEvents);
+
+})();
