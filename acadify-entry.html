@@ -571,10 +571,12 @@
 </head>
 <body>
 
-<!-- ── Navbar ──────────────────────────────────────── -->
+<!-- ── Navbar (rendered from config) ─────────────────── -->
 <nav class="nav">
   <a class="nav-logo" href="index.html">Digital<span>Kaagaz</span></a>
   <a class="nav-back" href="index.html">← Back to Home</a>
+  <!-- renderNavbar('#navRoot') will populate below -->
+  <div id="navRoot" class="nav-container" style="display:inline-block; margin-left:18px;"></div>
 </nav>
 
 <div class="page">
@@ -589,10 +591,10 @@
       Now in Early Access
     </div>
 
-    <h1 class="hero-title">
+    <h1 id="acadifyHeroTitle" class="hero-title">
       <span>Acadify</span> — Smart Platform<br>for <span class="accent">Coaching Institutes</span>
     </h1>
-    <p class="hero-desc">
+    <p id="acadifyHeroSub" class="hero-desc">
       A unified platform to manage classes, schedules, students, and teachers — all in one place.
       Built for modern coaching institutes running both offline and online.
     </p>
@@ -600,7 +602,7 @@
 
     <p class="hero-cta-label">Own a Coaching Institute? <strong>What are you waiting for?</strong></p>
     <div class="hero-cta">
-      <button class="btn-primary" onclick="openRegModal()">
+      <button class="btn-primary" onclick="openRegModal()" data-feature="instituteRegistration">
         🏫 Register Your Institute
       </button>
       <a class="btn-secondary" href="#enter-code">
@@ -672,8 +674,8 @@
       <div class="code-msg" id="codeMsg"></div>
       <div class="code-institute-name" id="codeInstituteName"></div>
       <div class="code-actions" id="codeActions">
-        <button class="btn-primary" onclick="goSignup()">🎓 Sign Up</button>
-        <button class="btn-secondary" onclick="goSignin()">→ Sign In</button>
+        <button class="btn-primary" onclick="openAuthFor('acadifyFlow','signup')">🎓 Sign Up</button>
+        <button class="btn-secondary" onclick="openAuthFor('acadifyFlow','signin')">→ Sign In</button>
       </div>
     </div>
   </section>
@@ -743,6 +745,17 @@
     </div>
   </div>
 </div>
+
+<!-- ── Config & Components (config-driven) ─────────── -->
+<script src="config/config.js"></script>
+<script src="components/navbar.js"></script>
+<script src="utils/auth.js"></script>
+<script src="pages/entry.js"></script>
+<script>
+  if (typeof renderNavbar === 'function') {
+    try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
+  }
+</script>
 
 <!-- ── Firebase + Logic ────────────────────────────── -->
 <script type="module">
