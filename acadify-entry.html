@@ -758,48 +758,27 @@
 </script>
 
 <!-- ── Firebase + Logic ────────────────────────────── -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+<!-- Centralized Firebase init -->
+<script type="module" src="src/firebase/init.js"></script>
+<script>
+  // Registration helpers using window._firebase
+  const db = window._firebase && window._firebase.db;
+  const collection = window._firebase && window._firebase.collection;
+  const addDoc = window._firebase && window._firebase.addDoc;
+  const getDocs = window._firebase && window._firebase.getDocs;
+  const query = window._firebase && window._firebase.query;
+  const where = window._firebase && window._firebase.where;
+  const serverTimestamp = window._firebase && window._firebase.serverTimestamp;
 
-  const cfg = {
-    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
-    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
-    projectId: "digitalkaagaz-c8263",
-    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
-    messagingSenderId: "18588901735",
-    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
-  };
-  const app = initializeApp(cfg);
-  const db  = getFirestore(app);
-
-  // ── Helpers ──────────────────────────────────────
   function generateCode(instituteName) {
-    // Take first word of each significant word, max 3 words, uppercase, then 3-digit random
-    const words = instituteName
-      .replace(/[^a-zA-Z0-9\s]/g, '')
-      .split(/\s+/)
-      .filter(w => w.length > 2)
-      .slice(0, 3)
-      .map(w => w.substring(0, 5).toUpperCase());
+    const words = instituteName.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2).slice(0,3).map(w => w.substring(0,5).toUpperCase());
     const num = String(Math.floor(Math.random() * 900) + 100);
     return words.join('_') + '_' + num;
   }
 
-  function setError(msg) {
-    const el = document.getElementById('regError');
-    el.textContent = msg;
-    el.classList.toggle('show', !!msg);
-  }
+  function setError(msg) { const el = document.getElementById('regError'); el.textContent = msg; el.classList.toggle('show', !!msg); }
+  function setBusy(busy) { const btn = document.getElementById('regSubmitBtn'); btn.disabled = busy; btn.textContent = busy ? 'Registering…' : 'Register & Get Code →'; }
 
-  function setBusy(busy) {
-    const btn = document.getElementById('regSubmitBtn');
-    btn.disabled = busy;
-    btn.textContent = busy ? 'Registering…' : 'Register & Get Code →';
-  }
-
-  // ── Registration ─────────────────────────────────
   window.submitRegistration = async function () {
     const instituteName = document.getElementById('reg-institute').value.trim();
     const ownerName     = document.getElementById('reg-owner').value.trim();
@@ -815,30 +794,23 @@
 
     try {
       // Check if institute name already registered
-      const dup = await getDocs(
-        query(collection(db, 'ac_institutes'), where('instituteName', '==', instituteName))
-      );
-      if (!dup.empty) {
-        setError('An institute with this name is already registered.');
-        setBusy(false);
-        return;
-      }
+      const dup = await getDocs(query(collection(db, 'ac_institutes'), where('instituteName', '==', instituteName)));
+      if (!dup.empty) { setError('An institute with this name is already registered.'); setBusy(false); return; }
 
-      // Generate unique code (retry if collision, max 5 attempts)
+      // Generate unique code
       let code, codeExists = true, attempts = 0;
       while (codeExists && attempts < 5) {
         code = generateCode(instituteName);
-        const cq = await getDocs(query(collection(db, 'ac_institutes'), where('code', '==', code)));
-        codeExists = !cq.empty;
-        attempts++;
+        const cq = await getDocs(query(collection(db, 'ac_institutes'), where('code','==',code)));
+        codeExists = !cq.empty; attempts++;
       }
       if (codeExists) { code = code + '_' + Date.now().toString().slice(-4); }
 
-      // Hash password — simple SHA-256 via Web Crypto (not stored in plaintext)
+      // Hash password
       const enc = new TextEncoder();
       const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(pass));
       const hashArr = Array.from(new Uint8Array(hashBuf));
-      const passHash = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+      const passHash = hashArr.map(b => b.toString(16).padStart(2,'0')).join('');
 
       await addDoc(collection(db, 'ac_institutes'), {
         instituteName,
@@ -1100,33 +1072,23 @@
 </div>
 
 <!-- ── Auth Firebase Logic ───────────────────────────── -->
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile }
-    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
-  const cfg = {
-    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
-    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
-    projectId: "digitalkaagaz-c8263",
-    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
-    messagingSenderId: "18588901735",
-    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
-  };
-  // Re-use existing app if already initialized (registration modal also inits Firebase)
-  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+<script type="module" src="src/firebase/init.js"></script>
+<script>
+  const auth = window._firebase && window._firebase.auth;
+  const db = window._firebase && window._firebase.db;
+  const createUserWithEmailAndPassword = window._firebase && window._firebase.createUserWithEmailAndPassword;
+  const signInWithEmailAndPassword = window._firebase && window._firebase.signInWithEmailAndPassword;
+  const updateProfile = window._firebase && window._firebase.updateProfile;
+  const collection = window._firebase && window._firebase.collection;
+  const addDoc = window._firebase && window._firebase.addDoc;
+  const serverTimestamp = window._firebase && window._firebase.serverTimestamp;
 
   window.submitAuthModal = async function () {
     const email = document.getElementById('authModalEmail').value.trim();
     const pass  = document.getElementById('authModalPass').value;
     const errEl = document.getElementById('authModalError');
     const btn   = document.getElementById('authModalSubmitBtn');
-    const inst  = document.getElementById('authModalInstitute').value.trim()
-                  || localStorage.getItem('ac_institute') || '';
+    const inst  = document.getElementById('authModalInstitute').value.trim() || localStorage.getItem('ac_institute') || '';
 
     errEl.style.display = 'none';
     if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display = 'block'; return; }
@@ -1169,7 +1131,6 @@
 
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
-        // ac_name / ac_role will be set by acadify.html's onAuthStateChanged
         window.location.href = 'acadify.html';
       }
     } catch (e) {

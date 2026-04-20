@@ -7,28 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
-      authDomain: "digitalkaagaz-c8263.firebaseapp.com",
-      projectId: "digitalkaagaz-c8263",
-      storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
-      messagingSenderId: "18588901735",
-      appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Expose to global for app.js
-    window._firebase = { auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, collection, addDoc, serverTimestamp, getDocs, query, orderBy, where };
-  </script>
+  <!-- Centralized Firebase init -->
+  <script type="module" src="src/firebase/init.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -241,7 +221,7 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script type="module" src="src/app.js"></script>
   <script src="src/config/config.js"></script>
   <script src="src/components/navbar.js"></script>
   <script>
