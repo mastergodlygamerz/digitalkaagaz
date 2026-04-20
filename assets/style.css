@@ -223,6 +223,30 @@ nav {
 .nav-auth .btn.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: #b0b4be; }
 .nav-auth .btn:hover { transform: translateY(-2px); }
 
+/* Horizontal menu (used by `src/components/navbar.js`) */
+.nav-menu {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+.nav-menu > li { position: relative; list-style: none; }
+.nav-menu .nav-link { display: inline-block; padding: 8px 10px; color: #6b7080; font-weight: 600; border-radius: 8px; }
+.nav-menu .nav-link:hover { color: #fff; background: rgba(255,255,255,0.02); }
+
+.nav-sub { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: rgba(14,14,24,0.98); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 0; min-width: 180px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); z-index: 120; }
+.nav-sub li { padding: 0; }
+.nav-sub .nav-link { display: block; padding: 8px 14px; color: #b0b4be; }
+.nav-sub .nav-link:hover { background: rgba(255,255,255,0.02); color: #fff; }
+.nav-menu li:hover > .nav-sub { display: block; }
+
+/* Responsive: collapse to stacked menu under 800px */
+@media (max-width: 800px) {
+  .nav-menu { flex-direction: column; gap: 6px; background: transparent; }
+  .nav-sub { position: static; box-shadow: none; border: none; padding-left: 12px; }
+}
+
 /* ===== HERO ===== */
 .hero {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
