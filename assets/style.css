@@ -235,6 +235,9 @@ nav {
 .nav-menu .nav-link { display: inline-block; padding: 8px 10px; color: #6b7080; font-weight: 600; border-radius: 8px; }
 .nav-menu .nav-link:hover { color: #fff; background: rgba(255,255,255,0.02); }
 
+/* When auth buttons are rendered inside .nav-menu, push them to the right */
+.nav-menu > .nav-auth { margin-left: auto; display: inline-flex; align-items: center; }
+
 .nav-sub { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: rgba(14,14,24,0.98); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 0; min-width: 180px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); z-index: 120; }
 .nav-sub li { padding: 0; }
 .nav-sub .nav-link { display: block; padding: 8px 14px; color: #b0b4be; }
