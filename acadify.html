@@ -608,6 +608,14 @@
     </div>
 
     <script src="acadify.js"></script>
+        <script src="config/config.js"></script>
+        <script src="components/navbar.js"></script>
+        <script src="pages/acadify.js"></script>
+        <script>
+            if (typeof renderNavbar === 'function') {
+                try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
+            }
+        </script>
 </body>
 </html>
 
