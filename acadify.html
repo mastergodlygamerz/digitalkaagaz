@@ -607,74 +607,14 @@
         </div>
     </div>
 
-        <script src="acadify.js"></script>
-        <script src="src/config/config.js"></script>
-        <script src="src/components/navbar.js"></script>
-        <script src="src/pages/acadify.js"></script>
-        <script>
-            if (typeof renderNavbar === 'function') {
-                try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
-            }
-        </script>
-</body>
-</html>
-
-        <!-- Calendar Section -->
-        <div class="grid-card">
-            <h2>📅 Class Calendar</h2>
-            <div class="form-section">
-                <label>Event Title:</label>
-                <input type="text" id="eventTitle" placeholder="e.g., Math Exam, Assignment Due">
-            </div>
-            <div class="form-section">
-                <label>Date:</label>
-                <input type="date" id="eventDate">
-            </div>
-            <div class="form-section">
-                <label>Time:</label>
-                <input type="time" id="eventTime">
-            </div>
-            <div class="form-section">
-                <label>Event Type:</label>
-                <select id="eventType">
-                    <option value="exam">Exam</option>
-                    <option value="assignment">Assignment</option>
-                    <option value="class">Class</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="action-buttons">
-                <button class="btn-primary-sm" id="addEventBtn">Add Event</button>
-                <button class="btn-secondary-sm" id="clearEventsBtn">Clear All</button>
-            </div>
-            <div class="calendar-list scrollbar-styled" id="calendarList">
-                <h3>Upcoming Events</h3>
-            </div>
-        </div>
-    </div>
-
-    <!-- Attendance Section -->
-    <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
-        <div class="grid-card">
-            <h2>✓ Attendance</h2>
-            <div class="form-section">
-                <label>Class:</label>
-                <select id="attendanceClass" style="width: 100%; margin-bottom: 15px;">
-                    <option value="">Select class for attendance</option>
-                    <option value="10A">Class 10A</option>
-                    <option value="10B">Class 10B</option>
-                    <option value="11A">Class 11A</option>
-                    <option value="12A">Class 12A</option>
-                </select>
-            </div>
-            <div id="attendanceGrid" class="attendance-grid"></div>
-            <div class="action-buttons" style="margin-top: 15px;">
-                <button class="btn-primary-sm" id="saveAttendanceBtn">Save Attendance</button>
-                <button class="btn-secondary-sm" id="markAllPresentBtn">Mark All Present</button>
-            </div>
-        </div>
-    </div>
-
+    <script type="module" src="src/firebase/init.js"></script>
+    <script src="src/config/config.js"></script>
+    <script src="src/components/navbar.js"></script>
     <script type="module" src="src/acadify.js"></script>
+    <script>
+        if (typeof renderNavbar === 'function') {
+            try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
+        }
+    </script>
 </body>
 </html>
