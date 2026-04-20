@@ -1,528 +1,672 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acadify</title>
-<script type="module">
-  import{initializeApp}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  import{getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  const cfg={apiKey:"AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",authDomain:"digitalkaagaz-c8263.firebaseapp.com",projectId:"digitalkaagaz-c8263",storageBucket:"digitalkaagaz-c8263.firebasestorage.app",messagingSenderId:"18588901735",appId:"1:18588901735:web:dfdafad03fc875ed890fc2"};
-  const app=initializeApp(cfg);
-  const auth=getAuth(app);
-  const db=getFirestore(app);
-  window._adb={auth,db,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,getDocs,deleteDoc,doc,where,onAuthStateChanged};
-</script>
-<script>(function(){var r=localStorage.getItem("ac_role")||localStorage.getItem("acadify_user_role");var n=localStorage.getItem("ac_name")||localStorage.getItem("acadify_user_name");document.documentElement.setAttribute("data-ac-show",(r&&n)?((r==="student")?"student":"teacher"):"login");}());</script>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#07070d;color:#eaf6ff;font-family:Arial,sans-serif;min-height:100vh}
-#loginSection{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-html[data-ac-show=login] #loginSection{display:flex!important}
-html[data-ac-show=student] #studentDash{display:block!important}
-html[data-ac-show=teacher] #teacherDash{display:block!important}
-.login-logo{font-size:2.6rem;color:#00e5ff;margin-bottom:6px;text-align:center}
-.login-sub{color:#7c3aed;margin-bottom:28px;font-size:1rem}
-.login-box{width:100%;max-width:400px;background:linear-gradient(135deg,rgba(12,12,20,.9),rgba(7,7,13,.8));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:28px}
-.role-row{display:flex;gap:10px;margin-bottom:16px}
-.role-btn{flex:1;padding:12px;background:rgba(0,229,255,.08);border:2px solid rgba(0,229,255,.2);border-radius:10px;color:#00e5ff;font-weight:600;cursor:pointer;font-size:.9rem;transition:all .2s}
-.role-btn.active{background:#00e5ff;color:#07070d;border-color:#00e5ff}
-.fr{margin-bottom:13px}.fr label{display:block;color:#7c3aed;font-size:.75rem;font-weight:700;text-transform:uppercase;margin-bottom:5px}
-.fr input,.fr select{width:100%;padding:9px 12px;background:rgba(7,7,13,.9);border:1px solid rgba(0,229,255,.2);border-radius:7px;color:#eaf6ff;font-size:.92rem}
-.fr select option{background:#0c0c14}
-.login-submit{width:100%;padding:11px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px}
-.top-bar{background:rgba(0,229,255,.06);border-bottom:1px solid rgba(0,229,255,.12);padding:13px 22px;display:flex;align-items:center;justify-content:space-between}
-.top-bar-left{color:#00e5ff;font-size:1.15rem;font-weight:700}
-.top-bar-right{display:flex;align-items:center;gap:12px}
-.user-pill{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);border-radius:20px;padding:5px 13px;font-size:.8rem;color:#eaf6ff}
-.role-tag{color:#7c3aed;margin-left:7px;font-size:.72rem}
-.logout-btn{padding:6px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:6px;cursor:pointer;font-size:.8rem}
-.back-home-btn{padding:6px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(232,234,246,.7);border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background .2s,color .2s}
-.back-home-btn:hover{background:rgba(255,255,255,.1);color:#e8eaf6}
-.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:20px;padding:22px;max-width:1400px;margin:0 auto}
-.card{background:linear-gradient(135deg,rgba(12,12,20,.5),rgba(7,7,13,.3));border:1px solid rgba(0,229,255,.1);border-radius:14px;padding:22px}
-.card h2{color:#00e5ff;margin-bottom:14px;font-size:1.05rem}
-.chat-win{background:rgba(0,0,0,.3);border:1px solid rgba(0,229,255,.1);border-radius:8px;padding:10px;height:300px;overflow-y:auto;margin-bottom:10px}
-.msg{padding:8px 10px;margin-bottom:7px;border-radius:6px;font-size:.87rem;border-left:3px solid #00e5ff;background:rgba(0,229,255,.04)}
-.msg.tmsg{border-left-color:#7c3aed;background:rgba(124,58,237,.04)}
-.msg.mymsg{border-left-color:#10b981;background:rgba(16,185,129,.04)}
-.sender{font-weight:700;font-size:.76rem;margin-bottom:3px;color:#00e5ff}
-.tmsg .sender{color:#7c3aed}.mymsg .sender{color:#10b981}
-.mtime{color:#8899bb;font-size:.7rem;margin-top:3px}
-.chat-row{display:flex;gap:8px}
-.chat-row input{flex:1;padding:8px 11px;background:rgba(7,7,13,.8);border:1px solid rgba(0,229,255,.2);border-radius:7px;color:#eaf6ff;font-size:.88rem}
-.send-btn{padding:8px 16px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:7px;color:#07070d;font-weight:600;cursor:pointer}
-.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.08);border-radius:8px}
-.filter-bar label{color:#7c3aed;font-size:.76rem;font-weight:700}
-.filter-bar select{padding:5px 9px;background:rgba(7,7,13,.85);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:#eaf6ff;font-size:.83rem}
-.ev-scroll{max-height:220px;overflow-y:auto;margin-bottom:12px}
-.ev-item{padding:9px 11px;background:rgba(0,229,255,.04);border-radius:7px;margin-bottom:7px;border-left:3px solid #00e5ff;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.ev-body{flex:1}
-.ev-item.ev-t{border-left-color:#7c3aed;background:rgba(124,58,237,.04)}
-.ev-item.ev-s{border-left-color:#10b981;background:rgba(16,185,129,.04)}
-.ev-title{font-weight:600;font-size:.88rem;color:#eaf6ff}
-.ev-meta{color:#a8b8cc;font-size:.76rem;margin-top:2px}
-.ev-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 0 5px;margin-top:4px}
-.ev-label.lbl-t{color:#7c3aed}.ev-label.lbl-s{color:#10b981}.ev-label.lbl-my{color:#00e5ff}
-.del-btn{padding:2px 8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:4px;cursor:pointer;font-size:.7rem;margin-top:5px;display:block}
-.today-badge{display:inline-block;background:rgba(0,229,255,.15);color:#00e5ff;font-size:.65rem;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle}
-.add-form{background:rgba(0,0,0,.2);border-radius:8px;padding:13px}
-.add-form h3{color:#00e5ff;font-size:.85rem;margin-bottom:10px}
-.add-form .fr{margin-bottom:8px}.add-form .fr label{font-size:.72rem}
-.add-form input,.add-form select{padding:6px 10px;background:rgba(7,7,13,.85);border:1px solid rgba(0,229,255,.18);border-radius:6px;color:#eaf6ff;font-size:.85rem;width:100%}
-.add-btns{display:flex;gap:8px;margin-top:9px}
-.add-btns button{flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.8rem}
-.btn-add{background:linear-gradient(135deg,#00e5ff,#7c3aed);color:#07070d}
-.btn-clr{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
-.no-msg{color:#6b7a90;padding:8px;font-size:.87rem}
-#studentFields{display:none}#studentDash,#teacherDash{display:none}
-.grp-block{margin-bottom:16px}.grp-block:first-child .grp-header{margin-top:0}
-.grp-header{font-size:.88rem;font-weight:700;padding:8px 0 5px;border-bottom:1px solid rgba(0,229,255,.15);margin-bottom:8px;margin-top:14px}
-.grp-header.grp-t{color:#7c3aed;border-bottom-color:rgba(124,58,237,.25)}
-.grp-header.grp-s{color:#10b981;border-bottom-color:rgba(16,185,129,.25)}
-/* === Background: match Welcome page glow effects === */
-body::before{content:'';position:fixed;top:-15%;left:10%;width:550px;height:550px;background:rgba(0,229,255,.07);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
-body::after{content:'';position:fixed;bottom:-10%;right:8%;width:400px;height:400px;background:rgba(0,144,255,.05);border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
-body{background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:64px 64px;}
-#loginSection,#studentDash,#teacherDash,#tStudentSummaryCard,#sTeacherSummaryCard,#proSection,#comingSoonSection{position:relative;z-index:1;}
-/* === Fix date/time input visibility === */
-input[type=date],input[type=time]{color-scheme:dark;-webkit-appearance:none;color:#eaf6ff!important;}
-/* === Chat: Teachers LEFT, Students RIGHT === */
-/* Teacher = LEFT, Student = RIGHT — role-based, not user-based */
-.chat-win{display:flex!important;flex-direction:column;gap:6px;}
-/* Student messages — RIGHT */
-.msg{align-self:flex-end;max-width:78%;border-left:none;border-right:3px solid #10b981;border-radius:14px 3px 14px 14px;background:rgba(16,185,129,.08);padding:9px 13px;}
-/* Teacher messages — LEFT */
-.msg.tmsg{align-self:flex-start;border-right:none;border-left:3px solid #7c3aed;border-radius:3px 14px 14px 14px;background:rgba(124,58,237,.08);}
-/* mymsg = student (right) — same as base .msg */
-.msg.mymsg{align-self:flex-end;border-right:3px solid #10b981;border-left:none;border-radius:14px 3px 14px 14px;background:rgba(16,185,129,.08);}
-/* Dark theme scrollbar for chat-win */
-.chat-win{scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.2) rgba(7,7,13,.4);}
-.chat-win::-webkit-scrollbar{width:5px;}
-.chat-win::-webkit-scrollbar-track{background:rgba(7,7,13,.4);border-radius:8px;}
-.chat-win::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(0,229,255,.3),rgba(124,58,237,.3));border-radius:8px;}
-.chat-win::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(0,229,255,.5),rgba(124,58,237,.5));}
-/* === Hero Section === */
-.hero-section{max-width:1400px;margin:0 auto;padding:48px 22px 28px;text-align:center;}
-.hero-title{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#00e5ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;line-height:1.3;}
-.hero-desc{color:rgba(234,246,255,.75);font-size:.93rem;line-height:1.75;max-width:780px;margin:0 auto 10px;}
-.hero-badge{display:inline-block;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:#00e5ff;font-size:.82rem;font-weight:600;padding:6px 16px;border-radius:20px;margin:10px 0 22px;}
-.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
-.btn-hero-primary{padding:11px 26px;background:linear-gradient(135deg,#00e5ff,#7c3aed);border:none;border-radius:8px;color:#07070d;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 20px rgba(0,229,255,.2);}
-.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,229,255,.3);}
-.btn-hero-secondary{padding:11px 26px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);border-radius:8px;color:#00e5ff;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s ease;}
-.btn-hero-secondary:hover{background:rgba(0,229,255,.14);box-shadow:0 4px 18px rgba(0,229,255,.15);}
-.hero-divider{width:80px;height:2px;background:linear-gradient(90deg,#00e5ff,#7c3aed);margin:28px auto 0;border-radius:2px;}
-/* === Pro Section === */
-#proSection{display:none;max-width:1400px;margin:22px auto;padding:0 22px;}
-html[data-ac-show=student] #proSection,html[data-ac-show=teacher] #proSection{display:block;}
-.pro-card{background:linear-gradient(135deg,rgba(12,12,20,.7),rgba(7,7,13,.5));border:1px solid rgba(124,58,237,.35);border-radius:16px;padding:30px 26px;box-shadow:0 0 40px rgba(124,58,237,.1),0 0 80px rgba(0,229,255,.04);text-align:center;}
-.pro-title{font-size:1.45rem;font-weight:700;background:linear-gradient(135deg,#7c3aed,#00e5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px;}
-.pro-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:0 auto 26px;max-width:900px;text-align:left;}
-.pro-feature-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:8px;font-size:.86rem;color:#eaf6ff;}
-.pro-feature-item::before{content:'✦';color:#00e5ff;font-size:.72rem;flex-shrink:0;}
-.btn-pro-upgrade{padding:12px 34px;background:linear-gradient(135deg,#7c3aed,#00e5ff);border:none;border-radius:10px;color:#07070d;font-weight:700;font-size:.92rem;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 24px rgba(124,58,237,.3);letter-spacing:.5px;}
-.btn-pro-upgrade:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,58,237,.4);}
-/* === Coming Soon Section === */
-#comingSoonSection{display:none;max-width:1400px;margin:22px auto 38px;padding:0 22px;}
-html[data-ac-show=student] #comingSoonSection,html[data-ac-show=teacher] #comingSoonSection{display:block;}
-.coming-card{background:linear-gradient(135deg,rgba(7,7,13,.6),rgba(12,12,20,.4));border:1px solid rgba(0,229,255,.12);border-radius:16px;padding:30px 26px;text-align:center;}
-.coming-title{font-size:1.35rem;font-weight:700;color:#00e5ff;margin-bottom:20px;}
-.coming-features{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px;}
-.coming-feature-item{padding:9px 16px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.12);border-radius:20px;font-size:.83rem;color:rgba(234,246,255,.8);display:flex;align-items:center;gap:6px;}
-.coming-feature-item::before{content:'⏳';font-size:.72rem;}
-.coming-note{color:rgba(234,246,255,.5);font-size:.85rem;font-style:italic;}
-@media(max-width:600px){.hero-title{font-size:1.3rem}.pro-title{font-size:1.15rem}.coming-title{font-size:1.1rem}.pro-card,.coming-card,.hero-section{padding:20px 14px}}
-
-/* =====================================================
-   ACADIFY — PREMIUM ANIMATION LAYER
-   ===================================================== */
-
-/* ── Keyframes ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeInLeft {
-  from { opacity: 0; transform: translateX(-32px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeInRight {
-  from { opacity: 0; transform: translateX(32px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes msgSlideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulseGlow {
-  0%,100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); }
-  50%      { box-shadow: 0 0 18px 4px rgba(0,229,255,0.22); }
-}
-@keyframes pulseGlowPurple {
-  0%,100% { box-shadow: 0 4px 24px rgba(124,58,237,.3); }
-  50%      { box-shadow: 0 4px 36px rgba(124,58,237,.55), 0 0 40px rgba(0,229,255,.18); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes blobFloat {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-18px) scale(1.04); }
-}
-@keyframes ripple {
-  0%   { transform: scale(0); opacity: .6; }
-  100% { transform: scale(3.5); opacity: 0; }
-}
-@keyframes shake {
-  0%,100% { transform: translateX(0); }
-  20%      { transform: translateX(-4px); }
-  40%      { transform: translateX(4px); }
-  60%      { transform: translateX(-3px); }
-  80%      { transform: translateX(3px); }
-}
-@keyframes navUnderline {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-/* ── TASK 1: Page-load entrance animations ── */
-.anim-hero {
-  animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both;
-}
-.anim-from-left {
-  animation: fadeInLeft 0.6s cubic-bezier(.22,.68,0,1.1) both;
-}
-.anim-from-right {
-  animation: fadeInRight 0.6s cubic-bezier(.22,.68,0,1.1) both;
-}
-/* scroll-reveal — starts hidden, JS adds .is-visible */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.22,.68,0,1.1);
-}
-.scroll-reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── TASK 2: Button hover micro-interactions ── */
-.send-btn,
-.btn-add,
-.btn-clr,
-.login-submit,
-.logout-btn,
-.role-btn,
-.btn-hero-primary,
-.btn-hero-secondary,
-.btn-pro-upgrade {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
-}
-.send-btn:hover,
-.btn-add:hover,
-.login-submit:hover,
-.role-btn:hover {
-  transform: scale(1.05) translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(0,229,255,.28) !important;
-}
-.logout-btn:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 4px 14px rgba(239,68,68,.3) !important;
-}
-.btn-clr:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 4px 14px rgba(239,68,68,.25) !important;
-}
-.btn-hero-secondary:hover {
-  transform: scale(1.05) translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(0,229,255,.22) !important;
-}
-
-/* ── TASK 2: Card hover lift ── */
-.card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
-}
-.card:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 12px 40px rgba(0,229,255,.12), 0 4px 16px rgba(0,0,0,.4) !important;
-  border-color: rgba(0,229,255,.25) !important;
-}
-
-/* ── TASK 2: Navbar top-bar brand hover ── */
-.top-bar-left {
-  position: relative;
-  cursor: default;
-  transition: color 0.2s ease;
-}
-.top-bar-left:hover { color: #7c3aed; }
-
-/* ── TASK 3: Chat input focus glow + expand ── */
-.chat-row input {
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, width 0.25s ease !important;
-}
-.chat-row input:focus {
-  border-color: rgba(0,229,255,.45) !important;
-  box-shadow: 0 0 0 3px rgba(0,229,255,.12) !important;
-  outline: none;
-}
-
-/* ── TASK 3: Send button click press animation ── */
-.send-btn:active {
-  transform: scale(0.93) !important;
-  box-shadow: 0 2px 8px rgba(0,229,255,.15) !important;
-}
-
-/* ── TASK 3: New chat message animation ── */
-.msg-anim {
-  animation: msgSlideUp 0.3s ease both;
-}
-
-/* ── TASK 4: Event card hover ── */
-.ev-item {
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
-}
-.ev-item:hover {
-  transform: scale(1.018) !important;
-  border-color: rgba(0,229,255,.35) !important;
-  box-shadow: 0 4px 16px rgba(0,229,255,.1) !important;
-}
-
-/* ── TASK 4: Delete button shake on hover ── */
-.del-btn {
-  transition: background 0.2s ease, color 0.2s ease !important;
-}
-.del-btn:hover {
-  animation: shake 0.35s ease !important;
-  background: rgba(239,68,68,.25) !important;
-  color: #ff6b6b !important;
-}
-
-/* ── TASK 4: Add slot button ripple container ── */
-.btn-add {
-  position: relative;
-  overflow: hidden;
-}
-.ripple-circle {
-  position: absolute;
-  border-radius: 50%;
-  width: 10px; height: 10px;
-  background: rgba(255,255,255,.35);
-  pointer-events: none;
-  transform: scale(0);
-  animation: ripple 0.55s ease-out forwards;
-}
-
-/* ── TASK 5: CTA hero buttons — shimmer + pulse ── */
-.btn-hero-primary {
-  background-size: 200% auto !important;
-  background-image: linear-gradient(135deg, #00e5ff 0%, #7c3aed 40%, #00e5ff 100%) !important;
-  animation: shimmer 3s linear infinite, pulseGlow 3s ease-in-out infinite !important;
-}
-.btn-hero-primary:hover {
-  transform: scale(1.06) translateY(-2px) !important;
-  animation: shimmer 1.2s linear infinite !important;
-}
-
-/* ── TASK 5: Upgrade to Pro — shimmer + purple pulse ── */
-.btn-pro-upgrade {
-  background-size: 200% auto !important;
-  background-image: linear-gradient(135deg, #7c3aed 0%, #00e5ff 40%, #7c3aed 100%) !important;
-  animation: shimmer 3.5s linear infinite, pulseGlowPurple 3s ease-in-out infinite !important;
-}
-.btn-pro-upgrade:hover {
-  transform: scale(1.06) translateY(-2px) !important;
-  animation: shimmer 1.2s linear infinite !important;
-}
-
-/* ── TASK 6: Hero animated background blobs ── */
-.hero-section {
-  position: relative;
-  overflow: hidden;
-}
-.hero-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-.hero-blob-1 {
-  width: 340px; height: 340px;
-  background: rgba(0,229,255,.07);
-  top: -80px; left: -60px;
-  animation: blobFloat 7s ease-in-out infinite;
-}
-.hero-blob-2 {
-  width: 260px; height: 260px;
-  background: rgba(124,58,237,.07);
-  bottom: -60px; right: -40px;
-  animation: blobFloat 9s ease-in-out infinite reverse;
-}
-.hero-section > *:not(.hero-blob) {
-  position: relative;
-  z-index: 1;
-}
-
-/* ── TASK 6: Pro section animated glow border ── */
-.pro-card {
-  animation: pulseGlowPurple 4s ease-in-out infinite !important;
-}
-
-/* ── Stagger delays for dash-grid cards ── */
-.anim-from-left  { animation-delay: 0.1s; }
-.anim-from-right { animation-delay: 0.25s; }
-
-</style></head><body>
-<div id="loginSection">
-  <h1 class="login-logo">&#127979; Acadify</h1>
-  <p class="login-sub">Coaching Management Platform</p>
-  <div class="login-box">
-    <div class="fr"><label>Your Name</label><input type="text" id="lName" placeholder="Enter your name"></div>
-    <p style="color:#7c3aed;font-size:.75rem;font-weight:700;text-transform:uppercase;margin-bottom:8px;">Choose Role</p>
-    <div class="role-row">
-      <button class="role-btn" id="lStudentBtn" onclick="selectRole('student')">&#128100; Student</button>
-      <button class="role-btn" id="lTeacherBtn" onclick="selectRole('teacher')">&#128104;&#8205;&#127979; Teacher</button>
-    </div>
-    <input type="hidden" id="lRoleInput" value="">
-    <div id="studentFields">
-      <div class="fr"><label>Your Class</label><select id="lClass"><option value="">Choose class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
-      <div class="fr"><label>Your Board</label><select id="lBoard"><option value="">Choose board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
-    </div>
-    <div class="fr"><label>Coaching Institute</label><select id="lInstitute"><option value="">Select institute</option><option value="Vedika Educational Institution">Vedika Educational Institution</option></select></div>
-    <button class="login-submit" onclick="submitLogin()">Login to Acadify</button>
-  </div>
-</div>
-<div id="studentDash" class="scroll-reveal">
-  <div class="top-bar">
-    <span class="top-bar-left">&#127979; Acadify</span>
-    <div class="top-bar-right">
-      <a class="back-home-btn" onclick="goBackHome();return false;" href="#">&#8592; Home</a>
-      <span class="user-pill"><span id="sUserName"></span></span><span id="sInstitutePill" style="display:none;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#7c3aed;font-weight:600;"></span>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
-<div class="hero-section anim-hero"><div class="hero-blob hero-blob-1"></div><div class="hero-blob hero-blob-2"></div><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div><p id="heroInstituteWrap" style="margin-top:18px;font-size:1rem;color:rgba(234,246,255,.75);">Welcome to <strong id="heroInstituteName" style="color:#00e5ff;font-weight:700;"></strong> <span style="color:#7c3aed;">🎓</span></p></div>
-  <div class="dash-grid">
-    <div class="card">
-      <h2>&#128172; Class Chat &nbsp;<small id="sChatLabel" style="font-size:.75rem;color:#7c3aed;font-weight:400;"></small></h2>
-      <div class="chat-win" id="sChatWin"><p class="no-msg">Connecting to chat...</p></div>
-      <div class="chat-row">
-        <input type="text" id="sChatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendStudentMsg()">
-        <button class="send-btn" onclick="sendStudentMsg()">Send</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2>&#128197; Events &amp; Availability</h2>
-      <div class="ev-scroll" id="sEventList"><p class="no-msg">Loading events...</p></div>
-      <div class="add-form">
-        <h3>Add Your Event</h3>
-        <div class="fr"><label>Title</label><input type="text" id="sEvTitle" placeholder="e.g. Study session"></div>
-        <div class="fr"><label>Date</label><input type="date" id="sEvDate"></div>
-        <div class="fr"><label>Time (optional)</label><input type="time" id="sEvTime"></div>
-        <div class="fr"><label>Board</label><select id="sEvBoard"><option value="">Select board</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
-        <div class="add-btns"><button class="btn-add" onclick="addStudentEvent()">Add</button><button class="btn-clr" onclick="clearStudentEvents()">Clear Mine</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-<div id="teacherDash" class="scroll-reveal">
-  <div class="top-bar">
-    <span class="top-bar-left">&#127979; Acadify</span>
-    <div class="top-bar-right">
-      <a class="back-home-btn" onclick="goBackHome();return false;" href="#">&#8592; Home</a>
-      <span class="user-pill"><span id="tUserName"></span></span><span id="tInstitutePill" style="display:none;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#7c3aed;font-weight:600;"></span>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
-<div class="hero-section"><h1 class="hero-title">Acadify — Smart Management for Modern Coaching Institutes</h1><p class="hero-desc">Acadify is a powerful platform by Digital Kaagaz designed for both private and public coaching institutes. Easily manage class schedules, teacher availability, and student coordination — all in one place.</p><p class="hero-desc">Whether your classes are offline or online, Acadify keeps everything organized and accessible for both teachers and students.</p><div class="hero-badge">🚀 You are currently using the Free Version — simple, fast, and ready to get started.</div><div class="hero-cta"><button class="btn-hero-primary" onclick="document.getElementById('proSection').scrollIntoView({behavior:'smooth'})">Upgrade to Pro</button><button class="btn-hero-secondary" onclick="document.getElementById('comingSoonSection').scrollIntoView({behavior:'smooth'})">Explore Features</button></div><div class="hero-divider"></div><p id="heroInstituteWrap" style="margin-top:18px;font-size:1rem;color:rgba(234,246,255,.75);">Welcome to <strong id="heroInstituteName" style="color:#00e5ff;font-weight:700;"></strong> <span style="color:#7c3aed;">🎓</span></p></div>
-  <div class="dash-grid">
-    <div class="card">
-      <h2>&#128172; Class Chat</h2>
-      <div class="filter-bar">
-        <label>Class:</label>
-        <select id="tClassSel" onchange="onTeacherClassChange()"><option value="">Select class</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
-      </div>
-      <div class="chat-win" id="tChatWin"><p class="no-msg">Select a class above to view chat</p></div>
-      <div class="chat-row">
-        <input type="text" id="tChatInput" placeholder="Message to class..." onkeydown="if(event.key==='Enter')sendTeacherMsg()">
-        <button class="send-btn" onclick="sendTeacherMsg()">Send</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2>&#128197; Events &amp; Availability</h2>
-      <div class="ev-scroll" id="tEventList"><p class="no-msg">Select a class above to see student events</p></div>
-      <div class="add-form">
-        <h3>Add Availability Slot</h3>
-        <div class="fr"><label>Title / Topic</label><input type="text" id="tEvTitle" placeholder="e.g. Chapter 5 revision"></div>
-        <div class="fr"><label>Date</label><input type="date" id="tEvDate"></div>
-        <div class="fr"><label>Time (optional)</label><input type="time" id="tEvTime"></div>
-        <div class="fr"><label>Class</label><select id="tEvClass"><option value="">All classes</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
-        <div class="fr"><label>Subject</label><select id="tEvSubject"><option value="">General</option><option value="Math">Math</option><option value="Science">Science</option><option value="English">English</option><option value="Hindi">Hindi</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select></div>
-        <div class="fr"><label>Board</label><select id="tEvBoard"><option value="">All boards</option><option value="CBSE">CBSE</option><option value="ICSE">ICSE</option><option value="State Board">State Board</option></select></div>
-        <div class="add-btns"><button class="btn-add" onclick="addTeacherEvent()">Add Slot</button><button class="btn-clr" onclick="clearTeacherEvents()">Clear Mine</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Teacher: grouped student events card (shown when class is selected) -->
-<div id="tStudentSummaryCard" class="card scroll-reveal" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128100; Student Events &mdash; <span id="tStudentSummaryClass" style="color:#10b981;font-size:.9rem;font-weight:400"></span></h2><div class="ev-scroll" style="max-height:400px" id="tStudentGroupList"><p class="no-msg">Select a class above to see student events grouped by name</p></div></div>
-<!-- Student: grouped teacher events card -->
-<div id="sTeacherSummaryCard" class="card scroll-reveal" style="display:none;margin:0 22px 22px;max-width:1400px;margin-left:auto;margin-right:auto"><h2>&#128104;&#8205;&#127979; Teacher Events for Your Class</h2><div class="ev-scroll" style="max-height:400px" id="sTeacherGroupList"><p class="no-msg">Loading teacher events...</p></div></div>
-<div id="proSection" class="scroll-reveal"><div class="pro-card"><div class="pro-title">🌟 Unlock More with Acadify Pro</div><div class="pro-features"><div class="pro-feature-item">Unlimited class chat groups</div><div class="pro-feature-item">Real-time notifications for students</div><div class="pro-feature-item">Advanced analytics &amp; performance tracking</div><div class="pro-feature-item">Attendance reports &amp; insights</div><div class="pro-feature-item">Multi-teacher coordination tools</div><div class="pro-feature-item">Priority support</div></div><button class="btn-pro-upgrade">Upgrade to Pro</button></div></div><div id="comingSoonSection" class="scroll-reveal"><div class="coming-card"><div class="coming-title">Coming Soon 🚀</div><div class="coming-features"><div class="coming-feature-item">Live online classes integration</div><div class="coming-feature-item">AI-powered doubt solving assistant</div><div class="coming-feature-item">Automated timetable generation</div><div class="coming-feature-item">Parent dashboard access</div><div class="coming-feature-item">Fee management system</div></div><p class="coming-note">We are constantly improving Acadify. Stay tuned — bigger updates are on the way!</p></div></div><script src="acadify.js?v=9"></script>
-
-<script>
-/* ── Intersection Observer: scroll-reveal ── */
-(function(){
-  var els = document.querySelectorAll('.scroll-reveal');
-  if(!els.length) return;
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); }
-    });
-  }, {threshold: 0.12});
-  els.forEach(function(el){ io.observe(el); });
-})();
-
-/* ── Ripple on .btn-add click ── */
-document.addEventListener('click', function(e){
-  var btn = e.target.closest('.btn-add');
-  if(!btn) return;
-  var r = document.createElement('span');
-  r.className = 'ripple-circle';
-  var rect = btn.getBoundingClientRect();
-  var size = Math.max(rect.width, rect.height);
-  r.style.width = r.style.height = size + 'px';
-  r.style.left = (e.clientX - rect.left - size/2) + 'px';
-  r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-  btn.appendChild(r);
-  setTimeout(function(){ r.remove(); }, 600);
-});
-
-/* ── Chat message entrance animation ── */
-(function(){
-  var observer = new MutationObserver(function(mutations){
-    mutations.forEach(function(m){
-      m.addedNodes.forEach(function(n){
-        if(n.nodeType===1 && n.classList && n.classList.contains('msg')){
-          n.classList.add('msg-anim');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acadify - Coaching Institute Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .proto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 60px auto 20px;
+            align-items: stretch;
         }
-      });
-    });
-  });
-  function watchChatWin(id){
-    var el = document.getElementById(id);
-    if(el) observer.observe(el, {childList:true});
-  }
-  // Try immediately and also after auth resolves
-  ['sChatWin','tChatWin'].forEach(watchChatWin);
-  document.addEventListener('DOMContentLoaded', function(){
-    ['sChatWin','tChatWin'].forEach(watchChatWin);
-  });
-})();
-</script>
-<script>
-function goBackHome(){
-  ['ac_role','ac_name','ac_class','ac_board','ac_institute','ac_institute_code','ac_entry_code','ac_entry_institute'].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
-  window.location.href='index.html';
-}
-</script>
+
+        .grid-card {
+            background: linear-gradient(135deg, rgba(7,7,13,0.5), rgba(12,12,20,0.5));
+            border: 1px solid rgba(0,229,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grid-card h2 {
+            color: #00e5ff;
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-window {
+            flex: 1;
+            min-height: 300px;
+            background: rgba(7,7,13,0.3);
+            border: 1px solid rgba(0,229,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            background: rgba(0,229,255,0.08);
+            border-left: 3px solid #00e5ff;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #eaf6ff;
+            word-wrap: break-word;
+        }
+
+        .chat-message.teacher {
+            background: rgba(124,58,237,0.08);
+            border-left-color: #7c3aed;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 12px;
+            background: rgba(7,7,13,0.6);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 8px;
+            color: #eaf6ff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+            border-color: rgba(0,229,255,0.3);
+        }
+
+        .btn-send {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #00e5ff, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: #07070d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,229,255,0.2);
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-section label {
+            display: block;
+            color: #00e5ff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 8px 10px;
+            background: rgba(7,7,13,0.6);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 8px;
+            color: #eaf6ff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .form-section input:focus,
+        .form-section select:focus {
+            outline: none;
+            box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+            border-color: rgba(0,229,255,0.3);
+        }
+
+        .calendar-list {
+            background: rgba(7,7,13,0.2);
+            border: 1px solid rgba(0,229,255,0.08);
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .calendar-list h3 {
+            color: #7c3aed;
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .cal-row {
+            --cal-entry-h: 36px;
+            padding: 8px 10px;
+            height: var(--cal-entry-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, rgba(0,229,255,0.02), rgba(124,58,237,0.02));
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
+            color: #eaf6ff;
+            font-size: 0.85rem;
+        }
+
+        .cal-row-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cal-row-title {
+            font-weight: 600;
+            color: #00e5ff;
+            margin-bottom: 2px;
+        }
+
+        .cal-row-meta {
+            font-size: 0.75rem;
+            color: rgba(234,246,255,0.6);
+        }
+
+        .cal-row-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            background: rgba(124,58,237,0.2);
+            border: 1px solid rgba(124,58,237,0.3);
+            color: #7c3aed;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .btn-small:hover {
+            background: rgba(124,58,237,0.4);
+        }
+
+        .btn-small.danger {
+            background: rgba(239,68,68,0.2);
+            border-color: rgba(239,68,68,0.3);
+            color: #ef4444;
+        }
+
+        .btn-small.danger:hover {
+            background: rgba(239,68,68,0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-primary-sm {
+            flex: 1;
+            padding: 8px;
+            background: linear-gradient(135deg, #00e5ff, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: #07070d;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-sm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,229,255,0.2);
+        }
+
+        .btn-primary-sm:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary-sm {
+            flex: 1;
+            padding: 8px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-sm:hover {
+            background: rgba(0,229,255,0.15);
+        }
+
+        .class-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .class-btn {
+            padding: 6px 12px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .class-btn.active {
+            background: #00e5ff;
+            color: #07070d;
+            border-color: #00e5ff;
+        }
+
+        @media (max-width: 768px) {
+            .proto-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scrollbar-styled::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-track {
+            background: rgba(0,229,255,0.02);
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-thumb {
+            background: rgba(0,229,255,0.15);
+            border-radius: 3px;
+        }
+
+        .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,229,255,0.25);
+        }
+
+        .chat-window {
+            scrollbar-color: rgba(0,229,255,0.15) rgba(0,229,255,0.02);
+        }
+
+        .calendar-list {
+            scrollbar-color: rgba(0,229,255,0.15) rgba(0,229,255,0.02);
+        }
+
+        /* Availability Calendar Styles (Teams/Outlook Style) */
+        .availability-calendar {
+            background: rgba(7,7,13,0.3);
+            border: 1px solid rgba(0,229,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        .availability-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr);
+            gap: 1px;
+            background: rgba(0,229,255,0.08);
+            padding: 1px;
+            min-width: 600px;
+        }
+
+        .availability-header {
+            background: rgba(0,229,255,0.1);
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #00e5ff;
+            border-radius: 0;
+        }
+
+        .availability-time {
+            background: rgba(124,58,237,0.1);
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #7c3aed;
+        }
+
+        .availability-cell {
+            background: rgba(7,7,13,0.6);
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0,229,255,0.08);
+            min-height: 40px;
+        }
+
+        .availability-cell:hover {
+            background: rgba(0,229,255,0.1);
+            border-color: rgba(0,229,255,0.2);
+        }
+
+        .availability-cell.available {
+            background: rgba(34,197,94,0.25);
+            border-color: rgba(34,197,94,0.4);
+            box-shadow: inset 0 0 8px rgba(34,197,94,0.2);
+        }
+
+        .availability-cell.busy {
+            background: rgba(239,68,68,0.25);
+            border-color: rgba(239,68,68,0.4);
+            box-shadow: inset 0 0 8px rgba(239,68,68,0.2);
+        }
+
+        .availability-cell.out-of-office {
+            background: rgba(168,85,247,0.25);
+            border-color: rgba(168,85,247,0.4);
+            box-shadow: inset 0 0 8px rgba(168,85,247,0.2);
+        }
+
+        .availability-cell.tentative {
+            background: rgba(251,191,36,0.25);
+            border-color: rgba(251,191,36,0.4);
+            box-shadow: inset 0 0 8px rgba(251,191,36,0.2);
+        }
+
+        .availability-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: rgba(0,229,255,0.02);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #eaf6ff;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .legend-color.available {
+            background: rgba(34,197,94,0.6);
+        }
+
+        .legend-color.busy {
+            background: rgba(239,68,68,0.6);
+        }
+
+        .legend-color.out-of-office {
+            background: rgba(168,85,247,0.6);
+        }
+
+        .legend-color.tentative {
+            background: rgba(251,191,36,0.6);
+        }
+
+        .week-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .week-selector button {
+            padding: 6px 12px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .week-selector button:hover {
+            background: rgba(0,229,255,0.15);
+        }
+
+        .week-display {
+            color: #7c3aed;
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">🎓 Acadify</h1>
+            <!-- Nav rendered from config -->
+            <div id="navRoot" class="nav-container"></div>
+        </div>
+    </nav>
+
+    <div class="proto-grid">
+        <!-- Chat Section -->
+        <div class="grid-card">
+            <h2>📱 Class Chat</h2>
+            <div class="form-section">
+                <label>Select Class:</label>
+                <select id="classSelect" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">Choose a class</option>
+                    <option value="10A">Class 10A</option>
+                    <option value="10B">Class 10B</option>
+                    <option value="11A">Class 11A</option>
+                    <option value="12A">Class 12A</option>
+                </select>
+            </div>
+                        <div class="chat-container">
+                                <script src="config/config.js"></script>
+                                <script src="components/navbar.js"></script>
+                                <script>
+                                    if (typeof renderNavbar === 'function') {
+                                        try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
+                                    }
+                                </script>
+                <div class="chat-window scrollbar-styled" id="chatWindow"></div>
+                <div class="chat-input-group">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type message...">
+                    <button class="btn-send" id="chatSendBtn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="grid-card">
+            <h2>📅 Class Calendar</h2>
+            <div class="form-section">
+                <label>Event Title:</label>
+                <input type="text" id="eventTitle" placeholder="e.g., Math Exam, Assignment Due">
+            </div>
+            <div class="form-section">
+                <label>Date:</label>
+                <input type="date" id="eventDate">
+            </div>
+            <div class="form-section">
+                <label>Time:</label>
+                <input type="time" id="eventTime">
+            </div>
+            <div class="form-section">
+                <label>Event Type:</label>
+                <select id="eventType">
+                    <option value="exam">Exam</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="class">Class</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-primary-sm" id="addEventBtn">Add Event</button>
+                <button class="btn-secondary-sm" id="clearEventsBtn">Clear All</button>
+            </div>
+            <div class="calendar-list scrollbar-styled" id="calendarList">
+                <h3>Upcoming Events</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Availability Calendar Section (Teams/Outlook Style) -->
+    <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+        <div class="grid-card">
+            <h2>📅 Availability Calendar (Teams/Outlook Style)</h2>
+            <div class="form-section">
+                <label>User Type:</label>
+                <select id="userType" style="width: 100%; margin-bottom: 15px;">
+                    <option value="">Select user type</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+            </div>
+            <div class="form-section">
+                <label>Select Class (for reference):</label>
+                <select id="availabilityClass" style="width: 100%; margin-bottom: 15px;">
+                    <option value="">Select class</option>
+                    <option value="10A">Class 10A</option>
+                    <option value="10B">Class 10B</option>
+                    <option value="11A">Class 11A</option>
+                    <option value="12A">Class 12A</option>
+                </select>
+            </div>
+
+            <!-- Week Navigation -->
+            <div class="week-selector">
+                <button id="prevWeekBtn">← Previous Week</button>
+                <div class="week-display" id="weekDisplay">Loading...</div>
+                <button id="nextWeekBtn">Next Week →</button>
+            </div>
+
+            <!-- Availability Calendar -->
+            <div class="availability-calendar">
+                <div class="availability-grid" id="availabilityGrid">
+                    <!-- Grid will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="availability-legend">
+                <div class="legend-item">
+                    <div class="legend-color available"></div>
+                    <span>Available (click once)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color busy"></div>
+                    <span>Busy (click twice)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color out-of-office"></div>
+                    <span>Out of Office (click thrice)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color tentative"></div>
+                    <span>Tentative (click four times)</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons" style="margin-top: 15px;">
+                <button class="btn-primary-sm" id="saveAvailabilityBtn">Save Availability</button>
+                <button class="btn-secondary-sm" id="clearAvailabilityBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="acadify.js"></script>
 </body>
+</html>
+
+        <!-- Calendar Section -->
+        <div class="grid-card">
+            <h2>📅 Class Calendar</h2>
+            <div class="form-section">
+                <label>Event Title:</label>
+                <input type="text" id="eventTitle" placeholder="e.g., Math Exam, Assignment Due">
+            </div>
+            <div class="form-section">
+                <label>Date:</label>
+                <input type="date" id="eventDate">
+            </div>
+            <div class="form-section">
+                <label>Time:</label>
+                <input type="time" id="eventTime">
+            </div>
+            <div class="form-section">
+                <label>Event Type:</label>
+                <select id="eventType">
+                    <option value="exam">Exam</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="class">Class</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-primary-sm" id="addEventBtn">Add Event</button>
+                <button class="btn-secondary-sm" id="clearEventsBtn">Clear All</button>
+            </div>
+            <div class="calendar-list scrollbar-styled" id="calendarList">
+                <h3>Upcoming Events</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Section -->
+    <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+        <div class="grid-card">
+            <h2>✓ Attendance</h2>
+            <div class="form-section">
+                <label>Class:</label>
+                <select id="attendanceClass" style="width: 100%; margin-bottom: 15px;">
+                    <option value="">Select class for attendance</option>
+                    <option value="10A">Class 10A</option>
+                    <option value="10B">Class 10B</option>
+                    <option value="11A">Class 11A</option>
+                    <option value="12A">Class 12A</option>
+                </select>
+            </div>
+            <div id="attendanceGrid" class="attendance-grid"></div>
+            <div class="action-buttons" style="margin-top: 15px;">
+                <button class="btn-primary-sm" id="saveAttendanceBtn">Save Attendance</button>
+                <button class="btn-secondary-sm" id="markAllPresentBtn">Mark All Present</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="acadify.js"></script>
+</body>
+</html>

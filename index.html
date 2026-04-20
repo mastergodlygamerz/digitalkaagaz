@@ -37,18 +37,8 @@
   <nav id="navbar">
     <div class="nav-inner">
       <a href="#hero" class="logo">Digital<span>Kagaaz</span></a>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#hero">Home</a></li>
-        <li class="nav-dropdown">
-          <a href="#products">Products</a>
-          <ul class="dropdown-menu">
-            <li><a href="acadify-entry.html">Acadify</a></li>
-          </ul>
-        </li>
-        <li><a href="#news">News</a></li>
-        <li><a href="#achievements">Achievements</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+      <!-- Nav links rendered from config -->
+      <div id="navRoot" class="nav-container"></div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
@@ -252,6 +242,13 @@
   </footer>
 
   <script src="app.js"></script>
+  <script src="config/config.js"></script>
+  <script src="components/navbar.js"></script>
+  <script>
+    if (typeof renderNavbar === 'function') {
+      try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
+    }
+  </script>
 
 </body>
 </html>
