@@ -58,12 +58,22 @@
           var signup = document.createElement('button');
           signup.className = 'btn btn-sm btn-primary';
           signup.textContent = 'Sign Up';
-          signup.onclick = function () { if (window.openAuthFor) window.openAuthFor(flow, 'signup'); };
+          signup.setAttribute('aria-label', 'Sign up');
+          signup.onclick = function () {
+            if (typeof openAuthModal === 'function') { openAuthModal('signup'); return; }
+            if (typeof openAuthFor === 'function') { openAuthFor(flow, 'signup'); return; }
+            window.location.href = 'signup.html';
+          };
           var signin = document.createElement('button');
           signin.className = 'btn btn-sm btn-ghost';
           signin.textContent = 'Sign In';
+          signin.setAttribute('aria-label', 'Sign in');
           signin.style.marginLeft = '8px';
-          signin.onclick = function () { if (window.openAuthFor) window.openAuthFor(flow, 'signin'); };
+          signin.onclick = function () {
+            if (typeof openAuthModal === 'function') { openAuthModal('signin'); return; }
+            if (typeof openAuthFor === 'function') { openAuthFor(flow, 'signin'); return; }
+            window.location.href = 'signin.html';
+          };
           authWrap.appendChild(signup);
           authWrap.appendChild(signin);
           root.appendChild(authWrap);
