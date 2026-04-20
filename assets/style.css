@@ -239,10 +239,20 @@ nav {
 .nav-menu > .nav-auth { margin-left: auto; display: inline-flex; align-items: center; }
 
 .nav-sub { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: rgba(14,14,24,0.98); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 0; min-width: 180px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); z-index: 120; }
+.nav-sub { pointer-events: auto; }
 .nav-sub li { padding: 0; }
 .nav-sub .nav-link { display: block; padding: 8px 14px; color: #b0b4be; }
 .nav-sub .nav-link:hover { background: rgba(255,255,255,0.02); color: #fff; }
 .nav-menu li:hover > .nav-sub { display: block; }
+
+/* ensure nav container aligns inline and doesn't clip dropdowns */
+.nav-container { display: flex; align-items: center; }
+
+/* make parent item explicitly interactive */
+.nav-parent { cursor: pointer; }
+
+/* increase submenu z-index to be above other page elements */
+.nav-sub { z-index: 9999; }
 
 /* Responsive: collapse to stacked menu under 800px */
 @media (max-width: 800px) {
