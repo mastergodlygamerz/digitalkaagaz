@@ -45,10 +45,12 @@
       try {
         var feats = (window.AppConfig && window.AppConfig.features) || {};
         if (feats.popupAuth !== false) {
-          var authWrap = document.createElement('div');
-          authWrap.className = 'nav-auth';
-          authWrap.style.display = 'inline-block';
-          authWrap.style.marginLeft = '12px';
+          // create auth buttons as a list item so they sit inline with the menu
+          var authLi = document.createElement('li');
+          authLi.className = 'nav-auth';
+          authLi.style.display = 'inline-flex';
+          authLi.style.alignItems = 'center';
+          authLi.style.marginLeft = '12px';
           function chooseFlow() {
             var p = (location.pathname || '').toLowerCase();
             if (p.indexOf('acadify') !== -1) return 'acadifyFlow';
@@ -74,9 +76,9 @@
             if (typeof openAuthFor === 'function') { openAuthFor(flow, 'signin'); return; }
             window.location.href = 'signin.html';
           };
-          authWrap.appendChild(signup);
-          authWrap.appendChild(signin);
-          root.appendChild(authWrap);
+          authLi.appendChild(signup);
+          authLi.appendChild(signin);
+          ul.appendChild(authLi);
         }
       } catch (e) {
         console.warn('navbar auth render failed', e);
