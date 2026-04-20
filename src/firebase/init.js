@@ -4,7 +4,7 @@ import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, limit, doc, setDoc
+  getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, limit, doc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 const cfg = {
@@ -35,6 +35,7 @@ Object.assign(window._firebase, {
   collection,
   addDoc,
   getDocs,
+  onSnapshot,
   query,
   where,
   orderBy,

@@ -7,6 +7,10 @@ const STORAGE_KEYS = {
 	AVAILABILITY: 'acadify_availability_'
 };
 
+// realtime listener unsubscribes
+let chatUnsub = null;
+let eventsUnsub = null;
+
 function getFirebase() {
 	return window._firebase || null;
 }
@@ -43,6 +47,37 @@ function initChat() {
 	if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 }
 
+function unsubscribeChat() {
+	try { if (chatUnsub) { chatUnsub(); chatUnsub = null; } } catch(e) { console.warn('unsubscribeChat', e); }
+}
+
+function subscribeChat(selectedClass) {
+	const chatWindow = document.getElementById('chatWindow');
+	if (!chatWindow) return;
+	unsubscribeChat();
+	if (!fbAvailable()) return loadChat(selectedClass);
+	const fb = getFirebase();
+	const instCode = localStorage.getItem('ac_institute_code') || 'public';
+	try {
+		const q = fb.query(fb.collection(fb.db, `institutes/${instCode}/chats`), fb.orderBy('createdAt', 'asc'), fb.limit(200));
+		chatUnsub = fb.onSnapshot(q, (snap) => {
+			chatWindow.innerHTML = '';
+			if (!snap || snap.empty) {
+				chatWindow.innerHTML = '<div style="color: rgba(234,246,255,0.4); text-align: center; padding: 20px;">No messages yet. Start a conversation!</div>';
+				return;
+			}
+			snap.forEach(doc => {
+				const msg = doc.data();
+				const msgEl = document.createElement('div');
+				msgEl.className = `chat-message ${msg.role || 'student'}`;
+				msgEl.innerHTML = `<strong style="color: ${msg.role === 'teacher' ? '#7c3aed' : '#00e5ff'}">${msg.role === 'teacher' ? 'Teacher' : 'Student'}:</strong> ${msg.text}<div style="font-size:0.7rem;opacity:0.6;margin-top:4px;">${msg.createdAt && msg.createdAt.toDate ? msg.createdAt.toDate().toLocaleTimeString() : ''}</div>`;
+				chatWindow.appendChild(msgEl);
+			});
+			chatWindow.scrollTop = chatWindow.scrollHeight;
+		}, (err) => { console.error('chat onSnapshot error', err); });
+	} catch (e) { console.error('subscribeChat failed', e); loadChat(selectedClass); }
+}
+
 function sendChatMessage() {
 	const classSelect = document.getElementById('classSelect');
 	const chatInput = document.getElementById('chatInput');
@@ -63,7 +98,7 @@ function sendChatMessage() {
 			createdAt: fb.serverTimestamp()
 		}).then(() => {
 			if (chatInput) chatInput.value = '';
-			loadChat(selectedClass);
+			// snapshot will update UI
 		}).catch(err => { console.error('chat add failed', err); alert('Failed to send message'); });
 		return;
 	}
@@ -83,25 +118,8 @@ function loadChat(selectedClass) {
 	if (!chatWindow) return;
 	chatWindow.innerHTML = '';
 
-	if (fbAvailable()) {
-		const fb = getFirebase();
-		const instCode = localStorage.getItem('ac_institute_code') || 'public';
-		fb.getDocs(fb.query(fb.collection(fb.db, `institutes/${instCode}/chats`), fb.orderBy('createdAt', 'asc'), fb.limit(200)))
-			.then(snap => {
-				if (snap.empty) {
-					chatWindow.innerHTML = '<div style="color: rgba(234,246,255,0.4); text-align: center; padding: 20px;">No messages yet. Start a conversation!</div>';
-					return;
-				}
-				snap.forEach(doc => {
-					const msg = doc.data();
-					const msgEl = document.createElement('div');
-					msgEl.className = `chat-message ${msg.role || 'student'}`;
-					msgEl.innerHTML = `<strong style="color: ${msg.role === 'teacher' ? '#7c3aed' : '#00e5ff'}">${msg.role === 'teacher' ? 'Teacher' : 'Student'}:</strong> ${msg.text}<div style="font-size:0.7rem;opacity:0.6;margin-top:4px;">${msg.createdAt && msg.createdAt.toDate ? msg.createdAt.toDate().toLocaleTimeString() : ''}</div>`;
-					chatWindow.appendChild(msgEl);
-				});
-			}).catch(err => { console.error('loadChat failed', err); chatWindow.innerHTML = '<div style="color: rgba(234,246,255,0.4); text-align: center; padding: 20px;">Unable to load messages.</div>'; });
-		return;
-	}
+	// Use realtime subscription when Firestore is available
+	if (fbAvailable()) { subscribeChat(selectedClass); return; }
 
 	const storageKey = STORAGE_KEYS.CHAT + selectedClass;
 	const chatHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -141,7 +159,13 @@ function addEvent() {
 		const fb = getFirebase();
 		const instCode = localStorage.getItem('ac_institute_code') || 'public';
 		fb.addDoc(fb.collection(fb.db, `institutes/${instCode}/events`), Object.assign({}, newEvent, { createdAt: fb.serverTimestamp() }))
-			.then(() => { loadCalendar(); })
+			.then(() => { 
+				// clear inputs; realtime snapshot will update UI
+				document.getElementById('eventTitle').value = '';
+				document.getElementById('eventDate').value = '';
+				document.getElementById('eventTime').value = '';
+				document.getElementById('eventType').value = 'exam';
+			})
 			.catch(err => { console.error('addEvent failed', err); alert('Failed to add event'); });
 		return;
 	}
@@ -161,20 +185,8 @@ function loadCalendar() {
 	const calendarList = document.getElementById('calendarList');
 	if (!calendarList) return;
 
-	if (fbAvailable()) {
-		const fb = getFirebase();
-		const instCode = localStorage.getItem('ac_institute_code') || 'public';
-		fb.getDocs(fb.query(fb.collection(fb.db, `institutes/${instCode}/events`), fb.orderBy('createdAt', 'asc')))
-			.then(snap => {
-				const listHTML = '<h3>Upcoming Events</h3>' + (snap.empty ? '<div style="color: rgba(234,246,255,0.4); padding: 20px; text-align: center;">No events scheduled</div>' : Array.from(snap.docs).map(doc => {
-					const event = doc.data();
-					const typeEmoji = ({'exam':'📝','assignment':'📋','class':'👥','other':'📌'})[event.type] || '📌';
-					return `<div class="cal-row"><div class="cal-row-content"><div class="cal-row-title">${typeEmoji} ${event.title}</div><div class="cal-row-meta">${event.date} at ${event.time}</div></div><div class="cal-row-actions"><button class="btn-small danger" onclick="deleteEvent(${event.id})">Delete</button></div></div>`;
-				}).join(''));
-				calendarList.innerHTML = listHTML;
-			}).catch(err => { console.error('loadCalendar failed', err); calendarList.innerHTML = '<h3>Upcoming Events</h3><div style="color: rgba(234,246,255,0.4); padding: 20px; text-align: center;">Unable to load events.</div>'; });
-		return;
-	}
+	// Use realtime subscription for events when Firestore is available
+	if (fbAvailable()) { subscribeEvents(); return; }
 
 	const events = JSON.parse(localStorage.getItem(STORAGE_KEYS.CALENDAR) || '[]');
 	const listHTML = '<h3>Upcoming Events</h3>' + (events.length === 0 ? '<div style="color: rgba(234,246,255,0.4); padding: 20px; text-align: center;">No events scheduled</div>' : events.map(event => {
@@ -183,6 +195,33 @@ function loadCalendar() {
 	}).join(''));
 	calendarList.innerHTML = listHTML;
 }
+
+function unsubscribeEvents() {
+	try { if (eventsUnsub) { eventsUnsub(); eventsUnsub = null; } } catch(e) { console.warn('unsubscribeEvents', e); }
+}
+
+function subscribeEvents() {
+	const calendarList = document.getElementById('calendarList');
+	if (!calendarList) return;
+	unsubscribeEvents();
+	if (!fbAvailable()) return loadCalendar();
+	const fb = getFirebase();
+	const instCode = localStorage.getItem('ac_institute_code') || 'public';
+	try {
+		const q = fb.query(fb.collection(fb.db, `institutes/${instCode}/events`), fb.orderBy('createdAt', 'asc'));
+		eventsUnsub = fb.onSnapshot(q, (snap) => {
+			const listHTML = '<h3>Upcoming Events</h3>' + (snap.empty ? '<div style="color: rgba(234,246,255,0.4); padding: 20px; text-align: center;">No events scheduled</div>' : Array.from(snap.docs).map(doc => {
+				const event = doc.data();
+				const typeEmoji = ({'exam':'📝','assignment':'📋','class':'👥','other':'📌'})[event.type] || '📌';
+				return `<div class="cal-row"><div class="cal-row-content"><div class="cal-row-title">${typeEmoji} ${event.title}</div><div class="cal-row-meta">${event.date} at ${event.time}</div></div><div class="cal-row-actions"><button class="btn-small danger" onclick="deleteEvent(${event.id})">Delete</button></div></div>`;
+			}).join(''));
+			calendarList.innerHTML = listHTML;
+		}, (err) => { console.error('events onSnapshot error', err); });
+	} catch (e) { console.error('subscribeEvents failed', e); loadCalendar(); }
+}
+
+// cleanup subscriptions on page unload
+window.addEventListener('beforeunload', () => { try { unsubscribeChat(); unsubscribeEvents(); } catch(e) { } });
 
 function deleteEvent(eventId) {
 	if (fbAvailable()) { console.warn('deleteEvent not implemented for Firestore in this migration'); }
