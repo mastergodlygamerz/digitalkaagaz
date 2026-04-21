@@ -59,7 +59,10 @@
         </div>
         <div class="form-group">
           <label for="su-institute">Coaching Institute</label>
-          <input type="text" id="su-institute" placeholder="Enter institute code on Acadify page first" readonly style="cursor:not-allowed;opacity:.7;" required>
+          <select id="su-institute" required>
+            <option value="">Select your institute</option>
+            <option value="Vedika Educational Institution">Vedika Educational Institution</option>
+          </select>
         </div>
         <div id="su-student-fields" hidden>
           <div class="form-group">
@@ -91,7 +94,7 @@
         <li class="nav-dropdown">
           <a href="#products">Products</a>
           <ul class="dropdown-menu">
-            <li><a href="acadify-entry.html">Acadify</a></li>
+            <li><a href="acadify.html">Acadify</a></li>
           </ul>
         </li>
         <li><a href="#news">News</a></li>
@@ -336,28 +339,5 @@
   </footer>
 
   <script src="app.js"></script>
-  <script>
-    // Pre-fill institute from sessionStorage (set by acadify-entry.html after code validation)
-    (function () {
-      var inst = sessionStorage.getItem('ac_entry_institute');
-      var code = sessionStorage.getItem('ac_entry_code');
-      var el = document.getElementById('su-institute');
-      if (el && inst) {
-        el.value = inst;
-        el.style.cursor = '';
-        el.style.opacity = '';
-        el.removeAttribute('readonly');
-      }
-      // Auto-open signup or signin modal based on hash
-      if (location.hash === '#signup') {
-        var btn = document.querySelector('[data-open="signup"], .signup-btn, #openSignup, [onclick*="signup"], [onclick*="Signup"]');
-        if (btn) btn.click();
-        else window.addEventListener('DOMContentLoaded', function () {
-          var b = document.querySelector('[data-open="signup"], .signup-btn, #openSignup');
-          if (b) b.click();
-        });
-      }
-    })();
-  </script>
 </body>
 </html>
