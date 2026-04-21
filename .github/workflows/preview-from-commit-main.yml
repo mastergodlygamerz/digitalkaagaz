@@ -11,6 +11,9 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write   # 🔥 IMPORTANT FIX
+
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -18,7 +21,11 @@ jobs:
       - name: Checkout Repo (FULL history)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # IMPORTANT FIX
+          fetch-depth: 0
+
+      - name: Verify commit exists
+        run: |
+          git cat-file -t ${{ github.event.inputs.commit_id }}
 
       - name: Checkout specific commit
         run: |
