@@ -81,10 +81,10 @@ function showDash(){
 
 function logout(){
   if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
-  ["ac_role","ac_name","ac_class","ac_board","ac_institute"].forEach(function(k){localStorage.removeItem(k);});
+  ["ac_role","ac_name","ac_class","ac_board","ac_institute","ac_institute_code"].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
   _role="";_name="";_class="";_board="";_institute="";
   waitForDb(function(fb){
-    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="/";});
+    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="acadify-entry.html";});
   });
 }
 
