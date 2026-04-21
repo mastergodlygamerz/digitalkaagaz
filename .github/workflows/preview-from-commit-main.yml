@@ -1,8 +1,12 @@
-name: Preview from Commit
+name: Preview from Branch + Commit
 
 on:
   workflow_dispatch:
     inputs:
+      branch_name:
+        description: "Enter branch name (e.g., main or gh-pages)"
+        required: true
+        default: "main"
       commit_id:
         description: "Enter commit ID to preview"
         required: true
@@ -12,28 +16,32 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write   # 🔥 IMPORTANT FIX
+      contents: write
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout Repo (FULL history)
+      - name: Checkout Repo (full history)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch target branch
+        run: |
+          git fetch origin ${{ github.event.inputs.branch_name }}
 
       - name: Verify commit exists
         run: |
           git cat-file -t ${{ github.event.inputs.commit_id }}
 
-      - name: Checkout specific commit
+      - name: Checkout commit
         run: |
           git checkout ${{ github.event.inputs.commit_id }}
 
-      - name: Create unique branch
+      - name: Create preview branch
         run: |
-          BRANCH=preview-${{ github.event.inputs.commit_id }}-$(date +%s)
+          BRANCH=preview-${{ github.event.inputs.branch_name }}-${{ github.event.inputs.commit_id }}-$(date +%s)
           git checkout -b $BRANCH
           git push origin $BRANCH
           echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
