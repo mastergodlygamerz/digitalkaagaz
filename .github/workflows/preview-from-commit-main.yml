@@ -11,22 +11,28 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
-      - name: Checkout Repo
+      - name: Checkout Repo (FULL history)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # IMPORTANT FIX
 
       - name: Checkout specific commit
         run: |
-          git fetch --all
           git checkout ${{ github.event.inputs.commit_id }}
 
-      - name: Create branch from commit
+      - name: Create unique branch
         run: |
-          git checkout -b preview-${{ github.event.inputs.commit_id }}
-          git push origin preview-${{ github.event.inputs.commit_id }} --force
+          BRANCH=preview-${{ github.event.inputs.commit_id }}-$(date +%s)
+          git checkout -b $BRANCH
+          git push origin $BRANCH
+          echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
