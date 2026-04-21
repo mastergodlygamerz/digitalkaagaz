@@ -229,14 +229,6 @@ nav {
   border-radius: 2px; transition: 0.3s;
 }
 
-/* Navbar auth buttons (rendered by components/navbar.js) */
-.nav-auth { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; }
-.nav-auth .btn { padding: 8px 12px; font-size: 0.9rem; border-radius: 10px; }
-.nav-auth .btn.btn-sm { padding: 6px 10px; font-size: 0.85rem; }
-.nav-auth .btn.btn-primary { background: linear-gradient(135deg,#00e5ff,#7c3aed); color: #07070d; box-shadow: 0 6px 18px rgba(0,229,255,0.08); border: none; }
-.nav-auth .btn.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: #b0b4be; }
-.nav-auth .btn:hover { transform: translateY(-2px); }
-
 /* ===== HERO ===== */
 .hero {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;

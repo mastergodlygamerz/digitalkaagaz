@@ -275,92 +275,27 @@
       var uHtml = '';
       users.forEach(function (u) {
         uHtml += '<tr>'
-          <script type="module" src="src/firebase/init.js"></script>
-          <script>
-            // Use centralized window._firebase provided by src/firebase/init.js
-            const auth = window._firebase && window._firebase.auth;
-            const db = window._firebase && window._firebase.db;
-            const signInWithEmailAndPassword = window._firebase && window._firebase.signInWithEmailAndPassword;
-            const signOut = window._firebase && window._firebase.signOut;
-            const onAuthStateChanged = window._firebase && window._firebase.onAuthStateChanged;
-            const collection = window._firebase && window._firebase.collection;
-            const getDocs = window._firebase && window._firebase.getDocs;
-            const query = window._firebase && window._firebase.query;
-            const orderBy = window._firebase && window._firebase.orderBy;
-            const limit = window._firebase && window._firebase.limit;
+          + '<td>' + escHtml(u.name) + '</td>'
+          + '<td>' + escHtml(u.email) + '</td>'
+          + '<td>' + escHtml(formatDate(u.createdAt)) + '</td>'
+          + '</tr>';
+      });
+      document.getElementById('users-table').innerHTML = uHtml || '<tr><td colspan="3" style="text-align:center;color:#6b7080">No users yet</td></tr>';
 
-            // ADMIN EMAIL — change this to your email
-            const ADMIN_EMAIL = '';
-
-            const loginDiv = document.getElementById('admin-login');
-            const dashDiv = document.getElementById('dashboard');
-            const loginErr = document.getElementById('login-err');
-
-            // Login
-            document.getElementById('adm-login-btn').addEventListener('click', function () {
-              const email = document.getElementById('adm-email').value.trim();
-              const pass = document.getElementById('adm-pass').value;
-              loginErr.style.display = 'none';
-              signInWithEmailAndPassword(auth, email, pass).catch(function (err) {
-                loginErr.textContent = err.message.replace('Firebase: ', '');
-                loginErr.style.display = 'block';
-              });
-            });
-
-            document.getElementById('dash-logout').addEventListener('click', function () {
-              signOut(auth);
-            });
-
-            onAuthStateChanged(auth, function (user) {
-              if (user) {
-                loginDiv.style.display = 'none';
-                dashDiv.style.display = 'block';
-                loadDashboard();
-              } else {
-                loginDiv.style.display = 'flex';
-                dashDiv.style.display = 'none';
-              }
-            });
-
-            // Tabs
-            document.querySelectorAll('.tab').forEach(function (tab) {
-              tab.addEventListener('click', function () {
-                document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-                tab.classList.add('active');
-                var target = tab.getAttribute('data-tab');
-                ['visitors', 'users', 'countries'].forEach(function (id) {
-                  document.getElementById('tab-' + id).style.display = id === target ? 'block' : 'none';
-                });
-              });
-            });
-
-            function formatDate(ts) {
-              if (!ts) return '—';
-              var d = ts.toDate ? ts.toDate() : new Date(ts);
-              return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            }
-
-            function escHtml(s) {
-              var d = document.createElement('div');
-              d.textContent = s || '—';
-              return d.innerHTML;
-            }
-
-            async function loadDashboard() {
-              // load visitors
-              var vq = query(collection(db, 'visitors'), orderBy('ts', 'desc'), limit(20));
-              var vs = await getDocs(vq);
-              var tbody = document.getElementById('visitors-table'); tbody.innerHTML = '';
-              vs.forEach(function (doc) { var r=doc.data(); var tr=document.createElement('tr'); tr.innerHTML = '<td>'+formatDate(r.ts)+'</td><td>'+escHtml(r.ip)+'</td><td>'+escHtml(r.country)+'</td><td>'+escHtml(r.city)+'</td><td>'+escHtml(r.device)+'</td><td>'+escHtml(r.ref)+'</td>'; tbody.appendChild(tr); });
-
-              // load users
-              var uq = query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(20));
-              var us = await getDocs(uq);
-              var tbody2 = document.getElementById('users-table'); tbody2.innerHTML = '';
-              us.forEach(function (doc) { var r=doc.data(); var tr=document.createElement('tr'); tr.innerHTML = '<td>'+escHtml(r.name)+'</td><td>'+escHtml(r.email)+'</td><td>'+formatDate(r.createdAt)+'</td>'; tbody2.appendChild(tr); });
-
-              // load counts
-              document.getElementById('stat-visitors').innerText = vs.size || '—';
-              document.getElementById('stat-users').innerText = us.size || '—';
-            }
-          </script>
+      // Country chart
+      var sorted = Object.entries(countries).sort(function (a, b) { return b[1] - a[1]; });
+      var maxCount = sorted.length ? sorted[0][1] : 1;
+      var cHtml = '';
+      sorted.forEach(function (entry) {
+        var pct = Math.round((entry[1] / maxCount) * 100);
+        cHtml += '<div class="country-bar">'
+          + '<div class="name">' + escHtml(entry[0]) + '</div>'
+          + '<div class="bar"><div class="fill" style="width:' + pct + '%"></div></div>'
+          + '<div class="count">' + entry[1] + '</div>'
+          + '</div>';
+      });
+      document.getElementById('countries-chart').innerHTML = cHtml || '<p style="color:#6b7080">No data yet</p>';
+    }
+  </script>
+</body>
+</html>

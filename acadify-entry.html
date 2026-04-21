@@ -571,12 +571,10 @@
 </head>
 <body>
 
-<!-- ── Navbar (rendered from config) ─────────────────── -->
+<!-- ── Navbar ──────────────────────────────────────── -->
 <nav class="nav">
   <a class="nav-logo" href="index.html">Digital<span>Kaagaz</span></a>
   <a class="nav-back" href="index.html">← Back to Home</a>
-  <!-- renderNavbar('#navRoot') will populate below -->
-  <div id="navRoot" class="nav-container" style="display:inline-block; margin-left:18px;"></div>
 </nav>
 
 <div class="page">
@@ -591,10 +589,10 @@
       Now in Early Access
     </div>
 
-    <h1 id="acadifyHeroTitle" class="hero-title">
+    <h1 class="hero-title">
       <span>Acadify</span> — Smart Platform<br>for <span class="accent">Coaching Institutes</span>
     </h1>
-    <p id="acadifyHeroSub" class="hero-desc">
+    <p class="hero-desc">
       A unified platform to manage classes, schedules, students, and teachers — all in one place.
       Built for modern coaching institutes running both offline and online.
     </p>
@@ -602,7 +600,7 @@
 
     <p class="hero-cta-label">Own a Coaching Institute? <strong>What are you waiting for?</strong></p>
     <div class="hero-cta">
-      <button class="btn-primary" onclick="openRegModal()" data-feature="instituteRegistration">
+      <button class="btn-primary" onclick="openRegModal()">
         🏫 Register Your Institute
       </button>
       <a class="btn-secondary" href="#enter-code">
@@ -674,8 +672,8 @@
       <div class="code-msg" id="codeMsg"></div>
       <div class="code-institute-name" id="codeInstituteName"></div>
       <div class="code-actions" id="codeActions">
-        <button class="btn-primary" onclick="openAuthFor('acadifyFlow','signup')">🎓 Sign Up</button>
-        <button class="btn-secondary" onclick="openAuthFor('acadifyFlow','signin')">→ Sign In</button>
+        <button class="btn-primary" onclick="goSignup()">🎓 Sign Up</button>
+        <button class="btn-secondary" onclick="goSignin()">→ Sign In</button>
       </div>
     </div>
   </section>
@@ -746,39 +744,49 @@
   </div>
 </div>
 
-<!-- ── Config & Components (config-driven) ─────────── -->
-<script src="src/config/config.js"></script>
-<script src="src/components/navbar.js"></script>
-<script src="src/utils/auth.js"></script>
-<script src="src/pages/entry.js"></script>
-<script>
-  if (typeof renderNavbar === 'function') {
-    try { renderNavbar('#navRoot'); } catch(e) { console.warn('renderNavbar failed', e); }
-  }
-</script>
-
 <!-- ── Firebase + Logic ────────────────────────────── -->
-<!-- Centralized Firebase init -->
-<script type="module" src="src/firebase/init.js"></script>
-<script>
-  // Registration helpers using window._firebase
-  const db = window._firebase && window._firebase.db;
-  const collection = window._firebase && window._firebase.collection;
-  const addDoc = window._firebase && window._firebase.addDoc;
-  const getDocs = window._firebase && window._firebase.getDocs;
-  const query = window._firebase && window._firebase.query;
-  const where = window._firebase && window._firebase.where;
-  const serverTimestamp = window._firebase && window._firebase.serverTimestamp;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
+  const cfg = {
+    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
+    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
+    projectId: "digitalkaagaz-c8263",
+    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
+    messagingSenderId: "18588901735",
+    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
+  };
+  const app = initializeApp(cfg);
+  const db  = getFirestore(app);
+
+  // ── Helpers ──────────────────────────────────────
   function generateCode(instituteName) {
-    const words = instituteName.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2).slice(0,3).map(w => w.substring(0,5).toUpperCase());
+    // Take first word of each significant word, max 3 words, uppercase, then 3-digit random
+    const words = instituteName
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 2)
+      .slice(0, 3)
+      .map(w => w.substring(0, 5).toUpperCase());
     const num = String(Math.floor(Math.random() * 900) + 100);
     return words.join('_') + '_' + num;
   }
 
-  function setError(msg) { const el = document.getElementById('regError'); el.textContent = msg; el.classList.toggle('show', !!msg); }
-  function setBusy(busy) { const btn = document.getElementById('regSubmitBtn'); btn.disabled = busy; btn.textContent = busy ? 'Registering…' : 'Register & Get Code →'; }
+  function setError(msg) {
+    const el = document.getElementById('regError');
+    el.textContent = msg;
+    el.classList.toggle('show', !!msg);
+  }
 
+  function setBusy(busy) {
+    const btn = document.getElementById('regSubmitBtn');
+    btn.disabled = busy;
+    btn.textContent = busy ? 'Registering…' : 'Register & Get Code →';
+  }
+
+  // ── Registration ─────────────────────────────────
   window.submitRegistration = async function () {
     const instituteName = document.getElementById('reg-institute').value.trim();
     const ownerName     = document.getElementById('reg-owner').value.trim();
@@ -794,23 +802,30 @@
 
     try {
       // Check if institute name already registered
-      const dup = await getDocs(query(collection(db, 'ac_institutes'), where('instituteName', '==', instituteName)));
-      if (!dup.empty) { setError('An institute with this name is already registered.'); setBusy(false); return; }
+      const dup = await getDocs(
+        query(collection(db, 'ac_institutes'), where('instituteName', '==', instituteName))
+      );
+      if (!dup.empty) {
+        setError('An institute with this name is already registered.');
+        setBusy(false);
+        return;
+      }
 
-      // Generate unique code
+      // Generate unique code (retry if collision, max 5 attempts)
       let code, codeExists = true, attempts = 0;
       while (codeExists && attempts < 5) {
         code = generateCode(instituteName);
-        const cq = await getDocs(query(collection(db, 'ac_institutes'), where('code','==',code)));
-        codeExists = !cq.empty; attempts++;
+        const cq = await getDocs(query(collection(db, 'ac_institutes'), where('code', '==', code)));
+        codeExists = !cq.empty;
+        attempts++;
       }
       if (codeExists) { code = code + '_' + Date.now().toString().slice(-4); }
 
-      // Hash password
+      // Hash password — simple SHA-256 via Web Crypto (not stored in plaintext)
       const enc = new TextEncoder();
       const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(pass));
       const hashArr = Array.from(new Uint8Array(hashBuf));
-      const passHash = hashArr.map(b => b.toString(16).padStart(2,'0')).join('');
+      const passHash = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
 
       await addDoc(collection(db, 'ac_institutes'), {
         instituteName,
@@ -915,7 +930,21 @@
     });
   };
 
-  // goSignup/goSignin defined below in auth modal script
+  // Navigation post-code-validation
+  window.goSignup = function () {
+    var code = sessionStorage.getItem('ac_entry_code') || document.getElementById('instituteCodeInput').value.trim().toUpperCase();
+    var inst = sessionStorage.getItem('ac_entry_institute') || '';
+    if (code) localStorage.setItem('ac_institute_code', code);
+    if (inst) localStorage.setItem('ac_institute', inst);
+    window.location.href = 'index.html#signup';
+  };
+  window.goSignin = function () {
+    var code = sessionStorage.getItem('ac_entry_code') || document.getElementById('instituteCodeInput').value.trim().toUpperCase();
+    var inst = sessionStorage.getItem('ac_entry_institute') || '';
+    if (code) localStorage.setItem('ac_institute_code', code);
+    if (inst) localStorage.setItem('ac_institute', inst);
+    window.location.href = 'acadify.html';
+  };
 </script>
 
 <script>
@@ -974,24 +1003,14 @@
     document.getElementById('authModalError').textContent = '';
     document.getElementById('authModalError').style.display = 'none';
   }
-
-  // These must be assigned BEFORE the authModal DOM listener below
-  var _isSignUp = false;
-  window._onRoleChange = function(sel) {
-    document.getElementById('authModalStudentFields').style.display =
-      (_isSignUp && sel.value === 'student') ? 'block' : 'none';
-  };
-
-  // #authModal is rendered after this script block, so defer its listener
-  document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('authModal').addEventListener('click', function (e) {
-      if (e.target === this) closeAuthModal();
-    });
+  document.getElementById('authModal').addEventListener('click', function (e) {
+    if (e.target === this) closeAuthModal();
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { closeAuthModal(); closeRegModal(); }
   });
 
+  var _isSignUp = false;
   function setAuthMode(signup) {
     _isSignUp = signup;
     document.getElementById('authModalTitle').textContent = signup ? '🎓 Create Account' : '🔑 Sign In';
@@ -999,7 +1018,6 @@
     document.getElementById('authModalNameGroup').style.display = signup ? 'block' : 'none';
     document.getElementById('authModalRoleGroup').style.display = signup ? 'block' : 'none';
     document.getElementById('authModalStudentFields').style.display = 'none';
-    document.getElementById('authModalRole').value = 'teacher';
     document.getElementById('authModalSwitch').innerHTML = signup
       ? 'Already have an account? <a href="#" id="authSwitchLink">Sign In</a>'
       : 'New here? <a href="#" id="authSwitchLink">Sign Up</a>';
@@ -1007,7 +1025,12 @@
     // Pre-fill institute
     var inst = localStorage.getItem('ac_institute') || sessionStorage.getItem('ac_entry_institute') || '';
     document.getElementById('authModalInstitute').value = inst;
+    document.getElementById('authModalRole').dispatchEvent(new Event('change'));
   }
+  document.getElementById('authModalRole').addEventListener('change', function () {
+    document.getElementById('authModalStudentFields').style.display =
+      (_isSignUp && this.value === 'student') ? 'block' : 'none';
+  });
 </script>
 
 <!-- ── Auth Modal (Signup / Signin) ─────────────────── -->
@@ -1031,7 +1054,7 @@
     </div>
     <div id="authModalRoleGroup" style="display:none" class="form-field">
       <label for="authModalRole">Role *</label>
-      <select id="authModalRole" onchange="_onRoleChange(this)">
+      <select id="authModalRole">
         <option value="teacher">Teacher</option>
         <option value="student">Student</option>
       </select>
@@ -1040,21 +1063,15 @@
       <div class="form-field">
         <label for="authModalClass">Class *</label>
         <select id="authModalClass">
-          <option value="">Select Class</option>
-          <option value="8">Class 8</option>
-          <option value="9">Class 9</option>
-          <option value="10">Class 10</option>
-          <option value="11">Class 11</option>
-          <option value="12">Class 12</option>
+          <option value="">Select class</option>
+          <option>7</option><option>8</option><option>9</option>
+          <option>10</option><option>11</option><option>12</option>
         </select>
       </div>
       <div class="form-field">
         <label for="authModalBoard">Board *</label>
         <select id="authModalBoard">
-          <option value="">Select Board</option>
-          <option value="CBSE">CBSE</option>
-          <option value="ICSE">ICSE</option>
-          <option value="State Board">State Board</option>
+          <option>CBSE</option><option>ICSE</option><option>State Board</option>
         </select>
       </div>
     </div>
@@ -1072,27 +1089,36 @@
 </div>
 
 <!-- ── Auth Firebase Logic ───────────────────────────── -->
-<script type="module" src="src/firebase/init.js"></script>
-<script>
-  const auth = window._firebase && window._firebase.auth;
-  const db = window._firebase && window._firebase.db;
-  const createUserWithEmailAndPassword = window._firebase && window._firebase.createUserWithEmailAndPassword;
-  const signInWithEmailAndPassword = window._firebase && window._firebase.signInWithEmailAndPassword;
-  const updateProfile = window._firebase && window._firebase.updateProfile;
-  const collection = window._firebase && window._firebase.collection;
-  const addDoc = window._firebase && window._firebase.addDoc;
-  const serverTimestamp = window._firebase && window._firebase.serverTimestamp;
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  const cfg = {
+    apiKey: "AIzaSyBPYVRimtsYSdG5oIuEQpfgGaeV0wQS5QU",
+    authDomain: "digitalkaagaz-c8263.firebaseapp.com",
+    projectId: "digitalkaagaz-c8263",
+    storageBucket: "digitalkaagaz-c8263.firebasestorage.app",
+    messagingSenderId: "18588901735",
+    appId: "1:18588901735:web:dfdafad03fc875ed890fc2"
+  };
+  // Re-use existing app if already initialized (registration modal also inits Firebase)
+  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
 
   window.submitAuthModal = async function () {
     const email = document.getElementById('authModalEmail').value.trim();
     const pass  = document.getElementById('authModalPass').value;
     const errEl = document.getElementById('authModalError');
     const btn   = document.getElementById('authModalSubmitBtn');
-    const inst  = document.getElementById('authModalInstitute').value.trim() || localStorage.getItem('ac_institute') || '';
+    const inst  = document.getElementById('authModalInstitute').value.trim()
+                  || localStorage.getItem('ac_institute') || '';
 
     errEl.style.display = 'none';
     if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display = 'block'; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Please enter a valid email address (e.g. you@email.com).'; errEl.style.display = 'block'; return; }
     if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
 
     btn.disabled = true;
@@ -1107,8 +1133,7 @@
 
         if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
         if (!inst) { errEl.textContent = 'No institute found. Please validate your code first.'; errEl.style.display = 'block'; return; }
-        if (role === 'student' && !cls) { errEl.textContent = 'Please select your class.'; errEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign Up →'; return; }
-        if (role === 'student' && !board) { errEl.textContent = 'Please select your board.'; errEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign Up →'; return; }
+        if (role === 'student' && !cls) { errEl.textContent = 'Please select your class.'; errEl.style.display = 'block'; return; }
 
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await updateProfile(cred.user, { displayName: name });
@@ -1131,21 +1156,11 @@
 
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
+        // ac_name / ac_role will be set by acadify.html's onAuthStateChanged
         window.location.href = 'acadify.html';
       }
     } catch (e) {
-      const code = (e.code || '');
-      const friendlyErrors = {
-        'auth/invalid-email': 'Invalid email address. Please enter a valid email.',
-        'auth/user-not-found': 'No account found with this email.',
-        'auth/wrong-password': 'Incorrect password. Please try again.',
-        'auth/invalid-credential': 'Incorrect email or password. Please try again.',
-        'auth/email-already-in-use': 'This email is already registered. Please sign in instead.',
-        'auth/weak-password': 'Password must be at least 6 characters.',
-        'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
-        'auth/network-request-failed': 'Network error. Please check your connection.',
-      };
-      errEl.textContent = friendlyErrors[code] || e.message.replace('Firebase: ', '').replace(/ \(auth\/[^)]+\)/, '') || 'Something went wrong. Please try again.';
+      errEl.textContent = e.message.replace('Firebase: ', '').replace(/ \(auth\/[^)]+\)/, '');
       errEl.style.display = 'block';
     } finally {
       btn.disabled = false;
