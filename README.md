@@ -74,6 +74,11 @@ digitalkaagaz/
   index.php              # PHP cache bypass for production
 ```
 
+## Flow Diagram
+
+<img width="1544" height="2420" alt="DigitalKaagaz_Flow_Diagram" src="https://github.com/user-attachments/assets/64f35d63-1dc5-46f4-8b04-54112b6c10e9" />
+
+
 ## Key Files Description
 
 ### HTML Files
@@ -202,6 +207,7 @@ This project is proprietary software. All rights reserved.
 ## Support
 
 For support and inquiries, please contact the development team.
+
 
 ---
 
