@@ -1,5 +1,7 @@
-var _role="",_name="",_class="",_board="";
+var _role="",_name="",_class="",_board="",_institute="";
 var _chatUnsub=null;
+function _iSlug(i){return(i||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").substring(0,20)||"default";}
+function _iCol(base,key){return base+(_institute?_iSlug(_institute)+"_":"")+key;}
 function sd(id,v){var e=document.getElementById(id);if(e)e.style.setProperty("display",v,"important");}
 function escH(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function isToday(ds){return new Date(ds).toDateString()===new Date().toDateString();}
@@ -16,9 +18,10 @@ document.addEventListener("DOMContentLoaded",function(){
         var r=localStorage.getItem("ac_role")||"student";
         var c=localStorage.getItem("ac_class")||"";
         var b=localStorage.getItem("ac_board")||"";
+        var inst=localStorage.getItem("ac_institute")||"";
         localStorage.setItem("ac_role",r);
         localStorage.setItem("ac_name",authName);
-        _role=r;_name=authName;_class=c;_board=b;
+        _role=r;_name=authName;_class=c;_board=b;_institute=inst;
         showDash();
       } else {
         ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
@@ -49,6 +52,8 @@ function submitLogin(){
     localStorage.setItem("ac_class",c);localStorage.setItem("ac_board",b);
   }
   _role=role;_name=n;
+  var inst=document.getElementById("lInstitute")?document.getElementById("lInstitute").value:localStorage.getItem("ac_institute")||"";
+  if(inst){_institute=inst;localStorage.setItem("ac_institute",inst);}
   localStorage.setItem("ac_role",role);localStorage.setItem("ac_name",n);
   showDash();
 }
@@ -58,7 +63,9 @@ function showDash(){
   sd("loginSection","none");
   if(_role==="student"){
     sd("studentDash","block");sd("teacherDash","none");
-    document.getElementById("sUserName").textContent="Student | "+_name+(_class?" | Class "+_class:"")+(_board?" | "+_board:"");
+    document.getElementById("sUserName").textContent="Student | "+_name+(_class?" | Class "+_class:"")+(_board?" | "+_board:"")+(_institute?" | "+_institute:"");
+    var sHeroInst=document.getElementById("heroInstituteName");if(sHeroInst)sHeroInst.textContent=_institute||"";
+    var sInstPill=document.getElementById("sInstitutePill");if(sInstPill){sInstPill.textContent=_institute||"";sInstPill.style.display=_institute?"inline-block":"none";}
     var lbl=document.getElementById("sChatLabel");if(lbl)lbl.textContent="(Class "+_class+")";
     var sb=document.getElementById("sEvBoard");if(sb&&_board)sb.value=_board;
     listenStudentChat();
@@ -67,15 +74,17 @@ function showDash(){
   }else{
     sd("studentDash","none");sd("teacherDash","block");
     document.getElementById("tUserName").textContent="Teacher | "+_name;
+    var tHeroInst=document.getElementById("heroInstituteName");if(tHeroInst)tHeroInst.textContent=_institute||"";
+    var tInstPill=document.getElementById("tInstitutePill");if(tInstPill){tInstPill.textContent=_institute||"";tInstPill.style.display=_institute?"inline-block":"none";}
   }
 }
 
 function logout(){
   if(_chatUnsub){try{_chatUnsub();}catch(e){}_chatUnsub=null;}
-  ["ac_role","ac_name","ac_class","ac_board"].forEach(function(k){localStorage.removeItem(k);});
-  _role="";_name="";_class="";_board="";
+  ["ac_role","ac_name","ac_class","ac_board","ac_institute","ac_institute_code"].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});
+  _role="";_name="";_class="";_board="";_institute="";
   waitForDb(function(fb){
-    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="/";});
+    fb.auth.signOut().catch(function(){}).finally(function(){window.location.href="acadify-entry.html";});
   });
 }
 
@@ -85,14 +94,14 @@ function listenStudentChat(){
   var cw=document.getElementById("sChatWin");if(!cw)return;
   cw.innerHTML="<p class=\"no-msg\">Connecting...</p>";
   waitForDb(function(fb){
-    var q=fb.query(fb.collection(fb.db,"ac_chat_"+_class),fb.orderBy("ts","asc"));
+    var q=fb.query(fb.collection(fb.db,_iCol("ac_chat_",_class)),fb.orderBy("ts","asc"));
     _chatUnsub=fb.onSnapshot(q,function(snap){
       cw.innerHTML="";
       if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages yet. Be the first!</p>";return;}
       snap.forEach(function(d){
-        var m=d.data();var isMine=m.name===_name&&m.role==="student";
+        var m=d.data();
         var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?" tmsg":isMine?" mymsg":"");
+        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
         var senderDiv=document.createElement("div");senderDiv.className="sender";
         senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
         var textNode=document.createTextNode(m.text);
@@ -110,7 +119,7 @@ function sendStudentMsg(){
   var i=document.getElementById("sChatInput");var msg=i.value.trim();if(!msg)return;
   i.value="";i.disabled=true;
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_chat_"+_class),{role:"student",name:_name,text:msg,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
+    fb.addDoc(fb.collection(fb.db,_iCol("ac_chat_",_class)),{role:"student",name:_name,text:msg,institute:_institute,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
     .catch(function(e){i.disabled=false;alert("Send failed: "+e.message);})
     .finally(function(){i.disabled=false;});
   });
@@ -121,7 +130,7 @@ function loadStudentEvents(){
   var el=document.getElementById("sEventList");if(!el)return;
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+_class),fb.orderBy("date","asc")))
+    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_sev_",_class)),fb.orderBy("date","asc")))
     .then(function(snap){
       var sevts=[];
       snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.sname===_name&&isFuture(e.date))sevts.push(e);});
@@ -157,7 +166,7 @@ function addStudentEvent(){
   if(!t||!d){alert("Please fill title and date");return;}
   var board=document.getElementById("sEvBoard")?document.getElementById("sEvBoard").value||_board||"":_board||"";
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_sev_"+_class),{sname:_name,title:t,date:d,time:ti||"",board:board,ts:fb.serverTimestamp()})
+    fb.addDoc(fb.collection(fb.db,_iCol("ac_sev_",_class)),{sname:_name,title:t,date:d,time:ti||"",board:board,institute:_institute,ts:fb.serverTimestamp()})
     .then(function(){
       document.getElementById("sEvTitle").value="";document.getElementById("sEvDate").value="";document.getElementById("sEvTime").value="";
       loadStudentEvents();
@@ -168,7 +177,7 @@ function addStudentEvent(){
 
 function delStudentEv(id){
   waitForDb(function(fb){
-    fb.deleteDoc(fb.doc(fb.db,"ac_sev_"+_class,id))
+    fb.deleteDoc(fb.doc(fb.db,_iCol("ac_sev_",_class),id))
     .then(function(){loadStudentEvents();})
     .catch(function(e){alert("Delete failed: "+e.message);});
   });
@@ -177,9 +186,9 @@ function delStudentEv(id){
 function clearStudentEvents(){
   if(!confirm("Clear your events?"))return;
   waitForDb(function(fb){
-    fb.getDocs(fb.collection(fb.db,"ac_sev_"+_class)).then(function(snap){
+    fb.getDocs(fb.collection(fb.db,_iCol("ac_sev_",_class))).then(function(snap){
       var promises=[];
-      snap.forEach(function(d){if(d.data().sname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,"ac_sev_"+_class,d.id)));});
+      snap.forEach(function(d){if(d.data().sname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,_iCol("ac_sev_",_class),d.id)));});
       Promise.all(promises).then(function(){loadStudentEvents();});
     });
   });
@@ -200,14 +209,14 @@ function listenTeacherChat(cls){
   var cw=document.getElementById("tChatWin");if(!cw)return;
   cw.innerHTML="<p class=\"no-msg\">Connecting...</p>";
   waitForDb(function(fb){
-    var q=fb.query(fb.collection(fb.db,"ac_chat_"+cls),fb.orderBy("ts","asc"));
+    var q=fb.query(fb.collection(fb.db,_iCol("ac_chat_",cls)),fb.orderBy("ts","asc"));
     _chatUnsub=fb.onSnapshot(q,function(snap){
       cw.innerHTML="";
       if(snap.empty){cw.innerHTML="<p class=\"no-msg\">No messages for Class "+cls+" yet</p>";return;}
       snap.forEach(function(d){
-        var m=d.data();var isMine=m.name===_name&&m.role==="teacher";
+        var m=d.data();
         var div=document.createElement("div");
-        div.className="msg"+(m.role==="teacher"?(isMine?" mymsg":" tmsg"):"");
+        div.className="msg"+(m.role==="teacher"?" tmsg":" mymsg");
         var senderDiv=document.createElement("div");senderDiv.className="sender";
         senderDiv.textContent=m.name+(m.role==="teacher"?" (Teacher)":" (Student)");
         var textNode=document.createTextNode(m.text);
@@ -227,7 +236,7 @@ function sendTeacherMsg(){
   var i=document.getElementById("tChatInput");var msg=i.value.trim();if(!msg)return;
   i.value="";i.disabled=true;
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_chat_"+cls),{role:"teacher",name:_name,text:msg,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
+    fb.addDoc(fb.collection(fb.db,_iCol("ac_chat_",cls)),{role:"teacher",name:_name,text:msg,institute:_institute,ts:fb.serverTimestamp(),clientTime:new Date().toLocaleString()})
     .catch(function(e){i.disabled=false;alert("Send failed: "+e.message);})
     .finally(function(){i.disabled=false;});
   });
@@ -239,7 +248,7 @@ function loadTeacherEvents(cls){
   if(!cls){el.innerHTML="<p class=\"no-msg\">Select a class to view events</p>";return;}
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+cls),fb.orderBy("date","asc")))
+    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_tev_",cls)),fb.orderBy("date","asc")))
     .then(function(snap){
       var myEvts=[];
       snap.forEach(function(d){var e=d.data();e._id=d.id;if(e.tname===_name&&isFuture(e.date))myEvts.push(e);});
@@ -271,7 +280,7 @@ function addTeacherEvent(){
   if(!t||!d){alert("Please fill title and date");return;}
   if(!cls){alert("Please select a class first");return;}
   waitForDb(function(fb){
-    fb.addDoc(fb.collection(fb.db,"ac_tev_"+cls),{tname:_name,title:t,date:d,time:ti||"",subject:sub,board:board,ts:fb.serverTimestamp()})
+    fb.addDoc(fb.collection(fb.db,_iCol("ac_tev_",cls)),{tname:_name,title:t,date:d,time:ti||"",subject:sub,board:board,institute:_institute,ts:fb.serverTimestamp()})
     .then(function(){
       document.getElementById("tEvTitle").value="";document.getElementById("tEvDate").value="";document.getElementById("tEvTime").value="";
       loadTeacherEvents(document.getElementById("tClassSel").value);
@@ -283,7 +292,7 @@ function addTeacherEvent(){
 function delTeacherEv(id,cls){
   if(!confirm("Delete this slot?"))return;
   waitForDb(function(fb){
-    fb.deleteDoc(fb.doc(fb.db,"ac_tev_"+cls,id))
+    fb.deleteDoc(fb.doc(fb.db,_iCol("ac_tev_",cls),id))
     .then(function(){loadTeacherEvents(cls);})
     .catch(function(e){alert("Delete failed: "+e.message);});
   });
@@ -294,9 +303,9 @@ function clearTeacherEvents(){
   if(!cls){alert("Please select a class first");return;}
   if(!confirm("Clear all your slots for Class "+cls+"?"))return;
   waitForDb(function(fb){
-    fb.getDocs(fb.collection(fb.db,"ac_tev_"+cls)).then(function(snap){
+    fb.getDocs(fb.collection(fb.db,_iCol("ac_tev_",cls))).then(function(snap){
       var promises=[];
-      snap.forEach(function(d){if(d.data().tname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,"ac_tev_"+cls,d.id)));});
+      snap.forEach(function(d){if(d.data().tname===_name)promises.push(fb.deleteDoc(fb.doc(fb.db,_iCol("ac_tev_",cls),d.id)));});
       Promise.all(promises).then(function(){loadTeacherEvents(cls);});
     });
   });
@@ -310,7 +319,7 @@ function loadTeacherStudentGrouped(cls){
   var el=document.getElementById("tStudentGroupList");if(!el)return;
   el.innerHTML="<p class=\"no-msg\">Loading...</p>";
   waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,"ac_sev_"+cls),fb.orderBy("date","asc")))
+    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_sev_",cls)),fb.orderBy("date","asc")))
     .then(function(snap){
       var byStudent={};
       snap.forEach(function(d){
@@ -348,7 +357,7 @@ function loadStudentTeacherGrouped(){
   var el=document.getElementById("sTeacherGroupList");if(!el)return;
   el.innerHTML="<p class=\"no-msg\">Loading teacher events...</p>";
   waitForDb(function(fb){
-    fb.getDocs(fb.query(fb.collection(fb.db,"ac_tev_"+_class),fb.orderBy("date","asc")))
+    fb.getDocs(fb.query(fb.collection(fb.db,_iCol("ac_tev_",_class)),fb.orderBy("date","asc")))
     .then(function(snap){
       var byTeacher={};
       snap.forEach(function(d){

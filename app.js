@@ -420,7 +420,7 @@ renderAchievements();
     });
 
     logoutBtn.addEventListener('click', function () {
-      ['ac_role','ac_name','ac_class','ac_board'].forEach(function(k){localStorage.removeItem(k);});
+      ['ac_role','ac_name','ac_class','ac_board','ac_institute'].forEach(function(k){localStorage.removeItem(k);});
       fb.signOut(auth);
     });
 
@@ -452,7 +452,7 @@ renderAchievements();
           fb.getDocs(fb.query(fb.collection(db, 'users'), fb.where('uid', '==', user.uid)))
             .then(function (snap) {
               var role = 'student', cls = '', board = '';
-              snap.forEach(function (d) { role = d.data().role || 'student'; cls = d.data().standard || ''; board = d.data().board || ''; });
+              snap.forEach(function (d) { role = d.data().role || 'student'; cls = d.data().standard || ''; board = d.data().board || ''; var inst = d.data().institute || ''; if (inst) localStorage.setItem('ac_institute', inst); });
               showUserBar(role, cls, board);
             })
             .catch(function () { showUserBar('student', '', ''); });
@@ -461,7 +461,7 @@ renderAchievements();
         authBtn.textContent = 'Sign In';
         authBtn.classList.remove('logged-in');
         userBar.setAttribute('hidden', '');
-        ['ac_role','ac_name','ac_class','ac_board'].forEach(function(k){localStorage.removeItem(k);});
+        ['ac_role','ac_name','ac_class','ac_board','ac_institute'].forEach(function(k){localStorage.removeItem(k);});
       }
     });
 
@@ -712,6 +712,8 @@ renderAchievements();
     }
     if (pass.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; errorEl.hidden = false; return; }
     if (pass !== pass2) { errorEl.textContent = 'Passwords do not match.'; errorEl.hidden = false; return; }
+    var institute = document.getElementById('su-institute').value || sessionStorage.getItem('ac_entry_institute') || '';
+    if (!institute) { errorEl.textContent = 'Please enter an institute code on the Acadify entry page first.'; errorEl.hidden = false; return; }
     if (roleVal === 'student' && (!standard || !board)) { errorEl.textContent = 'Please select standard and board.'; errorEl.hidden = false; return; }
 
     submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
@@ -730,6 +732,7 @@ renderAchievements();
             role: roleVal,
             standard: roleVal === 'student' ? standard : '',
             board: roleVal === 'student' ? board : '',
+            institute: institute,
             createdAt: fb.serverTimestamp()
           });
         });
@@ -737,6 +740,7 @@ renderAchievements();
       .then(function () {
         localStorage.setItem('ac_role', roleVal);
         localStorage.setItem('ac_name', name);
+        localStorage.setItem('ac_institute', institute);
         if (roleVal === 'student') { localStorage.setItem('ac_class', standard); localStorage.setItem('ac_board', board); }
         closeModal();
       })
